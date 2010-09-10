@@ -27,7 +27,10 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.Composition;
+using System.ComponentModel.Composition.Hosting;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Reflection;
 using System.Text;
@@ -53,25 +56,23 @@ namespace OpenSim
     /// </summary>
     public class OpenSimBase : RegionApplicationBase
     {
+        /// <summary>The file used to load and save prim backup xml if no filename has been specified</summary>
+        protected const string DEFAULT_PRIM_BACKUP_FILENAME = "prim-backup.xml";
+
         private static readonly ILog m_log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 
-        // These are the names of the plugin-points extended by this
-        // class during system startup.
-
-        private const string PLUGIN_ASSET_CACHE = "/OpenSim/AssetCache";
-        private const string PLUGIN_ASSET_SERVER_CLIENT = "/OpenSim/AssetClient";
-
-        protected string proxyUrl;
-        protected int proxyOffset = 0;
-        
-        public string userStatsURI = String.Empty;
-
+        protected string userStatsURI = String.Empty;
         protected bool m_autoCreateClientStack = true;
-
-        /// <value>
-        /// The file used to load and save prim backup xml if no filename has been specified
-        /// </value>
-        protected const string DEFAULT_PRIM_BACKUP_FILENAME = "prim-backup.xml";
+        protected string proxyUrl;
+        protected int proxyOffset;
+        protected ConfigSettings m_configSettings;
+        protected ConfigurationLoader m_configLoader;
+        protected IApplicationPlugin[] m_appPlugins = new IApplicationPlugin[0];
+        protected OpenSimConfigSource m_config;
+        protected List<IClientNetworkServer> m_clientServers = new List<IClientNetworkServer>();
+        protected ModuleLoader m_moduleLoader;
+        protected IRegistryCore m_applicationRegistry = new RegistryCore();
+        protected CompositionContainer m_moduleContainer;
 
         public ConfigSettings ConfigurationSettings
         {
@@ -79,32 +80,18 @@ namespace OpenSim
             set { m_configSettings = value; }
         }
 
-        protected ConfigSettings m_configSettings;
-
-        protected ConfigurationLoader m_configLoader;
-
-        public ConsoleCommand CreateAccount = null;
-
-        protected List<IApplicationPlugin> m_plugins = new List<IApplicationPlugin>();
-
-        /// <value>
-        /// The config information passed into the OpenSimulator region server.
-        /// </value>
+        /// <summary>The config information passed into the OpenSimulator region server</summary>
         public OpenSimConfigSource ConfigSource
         {
             get { return m_config; }
             set { m_config = value; }
         }
 
-        protected OpenSimConfigSource m_config;
-
         public List<IClientNetworkServer> ClientServers
         {
             get { return m_clientServers; }
         }
 
-        protected List<IClientNetworkServer> m_clientServers = new List<IClientNetworkServer>();
-       
         public uint HttpServerPort
         {
             get { return m_httpServerPort; }
@@ -116,9 +103,10 @@ namespace OpenSim
             set { m_moduleLoader = value; }
         }
 
-        protected ModuleLoader m_moduleLoader;
-
-        protected IRegistryCore m_applicationRegistry = new RegistryCore();
+        public CompositionContainer ModuleContainer
+        {
+            get { return m_moduleContainer; }
+        }
 
         public IRegistryCore ApplicationRegistry
         {
@@ -126,9 +114,8 @@ namespace OpenSim
         }
 
         /// <summary>
-        /// Constructor.
+        /// Default constructor
         /// </summary>
-        /// <param name="configSource"></param>
         public OpenSimBase(IConfigSource configSource) : base()
         {
             LoadConfigSettings(configSource);
@@ -151,13 +138,73 @@ namespace OpenSim
             }
         }
 
-        protected virtual void LoadPlugins()
+        protected virtual void LoadApplicationPlugins()
         {
-            using (PluginLoader<IApplicationPlugin> loader = new PluginLoader<IApplicationPlugin>(new ApplicationPluginInitialiser(this)))
+            #region Container Loading
+
+            AggregateCatalog catalog = new AggregateCatalog();
+
+            AssemblyCatalog assemblyCatalog = new AssemblyCatalog(System.Reflection.Assembly.GetExecutingAssembly());
+            DirectoryCatalog directoryCatalog = new DirectoryCatalog(".", "OpenSim.*.dll");
+
+            catalog.Catalogs.Add(assemblyCatalog);
+            catalog.Catalogs.Add(directoryCatalog);
+
+            m_moduleContainer = new CompositionContainer(catalog, true);
+
+            try
             {
-                loader.Load("/OpenSim/Startup");
-                m_plugins = loader.Plugins;
+                m_log.InfoFormat("[MODULES]: Found {0} modules in the current assembly and {1} modules in external assemblies",
+                    assemblyCatalog.Parts.Count(), directoryCatalog.Parts.Count());
             }
+            catch (System.Reflection.ReflectionTypeLoadException ex)
+            {
+                StringBuilder error = new StringBuilder("[MODULES]: Error(s) encountered loading plugin modules. You may have an incompatible or out of date plugin .dll in the current folder.");
+                foreach (Exception loaderEx in ex.LoaderExceptions)
+                    error.Append("\n " + loaderEx.Message);
+                m_log.Error(error.ToString());
+
+                Environment.Exit(-1);
+            }
+
+            #endregion Container Loading
+
+            #region Plugin Loading
+
+            IEnumerable<Lazy<object, object>> exportEnumerable = m_moduleContainer.GetExports(typeof(IApplicationPlugin), null, null);
+            Dictionary<string, Lazy<object, object>> exports = new Dictionary<string, Lazy<object, object>>();
+            List<IApplicationPlugin> imports = new List<IApplicationPlugin>();
+            List<string> notLoaded = new List<string>();
+
+            // Reshuffle exportEnumerable into a dictionary mapping module names to their lazy instantiations
+            foreach (Lazy<object, object> lazyExport in exportEnumerable)
+            {
+                IDictionary<string, object> metadata = (IDictionary<string, object>)lazyExport.Metadata;
+                object nameObj;
+                if (metadata.TryGetValue("Name", out nameObj))
+                {
+                    string name = (string)nameObj;
+
+                    if (!exports.ContainsKey(name))
+                        exports.Add(name, lazyExport);
+                    else
+                        m_log.Warn("[MODULES]: Found an IApplicationPlugin with a duplicate name: " + name);
+                }
+            }
+
+            // TODO: Load modules in the order they appear in the whitelist
+            foreach (Lazy<object, object> lazyExport in exports.Values)
+            {
+                imports.Add((IApplicationPlugin)lazyExport.Value);
+            }
+            exports.Clear();
+
+            // Populate m_appPlugins
+            m_appPlugins = imports.ToArray();
+
+            m_log.Debug("[MODULES]: Loaded " + m_appPlugins.Length + " application plugins");
+
+            #endregion Plugin Loading
         }
 
         protected override List<string> GetHelpTopics()
@@ -193,11 +240,11 @@ namespace OpenSim
             // Create a ModuleLoader instance
             m_moduleLoader = new ModuleLoader(m_config.Source);
 
-            LoadPlugins();
-            foreach (IApplicationPlugin plugin in m_plugins)
-            {
+            LoadApplicationPlugins();
+            foreach (IApplicationPlugin plugin in m_appPlugins)
+                plugin.Initialise(this);
+            foreach (IApplicationPlugin plugin in m_appPlugins)
                 plugin.PostInitialise();
-            }
 
             AddPluginCommands();
         }
@@ -575,7 +622,7 @@ namespace OpenSim
 
             return new Scene(
                 regionInfo, circuitManager, sceneGridService,
-                storageManager, m_moduleLoader, false, m_configSettings.PhysicalPrim,
+                m_moduleContainer, storageManager, m_moduleLoader, false, m_configSettings.PhysicalPrim,
                 m_configSettings.See_into_region_from_neighbor, m_config.Source, m_version);
         }
         

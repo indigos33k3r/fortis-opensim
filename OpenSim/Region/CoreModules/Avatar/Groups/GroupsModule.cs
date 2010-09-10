@@ -36,6 +36,7 @@ using OpenSim.Region.Framework.Scenes;
 
 namespace OpenSim.Region.CoreModules.Avatar.Groups
 {
+    [RegionModuleDeprecated("GroupsModule")]
     public class GroupsModule : IRegionModule
     {
         private static readonly ILog m_log =

@@ -44,6 +44,7 @@ namespace OpenSim.Client.MXP
     /**
      * MXP Client Module which adds MXP support to client / region communication.
      */
+    [RegionModuleDeprecated("MXPModule")]
     public class MXPModule : IRegionModule
     {
         private static readonly ILog m_log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);

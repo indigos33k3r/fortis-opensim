@@ -47,6 +47,7 @@ using GridRegion = OpenSim.Services.Interfaces.GridRegion;
 
 namespace OpenSim.Region.CoreModules.Avatar.Friends
 {
+    [RegionModule("FriendsModule")]
     public class FriendsModule : ISharedRegionModule, IFriendsModule
     {
         protected class UserFriendData

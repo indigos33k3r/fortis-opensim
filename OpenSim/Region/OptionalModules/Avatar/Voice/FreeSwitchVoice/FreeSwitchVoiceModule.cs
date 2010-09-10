@@ -52,6 +52,7 @@ using System.Text.RegularExpressions;
 
 namespace OpenSim.Region.OptionalModules.Avatar.Voice.FreeSwitchVoice
 {
+    [RegionModuleDeprecated("FreeSwitchVoiceModule")]
     public class FreeSwitchVoiceModule : IRegionModule, IVoiceModule
     {
         private static readonly ILog m_log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);

@@ -38,6 +38,7 @@ using OpenSim.Services.Interfaces;
 
 namespace OpenSim.Region.CoreModules.ServiceConnectorsOut.Asset
 {
+    [RegionModule("RemoteAssetServicesConnector")]
     public class RemoteAssetServicesConnector :
             AssetServicesConnector, ISharedRegionModule, IAssetService
     {

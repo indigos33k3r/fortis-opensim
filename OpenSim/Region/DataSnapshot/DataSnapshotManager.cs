@@ -43,6 +43,7 @@ using OpenSim.Region.Framework.Scenes;
 
 namespace OpenSim.Region.DataSnapshot
 {
+    [RegionModuleDeprecated("DataSnapshotManager")]
     public class DataSnapshotManager : IRegionModule, IDataSnapshot
     {
         #region Class members

@@ -39,6 +39,7 @@ using OpenSim.Services.Interfaces;
 
 namespace OpenSim.Region.CoreModules.Avatar.Dialog
 {
+    [RegionModuleDeprecated("DialogModule")]
     public class DialogModule : IRegionModule, IDialogModule
     { 
         private static readonly ILog m_log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);

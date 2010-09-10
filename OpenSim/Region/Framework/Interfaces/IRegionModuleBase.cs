@@ -26,12 +26,24 @@
  */
 
 using System;
-using Mono.Addins;
+using System.ComponentModel.Composition;
 using Nini.Config;
 using OpenSim.Region.Framework.Scenes;
 
 namespace OpenSim.Region.Framework.Interfaces
 {
+    /// <summary>
+    /// Decorates a class as an IRegionModuleBase that should be recognized by the 
+    /// OpenSim plugin loader
+    /// </summary>
+    [MetadataAttribute]
+    [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
+    public class RegionModuleAttribute : ExportAttribute
+    {
+        public RegionModuleAttribute(string name) : base(typeof(IRegionModuleBase)) { Name = name; }
+        public string Name { get; set; }
+    }
+
     public interface IRegionModuleBase
     {
         /// <value>

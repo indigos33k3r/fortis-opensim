@@ -63,6 +63,7 @@ namespace OpenSim.Region.CoreModules.Scripting.LSLHttp
         public string uri;
     }
 
+    [RegionModule("UrlModule")]
     public class UrlModule : ISharedRegionModule, IUrlModule
     {
         private static readonly ILog m_log =

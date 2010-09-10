@@ -39,6 +39,7 @@ using OpenSim.Services.Interfaces;
 
 namespace OpenSim.Region.CoreModules.World
 {
+    [RegionModule("AccessModule")]
     public class AccessModule : ISharedRegionModule
     {
 //        private static readonly ILog m_log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);

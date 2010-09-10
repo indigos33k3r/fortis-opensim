@@ -39,6 +39,7 @@ using OpenSim.Region.Framework.Scenes;
 
 namespace OpenSim.Region.OptionalModules.Scripting.RegionReady
 {
+    [RegionModule("RegionReadyModule")]
     public class RegionReadyModule : INonSharedRegionModule
     {
         private static readonly ILog m_log = 

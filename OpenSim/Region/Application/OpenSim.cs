@@ -850,7 +850,7 @@ namespace OpenSim
         /// </summary>
         /// <param name="mod"></param>
         /// <param name="cmd"></param>
-        public override void HandleShow(string mod, string[] cmd)
+        protected override void HandleShow(string mod, string[] cmd)
         {
             base.HandleShow(mod, cmd);
 

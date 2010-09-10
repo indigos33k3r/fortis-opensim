@@ -31,7 +31,6 @@ namespace OpenSim.Region.Framework.Interfaces
 {
     public interface IWindModule : IRegionModule
     {
-        
         /// <summary>
         /// Retrieves the current wind speed at the given Region Coordinates
         /// </summary>
@@ -40,12 +39,12 @@ namespace OpenSim.Region.Framework.Interfaces
         /// <summary>
         /// Set Wind Plugin Parameter
         /// </summary>
-        void WindParamSet(string plugin, string param, float value);
+        void WindParamSet(string param, float value);
 
         /// <summary>
         /// Get Wind Plugin Parameter
         /// </summary>
-        float WindParamGet(string plugin, string param);
+        float WindParamGet(string param);
 
         /// <summary>
         /// Current active wind model plugin or String.Empty

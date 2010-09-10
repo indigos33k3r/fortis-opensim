@@ -36,6 +36,7 @@ using OpenSim.Services.Connectors;
 
 namespace OpenSim.Region.CoreModules.ServiceConnectorsOut.Authentication
 {
+    [RegionModule("RemoteAuthenticationServicesConnector")]
     public class RemoteAuthenticationServicesConnector : AuthenticationServicesConnector,
             ISharedRegionModule, IAuthenticationService
     {

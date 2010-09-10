@@ -35,6 +35,7 @@ using OpenSim.Region.Framework.Scenes;
 
 namespace OpenSim.Region.CoreModules
 {
+    [RegionModuleDeprecated("CloudModule")]
     public class CloudModule : ICloudModule
     {
 //        private static readonly log4net.ILog m_log 

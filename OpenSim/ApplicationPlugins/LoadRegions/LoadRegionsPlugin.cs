@@ -41,6 +41,7 @@ using OpenSim.Region.CoreModules.Scripting.XMLRPC;
 
 namespace OpenSim.ApplicationPlugins.LoadRegions
 {
+    [ApplicationModule("LoadRegionsPlugin")]
     public class LoadRegionsPlugin : IApplicationPlugin, IRegionCreator
     {
         private static readonly ILog m_log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);

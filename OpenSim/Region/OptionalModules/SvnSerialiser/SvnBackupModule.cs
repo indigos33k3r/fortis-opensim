@@ -42,6 +42,7 @@ using Slash = System.IO.Path;
 
 namespace OpenSim.Region.Modules.SvnSerialiser
 {
+    [RegionModuleDeprecated("SvnBackupModule")]
     public class SvnBackupModule : IRegionModule
     {
         private static readonly ILog m_log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);

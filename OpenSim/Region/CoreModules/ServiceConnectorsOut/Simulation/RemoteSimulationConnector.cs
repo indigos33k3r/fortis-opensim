@@ -46,6 +46,7 @@ using GridRegion = OpenSim.Services.Interfaces.GridRegion;
 
 namespace OpenSim.Region.CoreModules.ServiceConnectorsOut.Simulation
 {
+    [RegionModule("RemoteSimulationConnectorModule")]
     public class RemoteSimulationConnectorModule : ISharedRegionModule, ISimulationService
     {
         private bool initialized = false;

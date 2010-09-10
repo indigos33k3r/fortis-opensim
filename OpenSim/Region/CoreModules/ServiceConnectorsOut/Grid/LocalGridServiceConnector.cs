@@ -41,6 +41,7 @@ using OpenMetaverse;
 
 namespace OpenSim.Region.CoreModules.ServiceConnectorsOut.Grid
 {
+    [RegionModule("LocalGridServicesConnector")]
     public class LocalGridServicesConnector :
             ISharedRegionModule, IGridService
     {

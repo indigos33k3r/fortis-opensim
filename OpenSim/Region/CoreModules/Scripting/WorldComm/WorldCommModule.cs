@@ -85,6 +85,7 @@ using OpenSim.Region.Framework.Scenes;
 
 namespace OpenSim.Region.CoreModules.Scripting.WorldComm
 {
+    [RegionModuleDeprecated("WorldCommModule")]
     public class WorldCommModule : IRegionModule, IWorldComm
     {
         // private static readonly ILog m_log =

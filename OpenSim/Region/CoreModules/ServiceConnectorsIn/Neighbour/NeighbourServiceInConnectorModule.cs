@@ -41,6 +41,7 @@ using OpenSim.Services.Interfaces;
 
 namespace OpenSim.Region.CoreModules.ServiceConnectorsIn.Neighbour
 {
+    [RegionModule("NeighbourServiceInConnectorModule")]
     public class NeighbourServiceInConnectorModule : ISharedRegionModule, INeighbourService
     {
         private static readonly ILog m_log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);

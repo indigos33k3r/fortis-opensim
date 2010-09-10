@@ -38,6 +38,7 @@ using OpenSim.Services.Interfaces;
 
 namespace OpenSim.Region.CoreModules.Avatar.Inventory.Transfer
 {
+    [RegionModule("InventoryTransferModule")]
     public class InventoryTransferModule : IInventoryTransferModule, ISharedRegionModule
     {
         private static readonly ILog m_log

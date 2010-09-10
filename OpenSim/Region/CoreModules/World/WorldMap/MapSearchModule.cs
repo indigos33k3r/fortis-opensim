@@ -37,6 +37,7 @@ using GridRegion = OpenSim.Services.Interfaces.GridRegion;
 
 namespace OpenSim.Region.CoreModules.World.WorldMap
 {
+    [RegionModuleDeprecated("MapSearchModule")]
     public class MapSearchModule : IRegionModule
     {
         private static readonly ILog m_log =

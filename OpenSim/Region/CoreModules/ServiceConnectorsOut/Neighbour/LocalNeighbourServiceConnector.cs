@@ -38,6 +38,7 @@ using OpenSim.Services.Interfaces;
 
 namespace OpenSim.Region.CoreModules.ServiceConnectorsOut.Neighbour
 {
+    [RegionModule("LocalNeighbourServicesConnector")]
     public class LocalNeighbourServicesConnector :
             ISharedRegionModule, INeighbourService
     {

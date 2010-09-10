@@ -38,6 +38,7 @@ using OpenSim.Services.Interfaces;
 
 namespace OpenSim.Region.OptionalModules.World.NPC
 {
+    [RegionModuleDeprecated("NPCModule")]
     public class NPCModule : IRegionModule, INPCModule
     {
         // private const bool m_enabled = false;

@@ -39,6 +39,7 @@ using OpenMetaverse;
 
 namespace OpenSim.Region.CoreModules.ServiceConnectorsOut.Avatar
 {
+    [RegionModule("LocalAvatarServicesConnector")]
     public class LocalAvatarServicesConnector : ISharedRegionModule, IAvatarService
     {
         private static readonly ILog m_log =

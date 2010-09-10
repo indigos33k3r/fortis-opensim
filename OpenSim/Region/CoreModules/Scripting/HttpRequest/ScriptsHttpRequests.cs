@@ -84,6 +84,7 @@ using OpenSim.Region.Framework.Scenes;
 
 namespace OpenSim.Region.CoreModules.Scripting.HttpRequest
 {
+    [RegionModuleDeprecated("HttpRequestModule")]
     public class HttpRequestModule : IRegionModule, IHttpRequestModule
     {
         private object HttpListLock = new object();

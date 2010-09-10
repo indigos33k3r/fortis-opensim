@@ -52,6 +52,7 @@ using GridRegion = OpenSim.Services.Interfaces.GridRegion;
 
 namespace OpenSim.Region.CoreModules.World.WorldMap
 {
+    [RegionModule("WorldMapModule")]
     public class WorldMapModule : INonSharedRegionModule, IWorldMapModule
     {
         private static readonly ILog m_log =

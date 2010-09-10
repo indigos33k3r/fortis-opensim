@@ -27,6 +27,8 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.Composition;
+using System.ComponentModel.Composition.Hosting;
 using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
@@ -318,6 +320,11 @@ namespace OpenSim.Region.Framework.Scenes
             get { return m_AvatarFactory; }
         }
         protected IConfigSource m_config;
+        protected CompositionContainer m_moduleContainer;
+        public CompositionContainer ModuleContainer
+        {
+            get { return m_moduleContainer; }
+        }
         protected IRegionSerialiserModule m_serialiser;
         protected IDialogModule m_dialogModule;
         protected IEntityTransferModule m_teleportModule;
@@ -487,11 +494,12 @@ namespace OpenSim.Region.Framework.Scenes
 
         public Scene(RegionInfo regInfo, AgentCircuitManager authen,
                      SceneCommunicationService sceneGridService,
-                     StorageManager storeManager,
+                     CompositionContainer moduleContainer, StorageManager storeManager,
                      ModuleLoader moduleLoader, bool dumpAssetsToFile, bool physicalPrim,
                      bool SeeIntoRegionFromNeighbor, IConfigSource config, string simulatorVersion)
         {
             m_config = config;
+            m_moduleContainer = moduleContainer;
 
             Random random = new Random();
             

@@ -27,9 +27,10 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.Composition;
+using System.ComponentModel.Composition.Hosting;
 using System.Reflection;
 using log4net;
-using Mono.Addins;
 using Nini.Config;
 using OpenSim;
 using OpenSim.Region.Framework.Interfaces;
@@ -37,8 +38,8 @@ using OpenSim.Region.Framework.Scenes;
 
 namespace OpenSim.ApplicationPlugins.RegionModulesController
 {
-    public class RegionModulesControllerPlugin : IRegionModulesController,
-            IApplicationPlugin
+    [ApplicationModule("RegionModulesController")]
+    public class RegionModulesControllerPlugin : IRegionModulesController, IApplicationPlugin
     {
         // Logger
         private static readonly ILog m_log =
@@ -48,18 +49,13 @@ namespace OpenSim.ApplicationPlugins.RegionModulesController
         // Config access
         private OpenSimBase m_openSim;
 
-        // Our name
-        private string m_name;
-
         // Internal lists to collect information about modules present
-        private List<TypeExtensionNode> m_nonSharedModules =
-                new List<TypeExtensionNode>();
-        private List<TypeExtensionNode> m_sharedModules =
-                new List<TypeExtensionNode>();
+        private List<INonSharedRegionModule> m_nonSharedModules = new List<INonSharedRegionModule>();
+        private List<ISharedRegionModule> m_sharedModules = new List<ISharedRegionModule>();
 
         // List of shared module instances, for adding to Scenes
-        private List<ISharedRegionModule> m_sharedInstances =
-                new List<ISharedRegionModule>();
+        //private List<ISharedRegionModule> m_sharedInstances =
+        //        new List<ISharedRegionModule>();
 
 #region IApplicationPlugin implementation
 
@@ -69,136 +65,41 @@ namespace OpenSim.ApplicationPlugins.RegionModulesController
             m_openSim.ApplicationRegistry.RegisterInterface<IRegionModulesController>(this);
             m_log.DebugFormat("[REGIONMODULES]: Initializing...");
 
-            // Who we are
-            string id = AddinManager.CurrentAddin.Id;
-
-            // Make friendly name
-            int pos = id.LastIndexOf(".");
-            if (pos == -1)
-                m_name = id;
-            else
-                m_name = id.Substring(pos + 1);
-
             // The [Modules] section in the ini file
-            IConfig modulesConfig =
-                    m_openSim.ConfigSource.Source.Configs["Modules"];
+            IConfig modulesConfig = m_openSim.ConfigSource.Source.Configs["Modules"];
             if (modulesConfig == null)
                 modulesConfig = m_openSim.ConfigSource.Source.AddConfig("Modules");
 
-            // Scan modules and load all that aren't disabled
-            foreach (TypeExtensionNode node in
-                    AddinManager.GetExtensionNodes("/OpenSim/RegionModules"))
+            CompositionContainer moduleContainer = openSim.ModuleContainer;
+            IEnumerable<Lazy<object, object>> exportEnumerable = moduleContainer.GetExports(typeof(IRegionModuleBase), null, null);
+
+            foreach (Lazy<object, object> lazyExport in exportEnumerable)
             {
-                if (node.Type.GetInterface(typeof(ISharedRegionModule).ToString()) != null)
+                IDictionary<string, object> metadata = (IDictionary<string, object>)lazyExport.Metadata;
+                object nameObj;
+                if (metadata.TryGetValue("Name", out nameObj))
                 {
-                    // Get the config string
-                    string moduleString =
-                            modulesConfig.GetString("Setup_" + node.Id, String.Empty);
+                    string name = (string)nameObj;
 
-                    // We have a selector
-                    if (moduleString != String.Empty)
+                    // TODO: Whitelist before we call lazyExport.Value, which instantiates
+                    if (lazyExport.Value is ISharedRegionModule)
                     {
-                        // Allow disabling modules even if they don't have
-                        // support for it
-                        if (moduleString == "disabled")
-                            continue;
-
-                        // Split off port, if present
-                        string[] moduleParts = moduleString.Split(new char[] { '/' }, 2);
-                        // Format is [port/][class]
-                        string className = moduleParts[0];
-                        if (moduleParts.Length > 1)
-                            className = moduleParts[1];
-
-                        // Match the class name if given
-                        if (className != String.Empty &&
-                                node.Type.ToString() != className)
-                            continue;
+                        m_log.DebugFormat("[REGIONMODULES]: Found shared region module {0}", name);
+                        m_sharedModules.Add((ISharedRegionModule)lazyExport.Value);
                     }
-
-                    m_log.DebugFormat("[REGIONMODULES]: Found shared region module {0}, class {1}", node.Id, node.Type);
-                    m_sharedModules.Add(node);
-                }
-                else if (node.Type.GetInterface(typeof(INonSharedRegionModule).ToString()) != null)
-                {
-                    // Get the config string
-                    string moduleString =
-                            modulesConfig.GetString("Setup_" + node.Id, String.Empty);
-
-                    // We have a selector
-                    if (moduleString != String.Empty)
+                    else if (lazyExport.Value is INonSharedRegionModule)
                     {
-                        // Allow disabling modules even if they don't have
-                        // support for it
-                        if (moduleString == "disabled")
-                            continue;
-
-                        // Split off port, if present
-                        string[] moduleParts = moduleString.Split(new char[] { '/' }, 2);
-                        // Format is [port/][class]
-                        string className = moduleParts[0];
-                        if (moduleParts.Length > 1)
-                            className = moduleParts[1];
-
-                        // Match the class name if given
-                        if (className != String.Empty &&
-                                node.Type.ToString() != className)
-                            continue;
+                        m_log.DebugFormat("[REGIONMODULES]: Found non-shared region module {0}", name);
+                        m_nonSharedModules.Add((INonSharedRegionModule)lazyExport.Value);
                     }
-
-                    m_log.DebugFormat("[REGIONMODULES]: Found non-shared region module {0}, class {1}", node.Id, node.Type);
-                    m_nonSharedModules.Add(node);
                 }
-                else
-                    m_log.DebugFormat("[REGIONMODULES]: Found unknown type of module {0}, class {1}", node.Id, node.Type);
             }
 
-            // Load and init the module. We try a constructor with a port
-            // if a port was given, fall back to one without if there is
-            // no port or the more specific constructor fails.
-            // This will be removed, so that any module capable of using a port
-            // must provide a constructor with a port in the future.
-            // For now, we do this so migration is easy.
-            //
-            foreach (TypeExtensionNode node in m_sharedModules)
+            foreach (ISharedRegionModule node in m_sharedModules)
             {
-                Object[] ctorArgs = new Object[] { (uint)0 };
-
-                // Read the config again
-                string moduleString =
-                        modulesConfig.GetString("Setup_" + node.Id, String.Empty);
-
-                // Get the port number, if there is one
-                if (moduleString != String.Empty)
-                {
-                    // Get the port number from the string
-                    string[] moduleParts = moduleString.Split(new char[] { '/' },
-                            2);
-                    if (moduleParts.Length > 1)
-                        ctorArgs[0] = Convert.ToUInt32(moduleParts[0]);
-                }
-
-                // Try loading and initilaizing the module, using the
-                // port if appropriate
-                ISharedRegionModule module = null;
-
-                try
-                {
-                    module = (ISharedRegionModule)Activator.CreateInstance(
-                            node.Type, ctorArgs);
-                }
-                catch
-                {
-                    module = (ISharedRegionModule)Activator.CreateInstance(
-                            node.Type);
-                }
-
                 // OK, we're up and running
-                m_sharedInstances.Add(module);
-                module.Initialise(m_openSim.ConfigSource.Source);
+                node.Initialise(m_openSim.ConfigSource.Source);
             }
-
-
         }
 
         public void PostInitialise ()
@@ -206,11 +107,10 @@ namespace OpenSim.ApplicationPlugins.RegionModulesController
             m_log.DebugFormat("[REGIONMODULES]: PostInitializing...");
 
             // Immediately run PostInitialise on shared modules
-            foreach (ISharedRegionModule module in m_sharedInstances)
+            foreach (ISharedRegionModule module in m_sharedModules)
             {
                 module.PostInitialise();
             }
-
         }
 
 #endregion
@@ -233,12 +133,11 @@ namespace OpenSim.ApplicationPlugins.RegionModulesController
         public void Dispose ()
         {
             // We expect that all regions have been removed already
-            while (m_sharedInstances.Count > 0)
+            while (m_sharedModules.Count > 0)
             {
-                m_sharedInstances[0].Close();
-                m_sharedInstances.RemoveAt(0);
+                m_sharedModules[0].Close();
+                m_sharedModules.RemoveAt(0);
             }
-            m_sharedModules.Clear();
             m_nonSharedModules.Clear();
         }
 
@@ -249,7 +148,7 @@ namespace OpenSim.ApplicationPlugins.RegionModulesController
         {
             get
             {
-                return AddinManager.CurrentAddin.Version;
+                return "1.0";
             }
         }
 
@@ -257,7 +156,7 @@ namespace OpenSim.ApplicationPlugins.RegionModulesController
         {
             get
             {
-                return m_name;
+                return "RegionModulesController";
             }
         }
 
@@ -287,7 +186,7 @@ namespace OpenSim.ApplicationPlugins.RegionModulesController
 
             // Iterate over the shared modules that have been loaded
             // Add them to the new Scene
-            foreach (ISharedRegionModule module in m_sharedInstances)
+            foreach (ISharedRegionModule module in m_sharedModules)
             {
                 // Here is where we check if a replaceable interface
                 // is defined. If it is, the module is checked against
@@ -325,36 +224,8 @@ namespace OpenSim.ApplicationPlugins.RegionModulesController
 
             // Scan for, and load, nonshared modules
             List<INonSharedRegionModule> list = new List<INonSharedRegionModule>();
-            foreach (TypeExtensionNode node in m_nonSharedModules)
+            foreach (INonSharedRegionModule module in m_nonSharedModules)
             {
-                Object[] ctorArgs = new Object[] {0};
-
-                // Read the config
-                string moduleString =
-                        modulesConfig.GetString("Setup_" + node.Id, String.Empty);
-
-                // Get the port number, if there is one
-                if (moduleString != String.Empty)
-                {
-                    // Get the port number from the string
-                    string[] moduleParts = moduleString.Split(new char[] {'/'},
-                            2);
-                    if (moduleParts.Length > 1)
-                        ctorArgs[0] = Convert.ToUInt32(moduleParts[0]);
-                }
-
-                // Actually load it
-                INonSharedRegionModule module = null;
-
-                Type[] ctorParamTypes = new Type[ctorArgs.Length];
-                for (int i = 0; i < ctorParamTypes.Length; i++)
-                    ctorParamTypes[i] = ctorArgs[i].GetType();
-
-                if (node.Type.GetConstructor(ctorParamTypes) != null)
-                    module = (INonSharedRegionModule)Activator.CreateInstance(node.Type, ctorArgs);
-                else
-                    module = (INonSharedRegionModule)Activator.CreateInstance(node.Type);
-
                 // Check for replaceable interfaces
                 Type replaceableInterface = module.ReplaceableInterface;
                 if (replaceableInterface != null)

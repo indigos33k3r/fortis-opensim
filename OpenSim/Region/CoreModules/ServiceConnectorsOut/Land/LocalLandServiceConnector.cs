@@ -38,6 +38,7 @@ using OpenSim.Services.Interfaces;
 
 namespace OpenSim.Region.CoreModules.ServiceConnectorsOut.Land
 {
+    [RegionModule("LocalLandServicesConnector")]
     public class LocalLandServicesConnector :
             ISharedRegionModule, ILandService
     {

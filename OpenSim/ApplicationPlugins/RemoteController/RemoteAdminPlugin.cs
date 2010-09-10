@@ -54,6 +54,7 @@ using GridRegion = OpenSim.Services.Interfaces.GridRegion;
 
 namespace OpenSim.ApplicationPlugins.RemoteController
 {
+    [ApplicationModule("RemoteAdminPlugin")]
     public class RemoteAdminPlugin : IApplicationPlugin
     {
         private static readonly ILog m_log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);

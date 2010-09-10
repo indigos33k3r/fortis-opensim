@@ -52,6 +52,7 @@ using OSDMap = OpenMetaverse.StructuredData.OSDMap;
 
 namespace OpenSim.Region.UserStatistics
 {
+    [RegionModuleDeprecated("WebStatsModule")]
     public class WebStatsModule : IRegionModule
     {
         private static readonly ILog m_log =

@@ -39,6 +39,7 @@ using OpenSim.Services.Interfaces;
 
 namespace OpenSim.Region.CoreModules.Asset
 {
+    [RegionModule("GlynnTuckerAssetCache")]
     public class GlynnTuckerAssetCache : ISharedRegionModule, IImprovedAssetCache
     {
         private static readonly ILog m_log =

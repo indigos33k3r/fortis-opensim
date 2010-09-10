@@ -40,6 +40,7 @@ using OpenSim.Region.Framework.Scenes;
 
 namespace OpenSim.Region.CoreModules.Scripting.EmailModules
 {
+    [RegionModuleDeprecated("EmailModule")]
     public class EmailModule : IRegionModule, IEmailModule
     {
         //

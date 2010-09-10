@@ -42,6 +42,7 @@ using OpenSim.Services.Interfaces;
 
 namespace OpenSim.Region.CoreModules.ServiceConnectorsIn.Login
 {
+    [RegionModule("LLLoginServiceInConnectorModule")]
     public class LLLoginServiceInConnectorModule : ISharedRegionModule
     {
         private static readonly ILog m_log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);

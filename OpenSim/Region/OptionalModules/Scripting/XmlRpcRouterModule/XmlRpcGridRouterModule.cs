@@ -49,6 +49,7 @@ namespace OpenSim.Region.OptionalModules.Scripting.XmlRpcGridRouterModule
         public string uri;
     }
 
+    [RegionModuleDeprecated("XmlRpcGridRouter")]
     public class XmlRpcGridRouter : IRegionModule, IXmlRpcRouter
     {
         private static readonly ILog m_log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);

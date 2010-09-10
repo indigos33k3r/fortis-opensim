@@ -34,7 +34,6 @@ using System.IO;
 using System.Net;
 using System.Reflection;
 using log4net;
-using Mono.Addins;
 using Nini.Config;
 using OpenSim.Framework;
 using OpenSim.Region.Framework.Interfaces;
@@ -51,7 +50,7 @@ namespace OpenSim.Services.Connectors.SimianGrid
     /// Connects region registration and neighbor lookups to the SimianGrid
     /// backend
     /// </summary>
-    [Extension(Path = "/OpenSim/RegionModules", NodeName = "RegionModule")]
+    [RegionModule("SimianGridServiceConnector")]
     public class SimianGridServiceConnector : IGridService, ISharedRegionModule
     {
         private static readonly ILog m_log =

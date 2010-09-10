@@ -43,6 +43,7 @@ using OpenSim.Region.Framework.Scenes;
 
 namespace OpenSim.Region.CoreModules.World.Terrain
 {
+    [RegionModule("TerrainModule")]
     public class TerrainModule : INonSharedRegionModule, ICommandableModule, ITerrainModule
     {
         #region StandardTerrainEffects enum

@@ -75,7 +75,8 @@ namespace OpenSim.Region.CoreModules.InterGrid
         public bool visible_to_parent;
         public string teleported_into_region;
     }
-    
+
+    [RegionModuleDeprecated("OpenGridProtocolModule")]
     public class OpenGridProtocolModule : IRegionModule
     {
         private static readonly ILog m_log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);

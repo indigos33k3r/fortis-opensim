@@ -36,6 +36,7 @@ using OpenSim.Region.Framework.Scenes;
 
 namespace OpenSim.Region.CoreModules.Agent.IPBan
 {
+    [RegionModuleDeprecated("IPBanModule")]
     public class IPBanModule : IRegionModule 
     {
         #region Implementation of IRegionModule

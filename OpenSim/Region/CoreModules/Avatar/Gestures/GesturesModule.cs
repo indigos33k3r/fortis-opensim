@@ -37,6 +37,7 @@ using OpenSim.Services.Interfaces;
 
 namespace OpenSim.Region.CoreModules.Avatar.Gestures
 {
+    [RegionModuleDeprecated("GesturesModule")]
     public class GesturesModule : IRegionModule
     { 
         private static readonly ILog m_log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);

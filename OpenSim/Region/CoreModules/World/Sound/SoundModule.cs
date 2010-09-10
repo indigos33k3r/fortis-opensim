@@ -34,6 +34,7 @@ using OpenSim.Region.Framework.Scenes;
 
 namespace OpenSim.Region.CoreModules.World.Sound
 {
+    [RegionModuleDeprecated("SoundModule")]
     public class SoundModule : IRegionModule, ISoundModule
     {
         //private static readonly ILog m_log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);

@@ -41,6 +41,7 @@ using OpenSim.Services.Interfaces;
 
 namespace OpenSim.Region.CoreModules.Agent.TextureDownload
 {
+    [RegionModuleDeprecated("TextureDownloadModule")]
     public class TextureDownloadModule : IRegionModule
     {
         private static readonly ILog m_log

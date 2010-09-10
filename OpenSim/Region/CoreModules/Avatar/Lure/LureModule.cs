@@ -37,6 +37,7 @@ using OpenSim.Region.Framework.Scenes;
 
 namespace OpenSim.Region.CoreModules.Avatar.Lure
 {
+    [RegionModule("LureModule")]
     public class LureModule : ISharedRegionModule
     {
         private static readonly ILog m_log = LogManager.GetLogger(

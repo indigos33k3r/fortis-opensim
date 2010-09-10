@@ -38,6 +38,7 @@ using OpenSim.Services.Interfaces;
 
 namespace OpenSim.Region.CoreModules.ServiceConnectorsOut.Asset
 {
+    [RegionModule("LocalAssetServicesConnector")]
     public class LocalAssetServicesConnector : ISharedRegionModule, IAssetService
     {
         private static readonly ILog m_log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);

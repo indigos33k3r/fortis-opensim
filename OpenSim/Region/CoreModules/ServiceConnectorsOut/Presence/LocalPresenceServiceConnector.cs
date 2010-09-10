@@ -40,6 +40,7 @@ using Nini.Config;
 
 namespace OpenSim.Region.CoreModules.ServiceConnectorsOut.Presence
 {
+    [RegionModule("LocalPresenceServicesConnector")]
     public class LocalPresenceServicesConnector : ISharedRegionModule, IPresenceService
     {
         private static readonly ILog m_log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);

@@ -56,6 +56,7 @@ namespace OpenSim.Region.CoreModules.World.Land
         public byte RegionAccess;
     }
 
+    [RegionModule("LandManagementModule")]
     public class LandManagementModule : INonSharedRegionModule
     {
         private static readonly ILog m_log =

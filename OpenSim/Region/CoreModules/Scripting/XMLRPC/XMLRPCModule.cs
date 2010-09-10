@@ -76,6 +76,7 @@ using OpenSim.Region.Framework.Scenes;
 
 namespace OpenSim.Region.CoreModules.Scripting.XMLRPC
 {
+    [RegionModuleDeprecated("XMLRPCModule")]
     public class XMLRPCModule : IRegionModule, IXMLRPC
     {
         private static readonly ILog m_log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);

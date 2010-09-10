@@ -33,7 +33,6 @@ using System.Reflection;
 using log4net;
 using Nini.Config;
 using Nwc.XmlRpc;
-using Mono.Addins;
 using OpenMetaverse;
 using OpenSim.Framework;
 
@@ -54,8 +53,7 @@ namespace OpenSim.Region.OptionalModules.World.MoneyModule
     /// This commonly looks like -helperuri http://127.0.0.1:9000/
     ///
     /// </summary>
-
-    [Extension(Path = "/OpenSim/RegionModules", NodeName = "RegionModule")]
+    [RegionModule("BetaGridLikeMoneyModule")]
     public class SampleMoneyModule : IMoneyModule, ISharedRegionModule
     {
         private static readonly ILog m_log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);

@@ -30,7 +30,6 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Reflection;
 using log4net;
-using Mono.Addins;
 using Nini.Config;
 using OpenSim.Framework;
 using OpenSim.Region.Framework.Interfaces;
@@ -44,7 +43,7 @@ namespace OpenSim.Services.Connectors.SimianGrid
     /// <summary>
     /// Connects avatar appearance data to the SimianGrid backend
     /// </summary>
-    [Extension(Path = "/OpenSim/RegionModules", NodeName = "RegionModule")]
+    [RegionModule("SimianAvatarServiceConnector")]
     public class SimianAvatarServiceConnector : IAvatarService, ISharedRegionModule
     {
         private static readonly ILog m_log =

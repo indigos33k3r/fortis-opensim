@@ -43,6 +43,7 @@ using System.Reflection;
 
 namespace OpenSim.Region.CoreModules.Scripting.VectorRender
 {
+    [RegionModuleDeprecated("VectorRenderModule")]
     public class VectorRenderModule : IRegionModule, IDynamicTextureRender
     {
         private static readonly ILog m_log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);

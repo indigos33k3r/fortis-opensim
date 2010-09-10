@@ -26,55 +26,39 @@
  */
 
 using System;
+using System.ComponentModel.Composition;
 
 namespace OpenSim.Framework
 {
     /// <summary>
-    /// Exception thrown if Initialise has been called, but failed.
+    /// Exception thrown if plugin loading failed
     /// </summary>
     public class PluginNotInitialisedException : Exception
     {
-        public PluginNotInitialisedException () : base() {}
         public PluginNotInitialisedException (string msg) : base(msg) {}
         public PluginNotInitialisedException (string msg, Exception e) : base(msg, e) {}
     }
 
     /// <summary>
-    /// This interface, describes a generic plugin
+    /// Decorates a class as an IPlugin that should be recognized by the 
+    /// OpenSim plugin loader
+    /// </summary>
+    [MetadataAttribute]
+    [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
+    public class PluginModuleAttribute : ExportAttribute
+    {
+        public PluginModuleAttribute(string name) : base(typeof(IPlugin)) { Name = name; }
+        public string Name { get; set; }
+    }
+
+    /// <summary>
+    /// Describes a generic plugin
     /// </summary>
     public interface IPlugin : IDisposable
     {
-        /// <summary>
-        /// Returns the plugin version
-        /// </summary>
-        /// <returns>Plugin version in MAJOR.MINOR.REVISION.BUILD format</returns>
-        string Version { get; }
-
-        /// <summary>
-        /// Returns the plugin name
-        /// </summary>
-        /// <returns>Plugin name, eg MySQL User Provider</returns>
-        string Name { get; }
-
         /// <summary>
         /// Default-initialises the plugin
         /// </summary>
         void Initialise();
     }
-
-    /// <summary>
-    /// Any plugins which need to pass parameters to their initialisers must
-    /// inherit this class and use it to set the PluginLoader Initialiser property
-    /// </summary>
-    public class PluginInitialiserBase
-    {
-        // this would be a lot simpler if C# supported currying or typedefs
-
-        // default initialisation
-        public virtual void Initialise (IPlugin plugin)
-        {
-            plugin.Initialise();
-        }
-    }
-
 }

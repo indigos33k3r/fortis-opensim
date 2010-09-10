@@ -1157,7 +1157,7 @@ namespace OpenSim.Region.ScriptEngine.Shared.Api
             {
                 try
                 {
-                    module.WindParamSet(plugin, param, value);
+                    module.WindParamSet(param, value);
                 }
                 catch (Exception) { }
             }
@@ -1171,7 +1171,7 @@ namespace OpenSim.Region.ScriptEngine.Shared.Api
             IWindModule module = World.RequestModuleInterface<IWindModule>();
             if (module != null)
             {
-                return module.WindParamGet(plugin, param);
+                return module.WindParamGet(param);
             }
 
             return 0.0f;

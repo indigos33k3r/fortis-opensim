@@ -29,7 +29,6 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using log4net;
-using Mono.Addins;
 using Nini.Config;
 using OpenMetaverse;
 using OpenMetaverse.StructuredData;
@@ -42,7 +41,7 @@ using Caps = OpenSim.Framework.Capabilities.Caps;
 
 namespace OpenSim.Region.OptionalModules.Avatar.XmlRpcGroups
 {
-    [Extension(Path = "/OpenSim/RegionModules", NodeName = "RegionModule")]
+    [RegionModule("GroupsMessagingModule")]
     public class GroupsMessagingModule : ISharedRegionModule, IGroupsMessagingModule
     {
         private static readonly ILog m_log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);

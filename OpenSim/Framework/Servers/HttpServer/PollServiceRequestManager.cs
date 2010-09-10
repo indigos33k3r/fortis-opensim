@@ -59,6 +59,7 @@ namespace OpenSim.Framework.Servers.HttpServer
                
                 m_workerThreads[i] = new Thread(m_PollServiceWorkerThreads[i].ThreadStart);
                 m_workerThreads[i].Name = String.Format("PollServiceWorkerThread{0}",i);
+                m_workerThreads[i].IsBackground = true;
                 //Can't add to thread Tracker here Referencing OpenSim.Framework creates circular reference
                 m_workerThreads[i].Start();
                 

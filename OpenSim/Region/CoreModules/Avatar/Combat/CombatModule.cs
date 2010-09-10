@@ -34,6 +34,7 @@ using OpenMetaverse;
 
 namespace OpenSim.Region.CoreModules.Avatar.Combat.CombatModule
 {
+    [RegionModuleDeprecated("CombatModule")]
     public class CombatModule : IRegionModule
     {
         //private static readonly ILog m_log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);

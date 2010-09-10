@@ -46,6 +46,7 @@ using OpenSim.Region.Framework.Scenes;
 
 namespace OpenSim.Region.OptionalModules.Scripting.Minimodule
 {
+    [RegionModuleDeprecated("MRMModule")]
     public class MRMModule : IRegionModule, IMRMModule
     {
         private static readonly ILog m_log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);

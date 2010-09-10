@@ -38,6 +38,7 @@ using OpenSim.Region.Framework.Scenes;
 
 namespace OpenSim.Region.CoreModules.World.Estate
 {
+    [RegionModuleDeprecated("EstateManagementModule")]
     public class EstateManagementModule : IEstateModule
     {
         private static readonly ILog m_log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);

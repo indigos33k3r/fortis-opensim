@@ -34,6 +34,7 @@ using OpenSim.Region.Framework.Interfaces;
 
 namespace OpenSim.Region.CoreModules.Avatar.Gods
 {
+    [RegionModuleDeprecated("GodsModule")]
     public class GodsModule : IRegionModule, IGodsModule
     {
         /// <summary>Special UUID for actions that apply to all agents</summary>

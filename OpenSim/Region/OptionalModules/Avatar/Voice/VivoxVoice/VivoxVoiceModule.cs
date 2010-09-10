@@ -49,6 +49,7 @@ using Caps = OpenSim.Framework.Capabilities.Caps;
 
 namespace OpenSim.Region.OptionalModules.Avatar.Voice.VivoxVoice
 {
+    [RegionModule("VivoxVoiceModule")]
     public class VivoxVoiceModule : ISharedRegionModule
     {
 

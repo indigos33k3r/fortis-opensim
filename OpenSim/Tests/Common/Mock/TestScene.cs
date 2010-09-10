@@ -26,6 +26,7 @@
  */
 
 using System;
+using System.ComponentModel.Composition.Hosting;
 using Nini.Config;
 using OpenSim.Framework;
 using OpenSim.Framework.Communications;
@@ -42,7 +43,7 @@ namespace OpenSim.Tests.Common.Mock
             SceneCommunicationService sceneGridService, StorageManager storeManager,
             ModuleLoader moduleLoader, bool dumpAssetsToFile, bool physicalPrim,
             bool SeeIntoRegionFromNeighbor, IConfigSource config, string simulatorVersion)
-            : base(regInfo, authen, sceneGridService, storeManager, moduleLoader,
+            : base(regInfo, authen, sceneGridService, null, storeManager, moduleLoader,
                    dumpAssetsToFile, physicalPrim, SeeIntoRegionFromNeighbor, config, simulatorVersion)
         {
         }

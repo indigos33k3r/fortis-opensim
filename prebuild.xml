@@ -167,8 +167,9 @@
       <Reference name="OpenSim.Framework.Servers.HttpServer"/>
       <Reference name="Nini.dll" />
       <Reference name="log4net.dll"/>
-      <Reference name="Mono.Addins.dll" />
       <Reference name="SmartThreadPool" />
+      <Reference name="System.ComponentModel.Composition"/>
+      
       <Files>
         <Match pattern="*.cs" recurse="false"/>
         <Match path="Client" pattern="*.cs" recurse="true"/>
@@ -247,11 +248,9 @@
       <Reference name="OpenMetaverseTypes.dll"/>
       <Reference name="OpenSim.Framework"/>
       <Reference name="log4net.dll"/>
-      <Reference name="Mono.Addins.dll" />
       <Files>
         <Match pattern="*.cs" recurse="false"/>
         <Match pattern="Properties/*.cs" recurse="false"/>
-        <Match pattern="*.addin.xml" path="Resources" buildAction="EmbeddedResource" recurse="true"/>
       </Files>
     </Project>
 
@@ -380,38 +379,6 @@
       <Reference name="Nini.dll" />
       <Files>
         <Match pattern="*.cs" recurse="true"/>
-      </Files>
-    </Project>
-
-    <Project frameworkVersion="v3_5" name="OpenSim.Framework.Servers" path="OpenSim/Framework/Servers" type="Library">
-      <Configuration name="Debug">
-        <Options>
-          <OutputPath>../../../bin/</OutputPath>
-        </Options>
-      </Configuration>
-      <Configuration name="Release">
-        <Options>
-          <OutputPath>../../../bin/</OutputPath>
-        </Options>
-      </Configuration>
-
-      <ReferencePath>../../../bin/</ReferencePath>
-      <Reference name="System"/>
-      <Reference name="System.Xml"/>
-      <Reference name="OpenSim.Data"/>
-      <Reference name="OpenSim.Framework"/>
-      <Reference name="OpenSim.Framework.Servers.HttpServer"/>
-      <Reference name="OpenSim.Framework.Console"/>
-      <Reference name="OpenSim.Framework.Statistics"/>
-      <Reference name="OpenMetaverse.StructuredData.dll"/>
-      <Reference name="OpenMetaverseTypes.dll"/>
-      <Reference name="XMLRPC.dll"/>
-      <Reference name="log4net.dll"/>
-      <Reference name="HttpServer_OpenSim.dll"/>
-
-      <Files>
-        <Match pattern="*.cs" recurse="false">
-        </Match>
       </Files>
     </Project>
 
@@ -675,7 +642,6 @@
       <Reference name="System.Xml"/>
       <Reference name="System.Web"/>
       <Reference name="OpenSim.Framework"/>
-      <Reference name="OpenSim.Framework.Servers"/>
       <Reference name="OpenSim.Framework.Servers.HttpServer"/>
       <Reference name="OpenSim.Framework.Statistics"/>
       <Reference name="OpenSim.Services.Interfaces"/>
@@ -688,7 +654,6 @@
         <Match pattern="*.cs" recurse="true">
           <Exclude name="Tests" pattern="Tests"/>
         </Match>
-        <Match pattern="*.addin.xml" path="Resources" buildAction="EmbeddedResource" recurse="true"/>
       </Files>
     </Project>
 
@@ -712,7 +677,6 @@
       <Reference name="OpenSim.Framework.AssetLoader.Filesystem"/>
       <Reference name="OpenSim.Data" />
       <Reference name="OpenSim.Framework.Capabilities"/>
-      <Reference name="OpenSim.Framework.Servers"/>
       <Reference name="OpenSim.Framework.Servers.HttpServer"/>
       <Reference name="OpenSim.Framework.Console"/>
       <Reference name="OpenSim.Framework.Statistics"/>
@@ -729,7 +693,6 @@
         <Match pattern="*.cs" recurse="true">
           <Exclude name="Tests" pattern="Tests"/>
         </Match>
-        <Match pattern="*.addin.xml" path="Resources" buildAction="EmbeddedResource" recurse="true"/>
       </Files>
     </Project>
 
@@ -761,10 +724,10 @@
       <Reference name="OpenSim.Framework.Communications"/>
       <Reference name="OpenSim.Data" />
       <Reference name="OpenSim.Framework.Console"/>
-      <Reference name="OpenSim.Framework.Servers"/>
       <Reference name="OpenSim.Framework.Servers.HttpServer"/>
       <Reference name="OpenSim.Framework.Statistics"/>
       <Reference name="OpenSim.Region.Physics.Manager"/>
+      <Reference name="System.ComponentModel.Composition"/>
 
       <!-- For scripting in funny languages by default -->
       <Reference name="XMLRPC.dll"/>
@@ -772,7 +735,6 @@
       <Reference name="Nini.dll" />
       <Reference name="log4net.dll"/>
       <Reference name="DotNetOpenMail.dll"/>
-      <Reference name="Mono.Addins.dll"/>
 
       <Files>
         <Match pattern="*.cs" recurse="true">
@@ -930,10 +892,10 @@
       <Reference name="OpenSim.Framework.Servers.HttpServer"/>
       <Reference name="OpenSim.Region.Framework"/>
       <Reference name="OpenSim.Server.Base"/>
-      <Reference name="Mono.Addins" />
       <Reference name="Nini.dll" />
       <Reference name="log4net.dll"/>
       <Reference name="XMLRPC.dll" />
+      <Reference name="System.ComponentModel.Composition"/>
 
       <Files>
         <Match pattern="*.cs" recurse="true"/>
@@ -1398,12 +1360,11 @@
       <Reference name="OpenSim.Services.Interfaces" />
       <Reference name="OpenSim.Framework.Serialization"/>
       <Reference name="OpenSim.Framework.Console"/>
-      <Reference name="OpenSim.Framework.Servers"/>
       <Reference name="OpenSim.Framework.Servers.HttpServer"/>
       <Reference name="OpenSim.Framework.Statistics"/>
       <Reference name="OpenSim.Region.Physics.Manager"/>
-
       <Reference name="GlynnTucker.Cache.dll"/>
+      <Reference name="System.ComponentModel.Composition"/>
 
       <!-- For scripting in funny languages by default -->
       <Reference name="XMLRPC.dll"/>
@@ -1412,15 +1373,10 @@
       <Reference name="log4net.dll"/>
       <Reference name="DotNetOpenMail.dll"/>
 
-      <!-- To allow regions to have mono addins -->
-      <Reference name="Mono.Addins.dll" />
-
       <Files>
-        <Match pattern="*.addin.xml" path="Resources" buildAction="EmbeddedResource" recurse="true"/>
         <Match pattern="*.cs" recurse="true">
           <Exclude name="Tests" pattern="Tests" />
         </Match>
-        <Match pattern="*.addin.xml" path="Resources" buildAction="EmbeddedResource" recurse="true"/>
       </Files>
     </Project>
 
@@ -1452,7 +1408,6 @@
       <Reference name="OpenSim.Region.CoreModules" />
       <Reference name="OpenSim.Framework.Capabilities"/>
       <Reference name="OpenSim.Framework.Console"/>
-      <Reference name="OpenSim.Framework.Servers"/>
       <Reference name="OpenSim.Framework.Servers.HttpServer"/>
       <Reference name="OpenSim.Framework.Statistics"/>
       <Reference name="OpenSim.Region.Physics.Manager"/>
@@ -1461,7 +1416,7 @@
       <Reference name="OpenSim.Services.Connectors" />
       <Reference name="OpenSim.Services.Base" />
       <Reference name="OpenSim.Services.Interfaces" />
-      <Reference name="Mono.Addins.dll" />
+      <Reference name="System.ComponentModel.Composition"/>
 
       <!-- For scripting in funny languages by default -->
       <Reference name="XMLRPC.dll"/>
@@ -1474,7 +1429,6 @@
         <Match pattern="*.cs" recurse="true">
           <Exclude name="Tests" pattern="Tests" />
         </Match>
-        <Match pattern="*.addin.xml" path="Resources" buildAction="EmbeddedResource" recurse="true"/>
       </Files>
     </Project>
 
@@ -1506,13 +1460,10 @@
       <Reference name="OpenSim.Region.CoreModules" />
       <Reference name="Nini.dll" />
       <Reference name="log4net.dll"/>
-
-      <!-- To allow regions to have mono addins -->
-      <Reference name="Mono.Addins.dll" />
+      <Reference name="System.ComponentModel.Composition"/>
 
       <Files>
         <Match pattern="*.cs" recurse="true" />
-        <Match pattern="*.addin.xml" path="Resources" buildAction="EmbeddedResource" recurse="true"/>
       </Files>
     </Project>
 
@@ -1535,7 +1486,6 @@
       <Reference name="OpenSim.Region.Framework"/>
       <Reference name="OpenSim.Framework"/>
       <Reference name="OpenSim.Data"/>
-      <Reference name="OpenSim.Framework.Servers"/>
       <Reference name="OpenSim.Framework.Servers.HttpServer"/>
       <Reference name="OpenSim.Framework.Console"/>
       <Reference name="OpenSim.Framework.Communications"/>
@@ -1574,7 +1524,6 @@
       <Reference name="OpenSim.Region.Framework"/>
       <Reference name="OpenSim.Framework"/>
       <Reference name="OpenSim.Data"/>
-      <Reference name="OpenSim.Framework.Servers"/>
       <Reference name="OpenSim.Framework.Console"/>
       <Reference name="OpenSim.Framework.Communications"/>
       <Reference name="OpenSim.Framework.Statistics"/>
@@ -1637,7 +1586,6 @@
       <ReferencePath>../../../bin/</ReferencePath>
       <Reference name="System"/>
       <Reference name="System.Xml"/>
-      <Reference name="Mono.Addins.dll" />
       <Reference name="OpenMetaverseTypes.dll"/>
       <Reference name="OpenMetaverse.StructuredData.dll"/>
       <Reference name="OpenMetaverse.dll"/>
@@ -1645,7 +1593,6 @@
       <Reference name="OpenSim.Data"/>
       <Reference name="OpenSim.Framework.Console"/>
       <Reference name="OpenSim.Region.Physics.Manager"/>
-      <Reference name="OpenSim.Framework.Servers"/>
       <Reference name="OpenSim.Framework.Servers.HttpServer"/>
       <Reference name="OpenSim.Framework.Statistics"/>
       <Reference name="OpenSim.Region.Framework"/>
@@ -1655,6 +1602,7 @@
       <Reference name="XMLRPC.dll"/>
       <Reference name="Nini.dll" />
       <Reference name="log4net.dll"/>
+      <Reference name="System.ComponentModel.Composition"/>
 
       <Files>
         <Match pattern="*.cs" recurse="true"/>
@@ -1674,7 +1622,6 @@
       </Configuration>
 
       <ReferencePath>../../../bin/</ReferencePath>
-      <Reference name="Mono.Addins.dll" />
       <Reference name="System"/>
       <Reference name="System.Xml"/>
       <Reference name="OpenMetaverseTypes.dll" />
@@ -1687,12 +1634,11 @@
       <Reference name="OpenSim.Framework.Console"/>
       <Reference name="OpenSim.Framework.RegionLoader.Filesystem"/>
       <Reference name="OpenSim.Framework.RegionLoader.Web"/>
-      <Reference name="OpenSim.Framework.Servers"/>
       <Reference name="log4net.dll"/>
+      <Reference name="System.ComponentModel.Composition"/>
 
       <Files>
         <Match pattern="*.cs" recurse="true"/>
-        <Match pattern="*.addin.xml" path="Resources" buildAction="EmbeddedResource" recurse="true"/>
       </Files>
     </Project>
 
@@ -1709,20 +1655,18 @@
       </Configuration>
 
       <ReferencePath>../../../bin/</ReferencePath>
-      <Reference name="Mono.Addins.dll" />
       <Reference name="Nini.dll" />
       <Reference name="OpenSim"/>
       <Reference name="OpenSim.Framework"/>
-      <Reference name="OpenSim.Framework.Servers"/>
       <Reference name="OpenSim.Region.Framework"/>
       <Reference name="OpenSim.Region.ClientStack"/>
       <Reference name="System"/>
       <Reference name="System.Xml"/>
       <Reference name="log4net.dll"/>
+      <Reference name="System.ComponentModel.Composition"/>
 
       <Files>
         <Match pattern="*.cs" recurse="true"/>
-        <Match pattern="*.addin.xml" path="Resources" buildAction="EmbeddedResource" recurse="true"/>
       </Files>
     </Project>
 
@@ -1739,7 +1683,6 @@
       </Configuration>
 
       <ReferencePath>../../../bin/</ReferencePath>
-      <Reference name="Mono.Addins.dll" />
       <Reference name="System"/>
       <Reference name="System.Xml"/>
       <Reference name="OpenMetaverse.dll" />
@@ -1753,15 +1696,14 @@
       <Reference name="OpenSim.Region.CoreModules"/>
       <Reference name="OpenSim.Framework.Communications"/>
       <Reference name="OpenSim.Framework"/>
-      <Reference name="OpenSim.Framework.Servers"/>
       <Reference name="OpenSim.Framework.Servers.HttpServer"/>
       <Reference name="OpenSim.Framework.Console"/>
       <Reference name="OpenSim.Services.Interfaces"/>
       <Reference name="log4net.dll"/>
+      <Reference name="System.ComponentModel.Composition"/>
 
       <Files>
         <Match pattern="*.cs" recurse="true"/>
-        <Match pattern="*.addin.xml" path="Resources" buildAction="EmbeddedResource" recurse="true"/>
       </Files>
     </Project>
 
@@ -1780,7 +1722,6 @@
       </Configuration>
 
       <ReferencePath>../../../bin/</ReferencePath>
-      <Reference name="Mono.Addins.dll" />
       <Reference name="System"/>
       <Reference name="System.Xml"/>
       <Reference name="OpenMetaverseTypes.dll" />
@@ -1792,7 +1733,6 @@
       <Reference name="OpenSim.Region.CoreModules"/>
       <Reference name="OpenSim.Framework.Communications"/>
       <Reference name="OpenSim.Framework"/>
-      <Reference name="OpenSim.Framework.Servers"/>
       <Reference name="OpenSim.Framework.Servers.HttpServer"/>
       <Reference name="OpenSim.Framework.Console"/>
       <Reference name="log4net.dll"/>
@@ -1816,7 +1756,6 @@
       </Configuration>
 
       <ReferencePath>../../../../bin/</ReferencePath>
-      <Reference name="Mono.Addins.dll" />
       <Reference name="System"/>
       <Reference name="System.Xml"/>
       <Reference name="OpenMetaverseTypes.dll" />
@@ -1828,15 +1767,14 @@
       <Reference name="OpenSim.Region.CoreModules"/>
       <Reference name="OpenSim.Framework.Communications"/>
       <Reference name="OpenSim.Framework"/>
-      <Reference name="OpenSim.Framework.Servers"/>
       <Reference name="OpenSim.Framework.Servers.HttpServer"/>
       <Reference name="OpenSim.Framework.Console"/>
       <Reference name="OpenSim.ApplicationPlugins.Rest"/>
       <Reference name="log4net.dll"/>
+      <Reference name="System.ComponentModel.Composition"/>
 
       <Files>
         <Match pattern="*.cs" recurse="true"/>
-        <Match pattern="*.addin.xml" path="Resources" buildAction="EmbeddedResource" recurse="true"/>
       </Files>
     </Project>
 
@@ -1854,7 +1792,6 @@
       </Configuration>
 
       <ReferencePath>../../../../bin/</ReferencePath>
-      <Reference name="Mono.Addins.dll" />
       <Reference name="System"/>
       <Reference name="System.Xml"/>
       <Reference name="System.Drawing"/>
@@ -1868,16 +1805,15 @@
       <Reference name="OpenSim.Region.CoreModules"/>
       <Reference name="OpenSim.Framework.Communications"/>
       <Reference name="OpenSim.Framework"/>
-      <Reference name="OpenSim.Framework.Servers"/>
       <Reference name="OpenSim.Framework.Servers.HttpServer"/>
       <Reference name="OpenSim.Framework.Console"/>
       <Reference name="OpenSim.Services.Interfaces"/>
       <Reference name="OpenSim.ApplicationPlugins.Rest"/>
       <Reference name="log4net.dll"/>
+      <Reference name="System.ComponentModel.Composition"/>
 
       <Files>
         <Match pattern="*.cs" recurse="true"/>
-        <Match pattern="*.addin.xml" path="Resources" buildAction="EmbeddedResource" recurse="true"/>
       </Files>
     </Project>
 
@@ -1905,7 +1841,6 @@
       <Reference name="OpenSim.Framework.Capabilities"/>
       <Reference name="OpenSim.Framework.Communications"/>
       <Reference name="OpenSim.Framework.Console"/>
-      <Reference name="OpenSim.Framework.Servers"/>
       <Reference name="OpenSim.Framework.Servers.HttpServer"/>
       <Reference name="OpenSim.Region.Framework"/>
       <Reference name="OpenSim.Region.CoreModules"/>
@@ -1913,8 +1848,9 @@
       <Reference name="OpenMetaverseTypes.dll"/>
       <Reference name="OpenMetaverse.dll"/>
       <Reference name="Nini.dll" />
-      <Reference name="Mono.Addins" />
       <Reference name="log4net.dll" />
+      <Reference name="System.ComponentModel.Composition"/>
+      
       <Files>
         <Match pattern="*.cs" recurse="true"/>
       </Files>
@@ -1941,6 +1877,8 @@
       <Reference name="OpenSim.Region.Framework"/>
       <Reference name="Nini.dll" />
       <Reference name="log4net.dll"/>
+      <Reference name="System.ComponentModel.Composition"/>
+      
       <Files>
         <Match pattern="*.cs" recurse="true"/>
       </Files>
@@ -1973,7 +1911,8 @@
       <Reference name="log4net.dll"/>
       <Reference name="protobuf-net"/>
       <Reference name="MXP.dll"/>
-      <Reference name="Mono.Addins"/>
+      <Reference name="System.ComponentModel.Composition"/>
+      
       <Files>
         <Match pattern="*.cs" recurse="true"/>
       </Files>
@@ -1999,7 +1938,6 @@
       <Reference name="System"/>
       <Reference name="System.Drawing"/>
       <Reference name="OpenSim.Framework"/>
-      <Reference name="OpenSim.Framework.Servers"/>
       <Reference name="OpenSim.Framework.Servers.HttpServer"/>
       <Reference name="OpenSim.Region.Framework"/>
       <Reference name="OpenSim.Framework.Communications"/>
@@ -2007,6 +1945,8 @@
       <Reference name="Nini.dll" />
       <Reference name="log4net.dll"/>
 	  <Reference name="Google.ProtocolBuffers.dll"/>
+	  <Reference name="System.ComponentModel.Composition"/>
+	  
       <Files>
         <Match pattern="*.cs" recurse="true"/>
       </Files>
@@ -2031,13 +1971,14 @@
       <Reference name="System"/>
 	  <Reference name="System.Drawing"/>
       <Reference name="OpenSim.Framework"/>
-	  <Reference name="OpenSim.Framework.Servers"/>
 	  <Reference name="OpenSim.Framework.Servers.HttpServer"/>
       <Reference name="OpenSim.Region.Framework"/>
       <Reference name="OpenSim.Framework.Communications"/>
       <Reference name="OpenSim.Services.Interfaces"/>
       <Reference name="Nini.dll" />
       <Reference name="log4net.dll"/>
+      <Reference name="System.ComponentModel.Composition"/>
+      
       <Files>
         <Match pattern="*.cs" recurse="true"/>
       </Files>
@@ -2066,7 +2007,6 @@
       <Reference name="Nini.dll" />
       <Reference name="log4net.dll"/>
       <Reference name="OpenSim.Framework.Capabilities"/>
-      <Reference name="OpenSim.Framework.Servers"/>
       <Reference name="OpenSim.Framework.Servers.HttpServer"/>
       <Reference name="OpenMetaverse.StructuredData.dll"/>
       <Reference name="OpenSim.Region.ClientStack"/>
@@ -2074,9 +2014,10 @@
       <Reference name="OpenSim.Services.Interfaces"/>
       <Reference name="XMLRPC.dll"/>
       <Reference name="OpenSim.Region.Framework"/>
+      <Reference name="System.ComponentModel.Composition"/>
+      
       <Files>
         <Match pattern="*.cs" recurse="true"/>
-        <Match pattern="*.addin.xml" path="Resources" buildAction="EmbeddedResource" recurse="true"/>
       </Files>
     </Project>
 
@@ -2108,7 +2049,6 @@
       <Reference name="OpenSim.Framework.Console"/>
       <Reference name="OpenSim.Region.Framework"/>
       <Reference name="log4net.dll"/>
-      <Reference name="Mono.Addins.dll" />
 
       <Files>
         <Match pattern="*.cs" recurse="true" >
@@ -2116,7 +2056,6 @@
         </Match>
         <Match path="Resources" pattern="*.sql" buildAction="EmbeddedResource"/>
         <Match path="Resources" pattern="*.migrations" buildAction="EmbeddedResource"/>
-        <Match pattern="*.addin.xml" path="Resources" buildAction="EmbeddedResource" recurse="true"/>
       </Files>
     </Project>
 
@@ -2144,13 +2083,11 @@
       <Reference name="OpenMetaverseTypes.dll"/>
       <Reference name="OpenMetaverse.dll"/>
       <Reference name="log4net.dll"/>
-      <Reference name="Mono.Addins.dll" />
 
       <Files>
         <Match pattern="*.cs" recurse="true"/>
         <Match path="Resources" pattern="*.sql" buildAction="EmbeddedResource"/>
         <Match path="Resources" pattern="*.migrations" buildAction="EmbeddedResource"/>
-        <Match pattern="*.addin.xml" path="Resources" buildAction="EmbeddedResource" recurse="true"/>
       </Files>
     </Project>
 
@@ -2179,7 +2116,6 @@
       <Reference name="OpenMetaverseTypes.dll"/>
       <Reference name="OpenMetaverse.dll"/>
       <Reference name="Mono.Data.SqliteClient"/>
-      <Reference name="Mono.Addins.dll" />
       <Reference name="log4net.dll"/>
 
       <Files>
@@ -2188,7 +2124,6 @@
         </Match>
         <Match path="Resources" pattern="*.sql" buildAction="EmbeddedResource"/>
         <Match path="Resources" pattern="*.migrations" buildAction="EmbeddedResource"/>
-        <Match pattern="*.addin.xml" path="Resources" buildAction="EmbeddedResource" recurse="true"/>
       </Files>
     </Project>
 
@@ -2217,7 +2152,6 @@
       <Reference name="OpenMetaverse.dll"/>
       <Reference name="OpenMetaverse.StructuredData.dll"/>
       <Reference name="Mono.Data.Sqlite"/>
-      <Reference name="Mono.Addins.dll" />
       <Reference name="log4net.dll"/>
 
       <Files>
@@ -2226,7 +2160,6 @@
         </Match>
         <Match path="Resources" pattern="*.sql" buildAction="EmbeddedResource"/>
         <Match path="Resources" pattern="*.migrations" buildAction="EmbeddedResource"/>
-        <Match pattern="*.addin.xml" path="Resources" buildAction="EmbeddedResource" recurse="true"/>
       </Files>
     </Project>
 
@@ -2482,9 +2415,9 @@
       <Reference name="Nini.dll" />
       <Reference name="RAIL.dll"/>
       <Reference name="log4net.dll"/>
+      <Reference name="System.ComponentModel.Composition"/>
 
       <Files>
-        <Match pattern="*.addin.xml" path="Resources" buildAction="EmbeddedResource" recurse="true"/>
         <Match pattern="*.cs" recurse="true">
           <Exclude name="Tests" pattern="Tests" />
         </Match>
@@ -2519,13 +2452,12 @@
       <Reference name="OpenSim.Region.Framework" />
       <Reference name="OpenSim.Region.CoreModules" />
       <Reference name="OpenSim.Framework.Console"/>
-      <Reference name="OpenSim.Framework.Servers"/>
       <Reference name="OpenSim.Framework.Capabilities"/>
       <Reference name="OpenSim.Framework.Servers.HttpServer"/>
       <Reference name="OpenSim.Framework.Statistics"/>
       <Reference name="OpenSim.Region.Physics.Manager"/>
       <Reference name="Mono.Data.SqliteClient"/>
-      <Reference name="Mono.Addins"/>
+      <Reference name="System.ComponentModel.Composition"/>
 
       <!-- For scripting in funny languages by default -->
       <Reference name="XMLRPC.dll"/>
@@ -2756,7 +2688,6 @@
       <Reference name="OpenSim.Framework"/>
       <Reference name="OpenSim.Framework.Communications"/>
       <Reference name="OpenSim.Framework.Console"/>
-      <Reference name="OpenSim.Framework.Servers"/>
       <Reference name="OpenSim.Framework.Servers.HttpServer"/>
       <Reference name="OpenSim.Data"/>
       <Reference name="OpenSim.Services.Interfaces"/>
@@ -2764,6 +2695,7 @@
       <Reference name="OpenSim.Region.Framework"/>
       <Reference name="OpenSim.Region.CoreModules"/>
       <Reference name="OpenSim.Region.Physics.Manager"/>
+      <Reference name="System.ComponentModel.Composition"/>
 
       <Files>
         <Match pattern="*.cs" recurse="true"/>
@@ -2818,7 +2750,6 @@
       <Reference name="OpenSim.Region.CoreModules"/>
       <Reference name="OpenSim.Tests.Common"/>
       <Reference name="log4net.dll"/>
-      <Reference name="Mono.Addins.dll" />
       <Reference name="nunit.framework.dll" />
       <Reference name="Nini.dll" />
 
@@ -2915,7 +2846,6 @@
       <Reference name="OpenSim.Services.Interfaces"/>
       <Reference name="OpenSim.Tests.Common"/>
       <Reference name="OpenSim.Framework"/>
-      <Reference name="OpenSim.Framework.Servers"/>
       <Reference name="OpenSim.Framework.Servers.HttpServer"/>
       <Reference name="log4net.dll"/>
       <Reference name="HttpServer_OpenSim.dll"/>
@@ -2951,7 +2881,6 @@
       <Reference name="OpenSim.Framework.Serialization"/>
       <Reference name="OpenSim.Framework.Communications"/>
       <Reference name="OpenSim.Framework.Console"/>
-      <Reference name="OpenSim.Framework.Servers"/>
       <Reference name="OpenSim.Framework.Servers.HttpServer"/>
       <Reference name="OpenSim.Framework.Statistics"/>
       <Reference name="OpenSim.Region.Framework"/>
@@ -3013,7 +2942,6 @@
       <Reference name="OpenSim.Framework"/>
       <Reference name="OpenSim.Framework.Communications"/>
       <Reference name="OpenSim.Framework.Console"/>
-      <Reference name="OpenSim.Framework.Servers"/>
       <Reference name="OpenSim.Framework.Statistics"/>
       <Reference name="OpenSim.Framework.Servers.HttpServer"/>
       <Reference name="OpenSim.Region.Framework"/>

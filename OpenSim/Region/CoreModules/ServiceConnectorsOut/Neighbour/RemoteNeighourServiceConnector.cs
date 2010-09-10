@@ -39,6 +39,7 @@ using OpenSim.Server.Base;
 
 namespace OpenSim.Region.CoreModules.ServiceConnectorsOut.Neighbour
 {
+    [RegionModule("RemoteNeighbourServicesConnector")]
     public class RemoteNeighbourServicesConnector :
             NeighbourServicesConnector, ISharedRegionModule, INeighbourService
     {

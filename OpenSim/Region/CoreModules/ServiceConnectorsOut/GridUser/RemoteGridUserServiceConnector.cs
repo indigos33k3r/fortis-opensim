@@ -40,6 +40,7 @@ using Nini.Config;
 
 namespace OpenSim.Region.CoreModules.ServiceConnectorsOut.GridUser
 {
+    [RegionModule("RemoteGridUserServicesConnector")]
     public class RemoteGridUserServicesConnector : ISharedRegionModule, IGridUserService
     {
         private static readonly ILog m_log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);

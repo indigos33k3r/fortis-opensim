@@ -35,6 +35,7 @@ using OpenSim.Region.OptionalModules.Agent.InternetRelayClientView.Server;
 
 namespace OpenSim.Region.OptionalModules.Agent.InternetRelayClientView
 {
+    [RegionModuleDeprecated("IRCStackModule")]
     public class IRCStackModule : IRegionModule
     {
         private static readonly ILog m_log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);

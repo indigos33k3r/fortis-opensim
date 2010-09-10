@@ -38,6 +38,7 @@ using OpenSim.Region.Framework.Scenes;
 
 namespace OpenSim.Client.VWoHTTP
 {
+    [RegionModuleDeprecated("VWoHTTPModule")]
     class VWoHTTPModule : IRegionModule, IHttpAgentHandler
     {
         private bool m_disabled = true;

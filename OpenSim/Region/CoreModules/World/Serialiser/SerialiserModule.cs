@@ -41,6 +41,7 @@ using OpenSim.Region.Framework.Scenes.Serialization;
 
 namespace OpenSim.Region.CoreModules.World.Serialiser
 {
+    [RegionModule("SerialiserModule")]
     public class SerialiserModule : ISharedRegionModule, IRegionSerialiserModule
     {
         private static readonly ILog m_log = 

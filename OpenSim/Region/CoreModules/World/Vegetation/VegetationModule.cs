@@ -36,6 +36,7 @@ using OpenSim.Region.Framework.Scenes;
 
 namespace OpenSim.Region.CoreModules.Avatar.Vegetation
 {
+    [RegionModuleDeprecated("VegetationModule")]
     public class VegetationModule : IRegionModule, IVegetationModule
     { 
         private static readonly ILog m_log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);

@@ -35,6 +35,7 @@ using OpenSim.Region.Framework.Scenes;
 
 namespace OpenSim.Region.CoreModules.Agent.Xfer
 {
+    [RegionModuleDeprecated("XferModule")]
     public class XferModule : IRegionModule, IXfer
     {
         private Scene m_scene;

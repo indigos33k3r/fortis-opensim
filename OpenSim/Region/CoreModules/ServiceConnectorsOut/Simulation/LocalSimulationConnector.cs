@@ -38,6 +38,7 @@ using GridRegion = OpenSim.Services.Interfaces.GridRegion;
 
 namespace OpenSim.Region.CoreModules.ServiceConnectorsOut.Simulation
 {
+    [RegionModule("LocalSimulationConnectorModule")]
     public class LocalSimulationConnectorModule : ISharedRegionModule, ISimulationService
     {
         private static readonly ILog m_log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);

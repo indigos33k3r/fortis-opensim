@@ -25,52 +25,99 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+using System;
 using System.Collections.Generic;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Net;
 using System.Reflection;
+using System.Reflection;
+using System.Text;
+using System.Threading;
+using System.Timers;
 using log4net;
+using log4net;
+using log4net.Appender;
+using log4net.Core;
+using log4net.Repository;
 using Nini.Config;
 using OpenMetaverse;
 using OpenSim.Framework;
 using OpenSim.Framework.Communications;
+using OpenSim.Framework.Console;
+using OpenSim.Framework.Servers;
 using OpenSim.Framework.Servers;
 using OpenSim.Framework.Servers.HttpServer;
+using OpenSim.Framework.Servers.HttpServer;
+using OpenSim.Framework.Statistics;
 using OpenSim.Region.Framework;
 using OpenSim.Region.Framework.Scenes;
 using OpenSim.Region.Physics.Manager;
 
+using Timer = System.Timers.Timer;
+
 namespace OpenSim.Region.ClientStack
 {
-    public abstract class RegionApplicationBase : BaseOpenSimServer
+    public abstract class RegionApplicationBase
     {
         private static readonly ILog m_log
             = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 
+        /// <summary>
+        /// This will control a periodic log printout of the current 'show stats' (if they are active) for this
+        /// server.
+        /// </summary>
+        private Timer m_periodicDiagnosticsTimer = new Timer(60 * 60 * 1000);
+
+        protected BaseHttpServer m_httpServer;
+        protected CommandConsole m_console;
+        protected OpenSimAppender m_consoleAppender;
+        protected IAppender m_logFileAppender = null;
+        /// <summary>Time at which this server was started</summary>
+        protected DateTime m_startuptime;
+        /// <summary>Record the initial startup directory for info purposes</summary>
+        protected string m_startupDirectory = Environment.CurrentDirectory;
+        /// <summary>Server version information.  Usually VersionInfo + information about git commit, operating system, etc.</summary>
+        protected string m_version;
+        protected string m_pidFile = String.Empty;
+        /// <summary>Random uuid for private data</summary>
+        protected string m_osSecret = String.Empty;
+        /// <summary>Holds the non-viewer statistics collection object for this service/server</summary>
+        protected IStatsCollector m_stats;
+
         protected Dictionary<EndPoint, uint> m_clientCircuits = new Dictionary<EndPoint, uint>();
         protected NetworkServersInfo m_networkServersInfo;
+        protected uint m_httpServerPort;
+        protected StorageManager m_storageManager;
+        protected ClientStackManager m_clientStackManager;
+        protected SceneManager m_sceneManager = new SceneManager();
+
+        public BaseHttpServer HttpServer
+        {
+            get { return m_httpServer; }
+        }
 
         public NetworkServersInfo NetServersInfo
         {
             get { return m_networkServersInfo; }
         }
-
-        protected uint m_httpServerPort;
-        
-        protected StorageManager m_storageManager;
         
         public StorageManager StorageManager
         {
             get { return m_storageManager; }
         }
         
-        protected ClientStackManager m_clientStackManager;
-
         public SceneManager SceneManager
         {
             get { return m_sceneManager; }
         }
-        protected SceneManager m_sceneManager = new SceneManager();
-       
+
+        public string osSecret
+        {
+            get { return m_osSecret; }
+        }
+
         protected abstract void Initialize();
         
         /// <summary>
@@ -88,18 +135,95 @@ namespace OpenSim.Region.ClientStack
         protected abstract Scene CreateScene(RegionInfo regionInfo, StorageManager storageManager,
                                              AgentCircuitManager circuitManager);
 
-        protected override void StartupSpecific()
+        public RegionApplicationBase()
+        {
+            m_startuptime = DateTime.Now;
+            m_version = VersionInfo.Version;
+
+            // Random uuid for private data
+            m_osSecret = UUID.Random().ToString();
+
+            m_periodicDiagnosticsTimer.Elapsed += new ElapsedEventHandler(LogDiagnostics);
+            m_periodicDiagnosticsTimer.Enabled = true;
+
+            // This thread will go on to become the console listening thread
+            Thread.CurrentThread.Name = "ConsoleThread";
+
+            ILoggerRepository repository = LogManager.GetRepository();
+            IAppender[] appenders = repository.GetAppenders();
+
+            foreach (IAppender appender in appenders)
+            {
+                if (appender.Name == "LogFileAppender")
+                {
+                    m_logFileAppender = appender;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Should be overriden and referenced by descendents if they need to perform extra shutdown processing
+        /// </summary>
+        public virtual void Shutdown()
+        {
+            ShutdownSpecific();
+
+            m_log.Info("[SHUTDOWN]: Shutdown processing on main thread complete.  Exiting...");
+            RemovePIDFile();
+
+            Environment.Exit(0);
+        }
+
+        public string StatReport(OSHttpRequest httpRequest)
+        {
+            // If we catch a request for "callback", wrap the response in the value for jsonp
+            if (httpRequest.Query.ContainsKey("callback"))
+            {
+                return httpRequest.Query["callback"].ToString() + "(" + m_stats.XReport((DateTime.Now - m_startuptime).ToString(), m_version) + ");";
+            }
+            else
+            {
+                return m_stats.XReport((DateTime.Now - m_startuptime).ToString(), m_version);
+            }
+        }
+
+        /// <summary>
+        /// Performs initialisation of the scene, such as loading configuration from disk.
+        /// </summary>
+        public virtual void Startup()
+        {
+            m_log.Info("[STARTUP]: Beginning startup processing");
+
+            EnhanceVersionInformation();
+
+            m_log.Info("[STARTUP]: OpenSimulator version: " + m_version + Environment.NewLine);
+            // clr version potentially is more confusing than helpful, since it doesn't tell us if we're running under Mono/MS .NET and
+            // the clr version number doesn't match the project version number under Mono.
+            //m_log.Info("[STARTUP]: Virtual machine runtime version: " + Environment.Version + Environment.NewLine);
+            m_log.Info("[STARTUP]: Operating system version: " + Environment.OSVersion + Environment.NewLine);
+
+            StartupSpecific();
+
+            TimeSpan timeTaken = DateTime.Now - m_startuptime;
+
+            m_log.InfoFormat("[STARTUP]: Startup took {0}m {1}s", timeTaken.Minutes, timeTaken.Seconds);
+        }
+
+        /// <summary>
+        /// Should be overriden and referenced by descendents if they need to perform extra shutdown processing
+        /// </summary>
+        public virtual void ShutdownSpecific() { }
+
+        protected virtual void StartupSpecific()
         {
             m_storageManager = CreateStorageManager();
-
             m_clientStackManager = CreateClientStackManager();
 
             Initialize();
 
-            m_httpServer 
-                = new BaseHttpServer(
-                    m_httpServerPort, m_networkServersInfo.HttpUsesSSL, m_networkServersInfo.httpSSLPort, 
-                    m_networkServersInfo.HttpSSLCN);
+            m_httpServer = new BaseHttpServer(
+                m_httpServerPort, m_networkServersInfo.HttpUsesSSL, m_networkServersInfo.httpSSLPort, 
+                m_networkServersInfo.HttpSSLCN);
             
             if (m_networkServersInfo.HttpUsesSSL && (m_networkServersInfo.HttpListenerPort == m_networkServersInfo.httpSSLPort))
             {
@@ -111,7 +235,71 @@ namespace OpenSim.Region.ClientStack
 
             MainServer.Instance = m_httpServer;
 
-            base.StartupSpecific();
+            #region Console Setup
+
+            if (m_console != null)
+            {
+                ILoggerRepository repository = LogManager.GetRepository();
+                IAppender[] appenders = repository.GetAppenders();
+
+                foreach (IAppender appender in appenders)
+                {
+                    if (appender.Name == "Console")
+                    {
+                        m_consoleAppender = (OpenSimAppender)appender;
+                        break;
+                    }
+                }
+
+                if (null == m_consoleAppender)
+                {
+                    Notice("No appender named Console found (see the log4net config file for this executable)!");
+                }
+                else
+                {
+                    m_consoleAppender.Console = m_console;
+
+                    // If there is no threshold set then the threshold is effectively everything.
+                    if (null == m_consoleAppender.Threshold)
+                        m_consoleAppender.Threshold = Level.All;
+
+                    Notice(String.Format("Console log level is {0}", m_consoleAppender.Threshold));
+                }
+
+                m_console.Commands.AddCommand("base", false, "quit",
+                        "quit",
+                        "Quit the application", HandleQuit);
+
+                m_console.Commands.AddCommand("base", false, "shutdown",
+                        "shutdown",
+                        "Quit the application", HandleQuit);
+
+                m_console.Commands.AddCommand("base", false, "set log level",
+                        "set log level <level>",
+                        "Set the console logging level", HandleLogLevel);
+
+                m_console.Commands.AddCommand("base", false, "show info",
+                        "show info",
+                        "Show general information", HandleShow);
+
+                m_console.Commands.AddCommand("base", false, "show stats",
+                        "show stats",
+                        "Show statistics", HandleShow);
+
+                m_console.Commands.AddCommand("base", false, "show threads",
+                        "show threads",
+                        "Show thread status", HandleShow);
+
+                m_console.Commands.AddCommand("base", false, "show uptime",
+                        "show uptime",
+                        "Show server uptime", HandleShow);
+
+                m_console.Commands.AddCommand("base", false, "show version",
+                        "show version",
+                        "Show server version", HandleShow);
+            }
+
+            #endregion Console Setup
         }
 
         /// <summary>
@@ -132,6 +320,267 @@ namespace OpenSim.Region.ClientStack
             physicsPluginManager.LoadPluginsFromAssemblies("Physics");
             
             return physicsPluginManager.GetPhysicsScene(engine, meshEngine, config, osSceneIdentifier);
+        }
+
+        /// <summary>
+        /// Print statistics to the logfile, if they are active
+        /// </summary>
+        protected void LogDiagnostics(object source, ElapsedEventArgs e)
+        {
+            StringBuilder sb = new StringBuilder("DIAGNOSTICS\n\n");
+            sb.Append(GetUptimeReport());
+
+            if (m_stats != null)
+            {
+                sb.Append(m_stats.Report());
+            }
+
+            sb.Append(Environment.NewLine);
+            sb.Append(GetThreadsReport());
+
+            m_log.Debug(sb);
+        }
+
+        /// <summary>
+        /// Provides a list of help topics that are available.  Overriding classes should append their topics to the
+        /// information returned when the base method is called.
+        /// </summary>
+        /// 
+        /// <returns>
+        /// A list of strings that represent different help topics on which more information is available
+        /// </returns>
+        protected virtual List<string> GetHelpTopics() { return new List<string>(); }
+
+        /// <summary>
+        /// Get a report about the registered threads in this server.
+        /// </summary>
+        protected string GetThreadsReport()
+        {
+            StringBuilder sb = new StringBuilder();
+
+            ProcessThreadCollection threads = ThreadTracker.GetThreads();
+            if (threads == null)
+            {
+                sb.Append("OpenSim thread tracking is only enabled in DEBUG mode.");
+            }
+            else
+            {
+                sb.Append(threads.Count + " threads are being tracked:" + Environment.NewLine);
+                foreach (ProcessThread t in threads)
+                {
+                    sb.Append("ID: " + t.Id + ", TotalProcessorTime: " + t.TotalProcessorTime + ", TimeRunning: " +
+                        (DateTime.Now - t.StartTime) + ", Pri: " + t.CurrentPriority + ", State: " + t.ThreadState);
+                    if (t.ThreadState == System.Diagnostics.ThreadState.Wait)
+                        sb.Append(", Reason: " + t.WaitReason + Environment.NewLine);
+                    else
+                        sb.Append(Environment.NewLine);
+
+                }
+            }
+            int workers = 0, ports = 0, maxWorkers = 0, maxPorts = 0;
+            ThreadPool.GetAvailableThreads(out workers, out ports);
+            ThreadPool.GetMaxThreads(out maxWorkers, out maxPorts);
+
+            sb.Append(Environment.NewLine + "*** ThreadPool threads ***" + Environment.NewLine);
+            sb.Append("workers: " + (maxWorkers - workers) + " (" + maxWorkers + "); ports: " + (maxPorts - ports) + " (" + maxPorts + ")" + Environment.NewLine);
+
+            return sb.ToString();
+        }
+
+        /// <summary>
+        /// Return a report about the uptime of this server
+        /// </summary>
+        /// <returns></returns>
+        protected string GetUptimeReport()
+        {
+            StringBuilder sb = new StringBuilder(String.Format("Time now is {0}\n", DateTime.Now));
+            sb.Append(String.Format("Server has been running since {0}, {1}\n", m_startuptime.DayOfWeek, m_startuptime));
+            sb.Append(String.Format("That is an elapsed time of {0}\n", DateTime.Now - m_startuptime));
+
+            return sb.ToString();
+        }
+
+        protected virtual void HandleShow(string module, string[] cmd)
+        {
+            List<string> args = new List<string>(cmd);
+
+            args.RemoveAt(0);
+
+            string[] showParams = args.ToArray();
+
+            switch (showParams[0])
+            {
+                case "info":
+                    Notice("Version: " + m_version);
+                    Notice("Startup directory: " + m_startupDirectory);
+                    break;
+
+                case "stats":
+                    if (m_stats != null)
+                        Notice(m_stats.Report());
+                    break;
+
+                case "threads":
+                    Notice(GetThreadsReport());
+                    break;
+
+                case "uptime":
+                    Notice(GetUptimeReport());
+                    break;
+
+                case "version":
+                    Notice(
+                        String.Format(
+                            "Version: {0} (interface version {1})", m_version, VersionInfo.MajorInterfaceVersion));
+                    break;
+            }
+        }
+
+        private void HandleQuit(string module, string[] args)
+        {
+            Shutdown();
+        }
+
+        private void HandleLogLevel(string module, string[] cmd)
+        {
+            if (null == m_consoleAppender)
+            {
+                Notice("No appender named Console found (see the log4net config file for this executable)!");
+                return;
+            }
+
+            string rawLevel = cmd[3];
+
+            ILoggerRepository repository = LogManager.GetRepository();
+            Level consoleLevel = repository.LevelMap[rawLevel];
+
+            if (consoleLevel != null)
+                m_consoleAppender.Threshold = consoleLevel;
+            else
+                Notice(
+                    String.Format(
+                        "{0} is not a valid logging level.  Valid logging levels are ALL, DEBUG, INFO, WARN, ERROR, FATAL, OFF",
+                        rawLevel));
+
+            Notice(String.Format("Console log level is {0}", m_consoleAppender.Threshold));
+        }
+
+        /// <summary>
+        /// Console output is only possible if a console has been established.
+        /// That is something that cannot be determined within this class. So
+        /// all attempts to use the console MUST be verified.
+        /// </summary>
+        protected void Notice(string msg)
+        {
+            if (m_console != null)
+            {
+                m_console.Output(msg);
+            }
+        }
+
+        /// <summary>
+        /// Enhance the version string with extra information if it's available.
+        /// </summary>
+        protected void EnhanceVersionInformation()
+        {
+            string buildVersion = string.Empty;
+
+            // Add commit hash and date information if available
+            // The commit hash and date are stored in a file bin/.version
+            // This file can automatically created by a post
+            // commit script in the opensim git master repository or
+            // by issuing the follwoing command from the top level
+            // directory of the opensim repository
+            // git log -n 1 --pretty="format:%h: %ci" >bin/.version
+            // For the full git commit hash use %H instead of %h
+            //
+            // The subversion information is deprecated and will be removed at a later date
+            // Add subversion revision information if available
+            // Try file "svn_revision" in the current directory first, then the .svn info.
+            // This allows to make the revision available in simulators not running from the source tree.
+            // FIXME: Making an assumption about the directory we're currently in - we do this all over the place
+            // elsewhere as well
+            string svnRevisionFileName = "svn_revision";
+            string svnFileName = ".svn/entries";
+            string gitCommitFileName = ".version";
+            string inputLine;
+            int strcmp;
+
+            if (File.Exists(gitCommitFileName))
+            {
+                StreamReader CommitFile = File.OpenText(gitCommitFileName);
+                buildVersion = CommitFile.ReadLine();
+                CommitFile.Close();
+                m_version += buildVersion ?? "";
+            }
+
+            // Remove the else logic when subversion mirror is no longer used
+            else
+            {
+                if (File.Exists(svnRevisionFileName))
+                {
+                    StreamReader RevisionFile = File.OpenText(svnRevisionFileName);
+                    buildVersion = RevisionFile.ReadLine();
+                    buildVersion.Trim();
+                    RevisionFile.Close();
+
+                }
+
+                if (string.IsNullOrEmpty(buildVersion) && File.Exists(svnFileName))
+                {
+                    StreamReader EntriesFile = File.OpenText(svnFileName);
+                    inputLine = EntriesFile.ReadLine();
+                    while (inputLine != null)
+                    {
+                        // using the dir svn revision at the top of entries file
+                        strcmp = String.Compare(inputLine, "dir");
+                        if (strcmp == 0)
+                        {
+                            buildVersion = EntriesFile.ReadLine();
+                            break;
+                        }
+                        else
+                        {
+                            inputLine = EntriesFile.ReadLine();
+                        }
+                    }
+                    EntriesFile.Close();
+                }
+
+                m_version += string.IsNullOrEmpty(buildVersion) ? "      " : ("." + buildVersion + "     ").Substring(0, 6);
+            }
+        }
+
+        protected void CreatePIDFile(string path)
+        {
+            try
+            {
+                string pidstring = System.Diagnostics.Process.GetCurrentProcess().Id.ToString();
+                FileStream fs = File.Create(path);
+                System.Text.ASCIIEncoding enc = new System.Text.ASCIIEncoding();
+                Byte[] buf = enc.GetBytes(pidstring);
+                fs.Write(buf, 0, buf.Length);
+                fs.Close();
+                m_pidFile = path;
+            }
+            catch (Exception)
+            {
+            }
+        }
+
+        protected void RemovePIDFile()
+        {
+            if (m_pidFile != String.Empty)
+            {
+                try
+                {
+                    File.Delete(m_pidFile);
+                    m_pidFile = String.Empty;
+                }
+                catch (Exception)
+                {
+                }
+            }
         }
     }
 }

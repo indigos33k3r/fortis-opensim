@@ -29,7 +29,6 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using log4net;
-using Mono.Addins;
 using Nini.Config;
 using OpenMetaverse;
 using OpenMetaverse.Packets;
@@ -41,7 +40,7 @@ using OpenSim.Region.Framework.Scenes.Serialization;
 
 namespace OpenSim.Region.CoreModules.Avatar.Attachments
 {
-    [Extension(Path = "/OpenSim/RegionModules", NodeName = "RegionModule", Id = "AttachmentsModule")]
+    [RegionModule("AttachmentsModule")]
     public class AttachmentsModule : IAttachmentsModule, INonSharedRegionModule
     {
         private static readonly ILog m_log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);

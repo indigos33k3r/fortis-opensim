@@ -42,6 +42,7 @@ using PresenceInfo = OpenSim.Services.Interfaces.PresenceInfo;
 
 namespace OpenSim.Region.CoreModules.Avatar.InstantMessage
 {
+    [RegionModule("PresenceModule")]
     public class PresenceModule : ISharedRegionModule, IPresenceModule
     {
         private static readonly ILog m_log = LogManager.GetLogger(

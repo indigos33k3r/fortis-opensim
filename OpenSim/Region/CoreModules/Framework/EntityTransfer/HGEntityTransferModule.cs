@@ -44,6 +44,7 @@ using Nini.Config;
 
 namespace OpenSim.Region.CoreModules.Framework.EntityTransfer
 {
+    [RegionModule("HGEntityTransferModule")]
     public class HGEntityTransferModule : EntityTransferModule, ISharedRegionModule, IEntityTransferModule, IUserAgentVerificationModule
     {
         private static readonly ILog m_log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);

@@ -36,6 +36,7 @@ using OpenSim.Services.Connectors;
 
 namespace OpenSim.Region.CoreModules.ServiceConnectorsOut.Avatar
 {
+    [RegionModule("RemoteAvatarServicesConnector")]
     public class RemoteAvatarServicesConnector : AvatarServicesConnector,
             ISharedRegionModule, IAvatarService
     {

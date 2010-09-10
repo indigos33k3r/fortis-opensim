@@ -41,6 +41,7 @@ using OpenSim.Region.Framework.Scenes;
 
 namespace OpenSim.Region.CoreModules.World.LightShare
 {
+    [RegionModuleDeprecated("LightShareModule")]
     public class LightShareModule : IRegionModule, ICommandableModule
     {
         private static readonly ILog m_log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);

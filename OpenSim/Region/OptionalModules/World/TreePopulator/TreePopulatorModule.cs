@@ -46,6 +46,7 @@ namespace OpenSim.Region.OptionalModules.World.TreePopulator
     /// <summary>
     /// Version 2.02 - Still hacky 
     /// </summary>
+    [RegionModuleDeprecated("TreePopulatorModule")]
     public class TreePopulatorModule : IRegionModule, ICommandableModule, IVegetationModule
     {
         private static readonly ILog m_log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);

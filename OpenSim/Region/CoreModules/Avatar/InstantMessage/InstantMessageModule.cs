@@ -37,6 +37,7 @@ using OpenSim.Region.Framework.Scenes;
 
 namespace OpenSim.Region.CoreModules.Avatar.InstantMessage
 {
+    [RegionModule("InstantMessageModule")]
     public class InstantMessageModule : ISharedRegionModule
     {
         private static readonly ILog m_log = LogManager.GetLogger(

@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright (c) Contributors, http://opensimulator.org/
  * See CONTRIBUTORS.TXT for a full list of copyright holders.
  *
@@ -54,7 +54,7 @@ namespace OpenSim
         }
 
         public const int VERSIONINFO_VERSION_LENGTH = 27;
-        
+
         /// <value>
         /// This is the external interface version.  It is separate from the OpenSimulator project version.
         /// 

@@ -39,6 +39,7 @@ using OpenSim.Region.Framework.Scenes;
 
 namespace OpenSim.Region.CoreModules.Framework.Monitoring
 {
+    [RegionModuleDeprecated("MonitorModule")]
     public class MonitorModule : IRegionModule 
     {
         private Scene m_scene;

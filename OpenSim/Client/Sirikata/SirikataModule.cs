@@ -73,6 +73,7 @@ using OpenSim.Region.Framework.Scenes;
 
 namespace OpenSim.Client.Sirikata
 {
+    [RegionModuleDeprecated("SirikataModule")]
     class SirikataModule : IRegionModule
     {
         private bool m_enabled = false;

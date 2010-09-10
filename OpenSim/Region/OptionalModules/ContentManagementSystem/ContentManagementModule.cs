@@ -50,6 +50,7 @@ using log4net;
 
 namespace OpenSim.Region.OptionalModules.ContentManagement
 {
+    [RegionModuleDeprecated("ContentManagementModule")]
     public class ContentManagementModule : IRegionModule
     {
         #region Static Fields

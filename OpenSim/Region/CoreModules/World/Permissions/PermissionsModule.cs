@@ -89,6 +89,7 @@ enum GroupPowers : long
 
 namespace OpenSim.Region.CoreModules.World.Permissions
 {
+    [RegionModuleDeprecated("PermissionsModule")]
     public class PermissionsModule : IRegionModule
     {
         private static readonly ILog m_log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);

@@ -38,6 +38,7 @@ using Caps=OpenSim.Framework.Capabilities.Caps;
 
 namespace OpenSim.Region.CoreModules.Agent.Capabilities
 {
+    [RegionModule("CapabilitiesModule")]
     public class CapabilitiesModule : INonSharedRegionModule, ICapabilitiesModule
     { 
         private static readonly ILog m_log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);

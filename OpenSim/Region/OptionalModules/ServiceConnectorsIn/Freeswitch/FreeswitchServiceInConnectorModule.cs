@@ -39,6 +39,7 @@ using OpenSim.Server.Handlers.Base;
 
 namespace OpenSim.Region.CoreModules.ServiceConnectorsIn.Freeswitch
 {
+    [RegionModule("FreeswitchServiceInConnectorModule")]
     public class FreeswitchServiceInConnectorModule : ISharedRegionModule
     {
         private static readonly ILog m_log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);

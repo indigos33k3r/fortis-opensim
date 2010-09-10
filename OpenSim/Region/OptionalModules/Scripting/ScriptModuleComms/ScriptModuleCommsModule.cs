@@ -32,12 +32,11 @@ using log4net;
 using OpenSim.Framework;
 using OpenSim.Region.Framework.Interfaces;
 using OpenSim.Region.Framework.Scenes;
-using Mono.Addins;
 using OpenMetaverse;
 
 namespace OpenSim.Region.OptionalModules.Scripting.ScriptModuleComms
 {
-    [Extension(Path = "/OpenSim/RegionModules", NodeName = "RegionModule", Id = "ScriptModuleCommsModule")]
+    [RegionModule("ScriptModuleCommsModule")]
     class ScriptModuleCommsModule : INonSharedRegionModule, IScriptModuleComms
     {
         private static readonly ILog m_log =

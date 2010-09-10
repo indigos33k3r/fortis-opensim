@@ -39,6 +39,7 @@ using OpenMetaverse;
 
 namespace OpenSim.Region.CoreModules.ServiceConnectorsOut.UserAccounts
 {
+    [RegionModule("LocalUserAccountServicesConnector")]
     public class LocalUserAccountServicesConnector : ISharedRegionModule, IUserAccountService
     {
         private static readonly ILog m_log =

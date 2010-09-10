@@ -42,6 +42,7 @@ using GridRegion = OpenSim.Services.Interfaces.GridRegion;
 
 namespace OpenSim.Region.CoreModules.ServiceConnectorsIn.Hypergrid
 {
+    [RegionModule("HypergridServiceInConnectorModule")]
     public class HypergridServiceInConnectorModule : ISharedRegionModule
     {
         private static readonly ILog m_log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);

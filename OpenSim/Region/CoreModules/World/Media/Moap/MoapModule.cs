@@ -34,7 +34,6 @@ using System.IO;
 using System.Web;
 using System.Xml;
 using log4net;
-using Mono.Addins;
 using Nini.Config;
 using OpenMetaverse;
 using OpenMetaverse.Messages.Linden;
@@ -52,7 +51,7 @@ using OSDMap = OpenMetaverse.StructuredData.OSDMap;
 
 namespace OpenSim.Region.CoreModules.Media.Moap
 {
-    [Extension(Path = "/OpenSim/RegionModules", NodeName = "RegionModule", Id = "MoapModule")]
+    [RegionModule("MoapModule")]
     public class MoapModule : INonSharedRegionModule, IMoapModule
     {    
         private static readonly ILog m_log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);

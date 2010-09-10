@@ -89,6 +89,7 @@ namespace OpenSim.Region.CoreModules.Asset
     /// ExpirationTime = 60
     /// </code>
     /// </example>
+    [RegionModule("CenomeMemoryAssetCache")]
     public class CenomeMemoryAssetCache : IImprovedAssetCache, ISharedRegionModule
     {
         private static readonly ILog m_log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);

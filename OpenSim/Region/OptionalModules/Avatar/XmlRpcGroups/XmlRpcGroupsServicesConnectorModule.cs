@@ -34,7 +34,6 @@ using System.Text;
 using Nwc.XmlRpc;
 
 using log4net;
-using Mono.Addins;
 using Nini.Config;
 
 using OpenMetaverse;
@@ -47,7 +46,7 @@ using OpenSim.Services.Interfaces;
 
 namespace OpenSim.Region.OptionalModules.Avatar.XmlRpcGroups
 {
-    [Extension(Path = "/OpenSim/RegionModules", NodeName = "RegionModule")]
+    [RegionModule("XmlRpcGroupsServicesConnector")]
     public class XmlRpcGroupsServicesConnectorModule : ISharedRegionModule, IGroupsServicesConnector
     {
         private static readonly ILog m_log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);

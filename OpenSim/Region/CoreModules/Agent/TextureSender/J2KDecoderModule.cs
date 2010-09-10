@@ -45,6 +45,7 @@ namespace OpenSim.Region.CoreModules.Agent.TextureSender
 {
     public delegate void J2KDecodeDelegate(UUID assetID);
 
+    [RegionModuleDeprecated("J2KDecoderModule")]
     public class J2KDecoderModule : IRegionModule, IJ2KDecoder
     {
         private static readonly ILog m_log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);

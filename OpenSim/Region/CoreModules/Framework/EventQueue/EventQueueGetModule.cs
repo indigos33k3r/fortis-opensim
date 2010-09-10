@@ -53,6 +53,7 @@ namespace OpenSim.Region.CoreModules.Framework.EventQueue
         public OSDMap body;
     }
 
+    [RegionModuleDeprecated("EventQueueGetModule")]
     public class EventQueueGetModule : IEventQueue, IRegionModule
     {
         private static readonly ILog m_log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);

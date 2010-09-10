@@ -39,6 +39,7 @@ using OpenMetaverse;
 
 namespace OpenSim.Region.CoreModules.ServiceConnectorsOut.GridUser
 {
+    [RegionModule("LocalGridUserServicesConnector")]
     public class LocalGridUserServicesConnector : ISharedRegionModule, IGridUserService
     {
         private static readonly ILog m_log =

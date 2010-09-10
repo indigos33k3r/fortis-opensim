@@ -38,6 +38,11 @@ namespace OpenSim.Region.Framework.Interfaces
     public interface IWindModelPlugin : IPlugin
     {
         /// <summary>
+        /// Name of this wind plugin
+        /// </summary>
+        string Name { get; }
+
+        /// <summary>
         /// Brief description of this plugin's wind model
         /// </summary>
         string Description { get; }

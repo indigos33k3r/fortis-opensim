@@ -39,6 +39,7 @@ using System.Reflection;
 
 namespace OpenSim.Region.CoreModules.Scripting.LoadImageURL
 {
+    [RegionModuleDeprecated("LoadImageURLModule")]
     public class LoadImageURLModule : IRegionModule, IDynamicTextureRender
     {
         private static readonly ILog m_log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);

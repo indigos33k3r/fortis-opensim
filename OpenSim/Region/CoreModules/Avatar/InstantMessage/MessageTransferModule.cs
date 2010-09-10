@@ -42,6 +42,7 @@ using OpenSim.Services.Interfaces;
 
 namespace OpenSim.Region.CoreModules.Avatar.InstantMessage
 {
+    [RegionModule("MessageTransferModule")]
     public class MessageTransferModule : ISharedRegionModule, IMessageTransferModule
     {
         private static readonly ILog m_log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);

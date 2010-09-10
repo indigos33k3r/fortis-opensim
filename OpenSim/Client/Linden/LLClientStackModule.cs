@@ -44,6 +44,7 @@ namespace OpenSim.Client.Linden
     /// <summary>
     /// Linden UDP Stack Region Module
     /// </summary>
+    [RegionModule("LLClientStackModule")]
     public class LLClientStackModule : INonSharedRegionModule
     {
         private static readonly ILog m_log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);

@@ -25,11 +25,25 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+using System;
+using System.ComponentModel.Composition;
 using Nini.Config;
 using OpenSim.Region.Framework.Scenes;
 
 namespace OpenSim.Region.Framework.Interfaces
 {
+    /// <summary>
+    /// Decorates a class as an IRegionModule that should be recognized by the 
+    /// OpenSim plugin loader
+    /// </summary>
+    [MetadataAttribute]
+    [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
+    public class RegionModuleDeprecatedAttribute : ExportAttribute
+    {
+        public RegionModuleDeprecatedAttribute(string name) : base(typeof(IRegionModule)) { Name = name; }
+        public string Name { get; set; }
+    }
+
     /// <summary>
     /// DEPRECATED! Use INonSharedRegionModule or ISharedRegionModule instead
     /// </summary>

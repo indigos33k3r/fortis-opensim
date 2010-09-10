@@ -29,20 +29,15 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Timers;
-
 using log4net;
-using Mono.Addins;
 using Nini.Config;
-
 using OpenMetaverse;
 using OpenMetaverse.StructuredData;
-
 using OpenSim.Framework;
 using OpenSim.Framework.Communications;
 using OpenSim.Region.CoreModules.Framework.EventQueue;
 using OpenSim.Region.Framework.Interfaces;
 using OpenSim.Region.Framework.Scenes;
-
 using OpenSim.Services.Interfaces;
 
 using Caps = OpenSim.Framework.Capabilities.Caps;
@@ -52,7 +47,7 @@ using DirFindFlags = OpenMetaverse.DirectoryManager.DirFindFlags;
 
 namespace OpenSim.Region.OptionalModules.Avatar.XmlRpcGroups
 {
-    [Extension(Path = "/OpenSim/RegionModules", NodeName = "RegionModule")]
+    [RegionModule("GroupsModule")]
     public class GroupsModule : ISharedRegionModule, IGroupsModule
     {
         /// <summary>

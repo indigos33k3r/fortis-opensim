@@ -37,6 +37,7 @@ using OpenSim.Region.Framework.Scenes;
 
 namespace OpenSim.Region.CoreModules.Agent.AssetTransaction
 {
+    [RegionModuleDeprecated("AssetTransactionModule")]
     public class AssetTransactionModule : IRegionModule, IAgentAssetTransactions
     {
 //        private static readonly ILog m_log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);

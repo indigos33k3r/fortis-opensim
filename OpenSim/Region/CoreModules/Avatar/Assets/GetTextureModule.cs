@@ -67,6 +67,7 @@ namespace OpenSim.Region.CoreModules.Avatar.ObjectCaps
 
     #endregion Stream Handler
 
+    [RegionModuleDeprecated("GetTextureModule")]
     public class GetTextureModule : IRegionModule
     {
         private static readonly ILog m_log =

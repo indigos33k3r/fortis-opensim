@@ -25,10 +25,24 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+using System;
+using System.ComponentModel.Composition;
 using OpenSim.Framework;
 
 namespace OpenSim
 {
+    /// <summary>
+    /// Decorates a class as an IApplicationPlugin that should be recognized by the 
+    /// OpenSim plugin loader
+    /// </summary>
+    [MetadataAttribute]
+    [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
+    public class ApplicationModuleAttribute : ExportAttribute
+    {
+        public ApplicationModuleAttribute(string name) : base(typeof(IApplicationPlugin)) { Name = name; }
+        public string Name { get; set; }
+    }
+
     /// <summary>
     /// OpenSimulator Application Plugin framework interface
     /// </summary>
@@ -44,22 +58,5 @@ namespace OpenSim
         /// Called when the application loading is completed 
         /// </summary>
         void PostInitialise();
-    }
-
-
-    public class ApplicationPluginInitialiser : PluginInitialiserBase
-    {
-        private OpenSimBase server;
-
-        public ApplicationPluginInitialiser(OpenSimBase s)
-        {
-            server = s;
-        }
-
-        public override void Initialise(IPlugin plugin)
-        {
-            IApplicationPlugin p = plugin as IApplicationPlugin;
-            p.Initialise(server);
-        }
     }
 }

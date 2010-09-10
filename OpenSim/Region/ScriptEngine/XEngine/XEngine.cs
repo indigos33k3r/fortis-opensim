@@ -54,7 +54,8 @@ using ScriptCompileQueue = OpenSim.Framework.LocklessQueue<object[]>;
 
 namespace OpenSim.Region.ScriptEngine.XEngine
 {
-    public class XEngine : INonSharedRegionModule, IScriptModule, IScriptEngine
+    [RegionModule("XEngine")]
+    public class XEngine : IScriptModule, IScriptEngine
     {
         private static readonly ILog m_log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 

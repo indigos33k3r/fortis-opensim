@@ -38,6 +38,7 @@ using OpenMetaverse;
 
 namespace OpenSim.Region.CoreModules.ServiceConnectorsOut.UserAccounts
 {
+    [RegionModule("RemoteUserAccountServicesConnector")]
     public class RemoteUserAccountServicesConnector : UserAccountServicesConnector,
             ISharedRegionModule, IUserAccountService
     {

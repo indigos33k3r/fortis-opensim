@@ -34,6 +34,7 @@ using OpenSim.Region.Framework.Scenes;
 
 namespace OpenSim.Region.Examples.SimpleModule
 {
+    [RegionModuleDeprecated("RegionModule")]
     public class RegionModule : IRegionModule
     {
         #region IRegionModule Members

@@ -26,8 +26,3 @@
  */
 
 using System;
-using Mono.Addins;
-using Nini.Config;
-
-[assembly: Addin("SimianGrid", "1.0")]
-[assembly: AddinDependency("OpenSim", "0.5")]

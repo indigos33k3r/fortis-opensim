@@ -41,6 +41,7 @@ using Caps=OpenSim.Framework.Capabilities.Caps;
 
 namespace OpenSim.Region.CoreModules.Avatar.ObjectCaps
 {
+    [RegionModuleDeprecated("ObjectAdd")]
     public class ObjectAdd : IRegionModule
     {
         private static readonly ILog m_log =

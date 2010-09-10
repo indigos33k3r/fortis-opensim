@@ -39,6 +39,7 @@ using OpenMetaverse;
 
 namespace OpenSim.Region.CoreModules.ServiceConnectorsOut.Authorization
 {
+    [RegionModule("RemoteAuthorizationServicesConnector")]
     public class RemoteAuthorizationServicesConnector :
             AuthorizationServicesConnector, ISharedRegionModule, IAuthorizationService
     {

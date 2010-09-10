@@ -49,12 +49,12 @@ namespace OpenSim
         /// <summary>
         /// Path to the main ini Configuration file
         /// </summary>
-        public static string iniFilePath = "";
+        public static string iniFilePath = String.Empty;
 
         /// <summary>
         /// Save Crashes in the bin/crashes folder.  Configurable with m_crashDir
         /// </summary>
-        public static bool m_saveCrashDumps = false;
+        public static bool m_saveCrashDumps;
 
         /// <summary>
         /// Directory to save crash reports to.  Relative to bin/
@@ -64,7 +64,9 @@ namespace OpenSim
         /// <summary>
         /// Instance of the OpenSim class.  This could be OpenSim or OpenSimBackground depending on the configuration
         /// </summary>
-        protected static OpenSimBase m_sim = null;
+        protected static OpenSimBase m_sim;
+
+        private static bool _IsHandlingException; // Make sure we don't go recursive on ourself
 
         //could move our main function into OpenSimMain and kill this class
         public static void Main(string[] args)
@@ -119,114 +121,6 @@ namespace OpenSim
             // Configure nIni aliases and localles
             Culture.SetCurrentCulture();
 
-
-            // Validate that the user has the most basic configuration done
-            // If not, offer to do the most basic configuration for them warning them along the way of the importance of 
-            // reading these files.
-            /*
-            m_log.Info("Checking for reguired configuration...\n");
-
-            bool OpenSim_Ini = (File.Exists(Path.Combine(Util.configDir(), "OpenSim.ini")))
-                               || (File.Exists(Path.Combine(Util.configDir(), "opensim.ini")))
-                               || (File.Exists(Path.Combine(Util.configDir(), "openSim.ini")))
-                               || (File.Exists(Path.Combine(Util.configDir(), "Opensim.ini")));
-            
-            bool StanaloneCommon_ProperCased = File.Exists(Path.Combine(Path.Combine(Util.configDir(), "config-include"), "StandaloneCommon.ini"));
-            bool StanaloneCommon_lowercased = File.Exists(Path.Combine(Path.Combine(Util.configDir(), "config-include"), "standalonecommon.ini"));
-            bool GridCommon_ProperCased = File.Exists(Path.Combine(Path.Combine(Util.configDir(), "config-include"), "GridCommon.ini"));
-            bool GridCommon_lowerCased = File.Exists(Path.Combine(Path.Combine(Util.configDir(), "config-include"), "gridcommon.ini"));
-
-            if ((OpenSim_Ini) 
-                && (
-                (StanaloneCommon_ProperCased
-                || StanaloneCommon_lowercased
-                || GridCommon_ProperCased
-                || GridCommon_lowerCased
-                )))
-            {
-                m_log.Info("Required Configuration Files Found\n");
-            }
-            else
-            {
-                MainConsole.Instance = new LocalConsole("Region");
-                string resp = MainConsole.Instance.CmdPrompt(
-                                        "\n\n*************Required Configuration files not found.*************\n\n   OpenSimulator will not run without these files.\n\nRemember, these file names are Case Sensitive in Linux and Proper Cased.\n1. ./OpenSim.ini\nand\n2. ./config-include/StandaloneCommon.ini \nor\n3. ./config-include/GridCommon.ini\n\nAlso, you will want to examine these files in great detail because only the basic system will load by default. OpenSimulator can do a LOT more if you spend a little time going through these files.\n\n" + ": " + "Do you want to copy the most basic Defaults from standalone?",
-                                        "yes");
-                if (resp == "yes")
-                {
-                    
-                        if (!(OpenSim_Ini))
-                        {
-                            try
-                            {
-                                File.Copy(Path.Combine(Util.configDir(), "OpenSim.ini.example"),
-                                          Path.Combine(Util.configDir(), "OpenSim.ini"));
-                            } catch (UnauthorizedAccessException)
-                            {
-                                MainConsole.Instance.Output("Unable to Copy OpenSim.ini.example to OpenSim.ini, Make sure OpenSim has have the required permissions\n");
-                            } catch (ArgumentException)
-                            {
-                                MainConsole.Instance.Output("Unable to Copy OpenSim.ini.example to OpenSim.ini, The current directory is invalid.\n");
-                            } catch (System.IO.PathTooLongException)
-                            {
-                                MainConsole.Instance.Output("Unable to Copy OpenSim.ini.example to OpenSim.ini, the Path to these files is too long.\n");
-                            } catch (System.IO.DirectoryNotFoundException)
-                            {
-                                MainConsole.Instance.Output("Unable to Copy OpenSim.ini.example to OpenSim.ini, the current directory is reporting as not found.\n");
-                            } catch (System.IO.FileNotFoundException)
-                            {
-                                MainConsole.Instance.Output("Unable to Copy OpenSim.ini.example to OpenSim.ini, the example is not found, please make sure that the example files exist.\n");
-                            } catch (System.IO.IOException)
-                            {
-                                // Destination file exists already or a hard drive failure...   ..    so we can just drop this one
-                                //MainConsole.Instance.Output("Unable to Copy OpenSim.ini.example to OpenSim.ini, the example is not found, please make sure that the example files exist.\n");
-                            } catch (System.NotSupportedException)
-                            {
-                                MainConsole.Instance.Output("Unable to Copy OpenSim.ini.example to OpenSim.ini, The current directory is invalid.\n");
-                            }
-
-                        }
-                        if (!(StanaloneCommon_ProperCased || StanaloneCommon_lowercased))
-                        {
-                            try
-                            {
-                                File.Copy(Path.Combine(Path.Combine(Util.configDir(), "config-include"), "StandaloneCommon.ini.example"),
-                                          Path.Combine(Path.Combine(Util.configDir(), "config-include"), "StandaloneCommon.ini"));
-                            }
-                            catch (UnauthorizedAccessException)
-                            {
-                                MainConsole.Instance.Output("Unable to Copy StandaloneCommon.ini.example to StandaloneCommon.ini, Make sure OpenSim has the required permissions\n");
-                            }
-                            catch (ArgumentException)
-                            {
-                                MainConsole.Instance.Output("Unable to Copy StandaloneCommon.ini.example to StandaloneCommon.ini, The current directory is invalid.\n");
-                            }
-                            catch (System.IO.PathTooLongException)
-                            {
-                                MainConsole.Instance.Output("Unable to Copy StandaloneCommon.ini.example to StandaloneCommon.ini, the Path to these files is too long.\n");
-                            }
-                            catch (System.IO.DirectoryNotFoundException)
-                            {
-                                MainConsole.Instance.Output("Unable to Copy StandaloneCommon.ini.example to StandaloneCommon.ini, the current directory is reporting as not found.\n");
-                            }
-                            catch (System.IO.FileNotFoundException)
-                            {
-                                MainConsole.Instance.Output("Unable to Copy StandaloneCommon.ini.example to StandaloneCommon.ini, the example is not found, please make sure that the example files exist.\n");
-                            }
-                            catch (System.IO.IOException)
-                            {
-                                // Destination file exists already or a hard drive failure...   ..    so we can just drop this one
-                                //MainConsole.Instance.Output("Unable to Copy OpenSim.ini.example to OpenSim.ini, the example is not found, please make sure that the example files exist.\n");
-                            }
-                            catch (System.NotSupportedException)
-                            {
-                                MainConsole.Instance.Output("Unable to Copy StandaloneCommon.ini.example to StandaloneCommon.ini, The current directory is invalid.\n");
-                            }
-                        }
-                }
-                MainConsole.Instance = null;
-            }      
-            */
             configSource.Alias.AddAlias("On", true);
             configSource.Alias.AddAlias("Off", false);
             configSource.Alias.AddAlias("True", true);
@@ -252,8 +146,6 @@ namespace OpenSim
             // load Crash directory config
             m_crashDir = configSource.Configs["Startup"].GetString("crash_dir", m_crashDir);
 
-           
-
             if (background)
             {
                 m_sim = new OpenSimBackground(configSource);
@@ -261,14 +153,8 @@ namespace OpenSim
             }
             else
             {
-
-
-                       
-
                 m_sim = new OpenSim(configSource);
 
-                    
-      
                 m_sim.Startup();
 
                 while (true)
@@ -285,8 +171,6 @@ namespace OpenSim
                 }
             }
         }
-
-        private static bool _IsHandlingException = false; // Make sure we don't go recursive on ourself
 
         /// <summary>
         /// Global exception handler -- all unhandlet exceptions end up here :)

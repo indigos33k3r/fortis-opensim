@@ -27,9 +27,11 @@
 
 using System;
 using System.Xml.Serialization;
+using OpenSim.Framework;
 
 namespace OpenSim.ApplicationPlugins.Rest.Regions
 {
+    [ApplicationModule("RestRegionPlugin")]
     public partial class RestRegionPlugin : RestPlugin
     {
         private static XmlSerializerNamespaces _xmlNs;

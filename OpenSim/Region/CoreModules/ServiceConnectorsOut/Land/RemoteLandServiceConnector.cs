@@ -40,6 +40,7 @@ using OpenSim.Server.Base;
 
 namespace OpenSim.Region.CoreModules.ServiceConnectorsOut.Land
 {
+    [RegionModule("RemoteLandServicesConnector")]
     public class RemoteLandServicesConnector :
             LandServicesConnector, ISharedRegionModule, ILandService
     {

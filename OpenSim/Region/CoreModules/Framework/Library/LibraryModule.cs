@@ -45,6 +45,7 @@ using Nini.Config;
 
 namespace OpenSim.Region.CoreModules.Framework.Library
 {
+    [RegionModule("LibraryModule")]
     public class LibraryModule : ISharedRegionModule
     {
         private static readonly ILog m_log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);

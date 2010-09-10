@@ -37,6 +37,7 @@ using OpenSim.Region.Framework.Scenes;
 
 namespace OpenSim.Region.CoreModules
 {
+    [RegionModuleDeprecated("SunModule")]
     public class SunModule : ISunModule
     {
         /// <summary>

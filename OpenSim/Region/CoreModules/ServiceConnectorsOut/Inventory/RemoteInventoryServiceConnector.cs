@@ -40,6 +40,7 @@ using OpenMetaverse;
 
 namespace OpenSim.Region.CoreModules.ServiceConnectorsOut.Inventory
 {
+    [RegionModule("RemoteInventoryServicesConnector")]
     public class RemoteInventoryServicesConnector : BaseInventoryConnector, ISharedRegionModule, IInventoryService
     {
         private static readonly ILog m_log =

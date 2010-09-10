@@ -38,6 +38,7 @@ using OpenSim.Services.Interfaces;
 
 namespace OpenSim.Region.CoreModules.Asset
 {
+    [RegionModule("CoreAssetCache")]
     public class CoreAssetCache : ISharedRegionModule, IImprovedAssetCache
     {
         private static readonly ILog m_log =

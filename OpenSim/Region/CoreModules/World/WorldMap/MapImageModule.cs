@@ -59,6 +59,7 @@ namespace OpenSim.Region.CoreModules.World.WorldMap
         public face[] trns;
     }
 
+    [RegionModuleDeprecated("MapImageModule")]
     public class MapImageModule : IMapImageGenerator, IRegionModule
     {
         private static readonly ILog m_log =

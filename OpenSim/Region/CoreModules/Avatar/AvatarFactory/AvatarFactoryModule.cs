@@ -38,6 +38,7 @@ using OpenSim.Services.Interfaces;
 
 namespace OpenSim.Region.CoreModules.Avatar.AvatarFactory
 {
+    [RegionModuleDeprecated("AvatarFactoryModule")]
     public class AvatarFactoryModule : IAvatarFactory, IRegionModule
     {
         private static readonly ILog m_log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);

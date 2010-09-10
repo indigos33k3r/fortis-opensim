@@ -40,6 +40,7 @@ using System.Reflection;
 
 namespace OpenSim.Region.CoreModules.Scripting.DynamicTexture
 {
+    [RegionModuleDeprecated("DynamicTextureModule")]
     public class DynamicTextureModule : IRegionModule, IDynamicTextureManager
     {
         //private static readonly ILog m_log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);

@@ -42,6 +42,7 @@ using OpenSim.Region.Framework.Scenes;
 
 namespace OpenSim.Region.CoreModules.InterGrid
 {
+    [RegionModuleDeprecated("OGSRadmin")]
     public class OGSRadmin : IRegionModule 
     {
         private static readonly ILog m_log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
