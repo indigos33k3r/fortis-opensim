@@ -433,54 +433,6 @@
       </Files>
     </Project>
 
-    <Project frameworkVersion="v3_5" name="OpenSim.Region.Physics.POSPlugin" path="OpenSim/Region/Physics/POSPlugin" type="Library">
-      <Configuration name="Debug">
-        <Options>
-          <OutputPath>../../../../bin/Physics/</OutputPath>
-        </Options>
-      </Configuration>
-      <Configuration name="Release">
-        <Options>
-          <OutputPath>../../../../bin/Physics/</OutputPath>
-        </Options>
-      </Configuration>
-
-      <ReferencePath>../../../../bin/</ReferencePath>
-      <Reference name="System"/>
-      <Reference name="OpenMetaverseTypes.dll"/>
-      <Reference name="Nini.dll" />
-      <Reference name="OpenSim.Framework"/>
-      <Reference name="OpenSim.Region.Physics.Manager"/>
-      <Files>
-        <Match pattern="*.cs" recurse="true"/>
-      </Files>
-    </Project>
-
-    <Project frameworkVersion="v3_5" name="OpenSim.Region.Physics.PhysXPlugin" path="OpenSim/Region/Physics/PhysXPlugin" type="Library">
-      <Configuration name="Debug">
-        <Options>
-          <OutputPath>../../../../bin/Physics/</OutputPath>
-        </Options>
-      </Configuration>
-      <Configuration name="Release">
-        <Options>
-          <OutputPath>../../../../bin/Physics/</OutputPath>
-        </Options>
-      </Configuration>
-
-      <ReferencePath>../../../../bin/</ReferencePath>
-      <Reference name="System"/>
-      <Reference name="OpenMetaverseTypes.dll"/>
-      <Reference name="Nini.dll" />
-      <Reference name="PhysX_Wrapper_Dotnet.dll"/>
-      <Reference name="OpenSim.Framework"/>
-      <Reference name="OpenSim.Region.Physics.Manager"/>
-      <Reference name="log4net.dll"/>
-      <Files>
-        <Match pattern="*.cs" recurse="true"/>
-      </Files>
-    </Project>
-
     <Project frameworkVersion="v3_5" name="OpenSim.Region.Physics.OdePlugin" path="OpenSim/Region/Physics/OdePlugin" type="Library">
       <Configuration name="Debug">
         <Options>
@@ -511,34 +463,6 @@
       </Files>
     </Project>
 
-    <Project frameworkVersion="v3_5" name="OpenSim.Region.Physics.BulletXPlugin" path="OpenSim/Region/Physics/BulletXPlugin" type="Library">
-      <Configuration name="Debug">
-        <Options>
-          <OutputPath>../../../../bin/Physics/</OutputPath>
-        </Options>
-      </Configuration>
-      <Configuration name="Release">
-        <Options>
-          <OutputPath>../../../../bin/Physics/</OutputPath>
-        </Options>
-      </Configuration>
-
-      <ReferencePath>../../../../bin/</ReferencePath>
-      <Reference name="System"/>
-      <Reference name="OpenMetaverseTypes.dll"/>
-      <Reference name="Nini.dll" />
-      <Reference name="OpenSim.Framework"/>
-      <Reference name="OpenSim.Framework.Console"/>
-      <Reference name="OpenSim.Region.Physics.Manager"/>
-      <Reference name="MonoXnaCompactMaths.dll"/>
-      <Reference name="Modified.XnaDevRu.BulletX.dll" />
-      <Reference name="log4net.dll"/>
-
-      <Files>
-        <Match pattern="*.cs" recurse="true"/>
-      </Files>
-    </Project>
-
     <Project frameworkVersion="v3_5" name="OpenSim.Region.Physics.Meshing" path="OpenSim/Region/Physics/Meshing" type="Library">
       <Configuration name="Debug">
         <Options>
@@ -561,34 +485,6 @@
       <Reference name="OpenSim.Framework"/>
       <Reference name="OpenSim.Framework.Console"/>
       <Reference name="OpenSim.Region.Physics.Manager"/>
-      <Reference name="log4net.dll"/>
-
-      <Files>
-        <Match pattern="*.cs" recurse="true"/>
-      </Files>
-    </Project>
-
-    <Project frameworkVersion="v3_5" name="OpenSim.Region.Physics.BulletDotNETPlugin" path="OpenSim/Region/Physics/BulletDotNETPlugin" type="Library">
-      <Configuration name="Debug">
-        <Options>
-          <OutputPath>../../../../bin/Physics/</OutputPath>
-        </Options>
-      </Configuration>
-      <Configuration name="Release">
-        <Options>
-          <OutputPath>../../../../bin/Physics/</OutputPath>
-        </Options>
-      </Configuration>
-
-      <ReferencePath>../../../../bin/</ReferencePath>
-      <Reference name="System"/>
-      <Reference name="OpenMetaverseTypes.dll"/>
-      <Reference name="Nini.dll" />
-      <Reference name="OpenSim.Framework"/>
-      <Reference name="OpenSim.Framework.Console"/>
-      <Reference name="OpenSim.Region.Physics.Manager"/>
-      <Reference name="BulletDotNET.dll" />
-      <Reference name="nunit.framework.dll" />
       <Reference name="log4net.dll"/>
 
       <Files>
