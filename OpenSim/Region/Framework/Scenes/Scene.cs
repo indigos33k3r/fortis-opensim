@@ -1037,29 +1037,30 @@ namespace OpenSim.Region.Framework.Scenes
                 if (ScriptEngine)
                 {
                     m_log.Info("Stopping all Scripts in Scene");
-                    foreach (EntityBase ent in Entities)
+                    
+                    EntityBase[] entities = Entities.GetEntities();
+                    foreach (EntityBase ent in entities)
                     {
                         if (ent is SceneObjectGroup)
-                        {
-                            ((SceneObjectGroup) ent).RemoveScriptInstances(false);
-                        }
+                            ((SceneObjectGroup)ent).RemoveScriptInstances(false);
                     }
                 }
                 else
                 {
                     m_log.Info("Starting all Scripts in Scene");
-                    lock (Entities)
+
+                    EntityBase[] entities = Entities.GetEntities();
+                    foreach (EntityBase ent in entities)
                     {
-                        foreach (EntityBase ent in Entities)
+                        if (ent is SceneObjectGroup)
                         {
-                            if (ent is SceneObjectGroup)
-                            {
-                                ((SceneObjectGroup)ent).CreateScriptInstances(0, false, DefaultScriptEngine, 0);
-                                ((SceneObjectGroup)ent).ResumeScripts();
-                            }
+                            SceneObjectGroup sog = (SceneObjectGroup)ent;
+                            sog.CreateScriptInstances(0, false, DefaultScriptEngine, 0);
+                            sog.ResumeScripts();
                         }
                     }
                 }
+
                 m_scripts_enabled = !ScriptEngine;
                 m_log.Info("[TOTEDD]: Here is the method to trigger disabling of the scripting engine");
             }
@@ -1106,7 +1107,7 @@ namespace OpenSim.Region.Framework.Scenes
             shuttingdown = true;
 
             m_log.Debug("[SCENE]: Persisting changed objects");
-            List<EntityBase> entities = GetEntities();
+            EntityBase[] entities = GetEntities();
             foreach (EntityBase entity in entities)
             {
                 if (!entity.IsDeleted && entity is SceneObjectGroup && ((SceneObjectGroup)entity).HasGroupChanged)
@@ -1166,8 +1167,9 @@ namespace OpenSim.Region.Framework.Scenes
             while (m_regInfo.EstateSettings.EstateOwner == UUID.Zero && MainConsole.Instance != null)
             {
                 MainConsole.Instance.Output("The current estate has no owner set.");
-                string first = MainConsole.Instance.CmdPrompt("Estate owner first name", "Test");
-                string last = MainConsole.Instance.CmdPrompt("Estate owner last name", "User");
+                List<char> excluded = new List<char>(new char[1]{' '});
+                string first = MainConsole.Instance.CmdPrompt("Estate owner first name", "Test", excluded);
+                string last = MainConsole.Instance.CmdPrompt("Estate owner last name", "User", excluded);
 
                 UserAccount account = UserAccountService.GetUserAccount(m_regInfo.ScopeID, first, last);
 
@@ -2045,8 +2047,7 @@ namespace OpenSim.Region.Framework.Scenes
         {
             lock (Entities)
             {
-                ICollection<EntityBase> entities = new List<EntityBase>(Entities);
-
+                EntityBase[] entities = Entities.GetEntities();
                 foreach (EntityBase e in entities)
                 {
                     if (e is SceneObjectGroup)
@@ -3985,9 +3986,8 @@ namespace OpenSim.Region.Framework.Scenes
         /// </summary>
         public void ForceClientUpdate()
         {
-            List<EntityBase> EntityList = GetEntities();
-
-            foreach (EntityBase ent in EntityList)
+            EntityBase[] entityList = GetEntities();
+            foreach (EntityBase ent in entityList)
             {
                 if (ent is SceneObjectGroup)
                 {
@@ -4005,9 +4005,8 @@ namespace OpenSim.Region.Framework.Scenes
         {
             m_log.Debug("Searching for Primitive: '" + cmdparams[2] + "'");
 
-            List<EntityBase> EntityList = GetEntities();
-
-            foreach (EntityBase ent in EntityList)
+            EntityBase[] entityList = GetEntities();
+            foreach (EntityBase ent in entityList)
             {
                 if (ent is SceneObjectGroup)
                 {
@@ -4376,7 +4375,7 @@ namespace OpenSim.Region.Framework.Scenes
         /// will not affect the original list of objects in the scene.
         /// </summary>
         /// <returns></returns>
-        public List<EntityBase> GetEntities()
+        public EntityBase[] GetEntities()
         {
             return m_sceneGraph.GetEntities();
         }
@@ -4410,9 +4409,8 @@ namespace OpenSim.Region.Framework.Scenes
 
         public void CleanTempObjects()
         {
-            List<EntityBase> objs = GetEntities();
-
-            foreach (EntityBase obj in objs)
+            EntityBase[] entities = GetEntities();
+            foreach (EntityBase obj in entities)
             {
                 if (obj is SceneObjectGroup)
                 {
