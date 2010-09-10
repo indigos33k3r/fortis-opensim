@@ -1,7 +1,10 @@
-#!/bin/sh
+#!/bin/bash
 
-mono bin/Prebuild.exe /target nant
-# needed until we break up OpenSim.exe
-perl -pi -e 's{OpenSim.dll}{OpenSim.exe}' OpenSim/ApplicationPlugins/LoadRegions/OpenSim.ApplicationPlugins.LoadRegions.dll.build
-mono bin/Prebuild.exe /target monodev
-mono bin/Prebuild.exe /target vs2008
+mono bin/Prebuild.exe /target vs2010
+
+if [[ $1 == build ]] ; then
+    xbuild OpenSim.sln
+else
+    echo Next, run the 'xbuild' command to compile
+    echo
+fi

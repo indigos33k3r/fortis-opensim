@@ -3,20 +3,15 @@
 # OpenSim makefile
 #
 
-RUBY    = $(strip $(shell which ruby 2>/dev/null))
-ifeq ($(RUBY),)
-NANT    = nant
-else
-NANT	= $(shell if test "$$EMACS" = "t" ; then echo "nant"; else echo "./nant-color"; fi)
-endif
+XBUILD    = xbuild
 
 all: prebuild
 	# @export PATH=/usr/local/bin:$(PATH)
-	${NANT}
+	${XBUILD}
 	find OpenSim -name \*.mdb -exec cp {} bin \; 
 
 release: prebuild
-	${NANT} -D:project.config=Release
+	${XBUILD} /p:Configuration=Release
 	find OpenSim -name \*.mdb -exec cp {} bin \;
 
 prebuild:
@@ -24,13 +19,7 @@ prebuild:
 
 clean:
 	# @export PATH=/usr/local/bin:$(PATH)
-	-${NANT} clean
-
-test: prebuild
-	${NANT} test
-
-test-xml: prebuild
-	${NANT} test-xml
+	-${XBUILD} /target:clean
 
 tags:
 	find OpenSim -name \*\.cs | xargs etags 
@@ -40,4 +29,3 @@ cscope-tags:
 	cscope -b
 
 include $(wildcard Makefile.local)
-
