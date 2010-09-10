@@ -93,11 +93,6 @@ namespace OpenSim.Region.CoreModules.Framework.Library
             get { return "Library Module"; }
         }
 
-        public Type ReplaceableInterface
-        {
-            get { return null; }
-        }
-
         public void AddRegion(Scene scene)
         {
             if (!m_Enabled)

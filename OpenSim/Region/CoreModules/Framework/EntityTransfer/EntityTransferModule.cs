@@ -57,11 +57,6 @@ namespace OpenSim.Region.CoreModules.Framework.EntityTransfer
 
         #region ISharedRegionModule
 
-        public Type ReplaceableInterface
-        {
-            get { return null; }
-        }
-
         public virtual string Name
         {
             get { return "BasicEntityTransferModule"; }

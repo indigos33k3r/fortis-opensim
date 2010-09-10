@@ -58,12 +58,6 @@ namespace OpenSim.Region.CoreModules.World.Archiver
             get { return "RegionArchiverModule"; } 
         }
 
-        public Type ReplaceableInterface 
-        { 
-            get { return null; }
-        }
-
-
         public void Initialise(IConfigSource source)
         {
             //m_log.Debug("[ARCHIVER] Initialising");

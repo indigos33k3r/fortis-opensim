@@ -198,11 +198,6 @@ namespace OpenSim.Region.OptionalModules.Avatar.XmlRpcGroups
             if (m_debugEnabled) m_log.Debug("[GROUPS]: Shutting down Groups module.");
         }
 
-        public Type ReplaceableInterface 
-        {
-            get { return null; }
-        }
-
         public string Name
         {
             get { return "GroupsModule"; }

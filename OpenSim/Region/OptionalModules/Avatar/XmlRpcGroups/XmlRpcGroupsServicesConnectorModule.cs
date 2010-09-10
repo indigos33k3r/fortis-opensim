@@ -88,12 +88,6 @@ namespace OpenSim.Region.OptionalModules.Avatar.XmlRpcGroups
             get { return "XmlRpcGroupsServicesConnector"; }
         }
 
-        // this module is not intended to be replaced, but there should only be 1 of them.
-        public Type ReplaceableInterface
-        {
-            get { return null; }
-        }
-
         public void Initialise(IConfigSource config)
         {
             IConfig groupsConfig = config.Configs["Groups"];

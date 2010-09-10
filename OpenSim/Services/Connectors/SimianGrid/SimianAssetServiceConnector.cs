@@ -58,7 +58,6 @@ namespace OpenSim.Services.Connectors.SimianGrid
 
         #region ISharedRegionModule
 
-        public Type ReplaceableInterface { get { return null; } }
         public void RegionLoaded(Scene scene)
         {
             if (m_cache == null)

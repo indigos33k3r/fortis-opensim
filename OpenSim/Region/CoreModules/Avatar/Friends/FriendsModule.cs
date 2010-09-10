@@ -190,11 +190,6 @@ namespace OpenSim.Region.CoreModules.Avatar.Friends
             get { return "FriendsModule"; }
         }
 
-        public Type ReplaceableInterface
-        {
-            get { return null; }
-        }
-
         public uint GetFriendPerms(UUID principalID, UUID friendID)
         {
             FriendInfo[] friends = GetFriends(principalID);

@@ -126,11 +126,6 @@ namespace OpenSim.Region.CoreModules.Avatar.Inventory.Transfer
             get { return "InventoryModule"; }
         }
 
-        public Type ReplaceableInterface
-        {
-            get { return null; }
-        }
-
         #endregion
 
         private void OnNewClient(IClientAPI client)

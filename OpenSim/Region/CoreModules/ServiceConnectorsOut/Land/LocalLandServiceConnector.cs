@@ -61,11 +61,6 @@ namespace OpenSim.Region.CoreModules.ServiceConnectorsOut.Land
 
         #region ISharedRegionModule
 
-        public Type ReplaceableInterface 
-        {
-            get { return null; }
-        }
-
         public string Name
         {
             get { return "LocalLandServicesConnector"; }

@@ -50,12 +50,7 @@ namespace OpenSim.Region.CoreModules.ServiceConnectorsOut.Inventory
 
         private IInventoryService m_InventoryService;
 
-        private bool m_Enabled = false;
-
-        public Type ReplaceableInterface 
-        {
-            get { return null; }
-        }
+        private bool m_Enabled;
 
         public string Name
         {

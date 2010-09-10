@@ -73,11 +73,6 @@ namespace OpenSim.Region.CoreModules.ServiceConnectorsIn.Asset
         {
         }
 
-        public Type ReplaceableInterface 
-        {
-            get { return null; }
-        }
-
         public string Name
         {
             get { return "RegionAssetService"; }

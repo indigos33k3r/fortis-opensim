@@ -124,11 +124,6 @@ namespace OpenSim.Region.CoreModules.Avatar.InstantMessage
             get { return "MessageTransferModule"; }
         }
 
-        public virtual Type ReplaceableInterface
-        {
-            get { return null; }
-        }
-
         public virtual void SendInstantMessage(GridInstantMessage im, MessageResultNotification result)
         {
             UUID toAgentID = new UUID(im.toAgentID);

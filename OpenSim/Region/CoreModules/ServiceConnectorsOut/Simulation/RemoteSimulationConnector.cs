@@ -124,11 +124,6 @@ namespace OpenSim.Region.CoreModules.ServiceConnectorsOut.Simulation
                 return;
         }
 
-        public Type ReplaceableInterface
-        {
-            get { return null; }
-        }
-
         public virtual string Name
         {
             get { return "RemoteSimulationConnectorModule"; }

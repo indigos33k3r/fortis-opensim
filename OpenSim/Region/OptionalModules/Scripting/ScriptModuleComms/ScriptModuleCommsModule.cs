@@ -72,11 +72,6 @@ namespace OpenSim.Region.OptionalModules.Scripting.ScriptModuleComms
             get { return "ScriptModuleCommsModule"; }
         }
 
-        public Type ReplaceableInterface
-        {
-            get { return null; }
-        }
-
         public void Close()
         {
         }

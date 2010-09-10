@@ -49,12 +49,7 @@ namespace OpenSim.Region.CoreModules.ServiceConnectorsOut.Authorization
 
         private IAuthorizationService m_AuthorizationService;
 
-        private bool m_Enabled = false;
-
-        public Type ReplaceableInterface 
-        {
-            get { return null; }
-        }
+        private bool m_Enabled;
 
         public string Name
         {

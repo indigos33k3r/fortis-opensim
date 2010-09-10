@@ -56,8 +56,7 @@ namespace OpenSim.Region.CoreModules.Media.Moap
     {    
         private static readonly ILog m_log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
         
-        public string Name { get { return "MoapModule"; } }                
-        public Type ReplaceableInterface { get { return null; } }        
+        public string Name { get { return "MoapModule"; } }    
 
         /// <summary>
         /// Is this module enabled?

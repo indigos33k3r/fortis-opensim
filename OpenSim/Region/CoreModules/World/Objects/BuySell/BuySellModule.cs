@@ -48,8 +48,7 @@ namespace OpenSim.Region.CoreModules.World.Objects.BuySell
         protected Scene m_scene = null;
         protected IDialogModule m_dialogModule;
         
-        public string Name { get { return "Object BuySell Module"; } }        
-        public Type ReplaceableInterface { get { return null; } }        
+        public string Name { get { return "Object BuySell Module"; } }  
 
         public void Initialise(IConfigSource source) {}
         

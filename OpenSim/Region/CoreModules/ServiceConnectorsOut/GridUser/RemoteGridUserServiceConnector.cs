@@ -52,11 +52,6 @@ namespace OpenSim.Region.CoreModules.ServiceConnectorsOut.GridUser
         private ActivityDetector m_ActivityDetector;
         private IGridUserService m_RemoteConnector;
 
-        public Type ReplaceableInterface
-        {
-            get { return null; }
-        }
-
         public string Name
         {
             get { return "RemoteGridUserServicesConnector"; }

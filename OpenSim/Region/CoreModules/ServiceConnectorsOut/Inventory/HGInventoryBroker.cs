@@ -59,11 +59,6 @@ namespace OpenSim.Region.CoreModules.ServiceConnectorsOut.Inventory
 
         private List<Scene> m_Scenes = new List<Scene>();
 
-        public Type ReplaceableInterface 
-        {
-            get { return null; }
-        }
-
         public string Name
         {
             get { return "HGInventoryBroker"; }

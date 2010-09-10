@@ -138,11 +138,6 @@ namespace OpenSim.Region.CoreModules.Avatar.InstantMessage
             get { return "InstantMessageModule"; }
         }
 
-        public Type ReplaceableInterface
-        {
-            get { return null; }
-        }
-
         #endregion
 
         public void OnInstantMessage(IClientAPI client, GridInstantMessage im)

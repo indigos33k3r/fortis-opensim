@@ -64,11 +64,6 @@ namespace OpenSim.Region.CoreModules.ServiceConnectorsOut.Grid
 
         #region ISharedRegionmodule
 
-        public Type ReplaceableInterface 
-        {
-            get { return null; }
-        }
-
         public string Name
         {
             get { return "RemoteGridServicesConnector"; }

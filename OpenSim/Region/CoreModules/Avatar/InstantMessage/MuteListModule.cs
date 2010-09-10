@@ -113,11 +113,6 @@ namespace OpenSim.Region.CoreModules.Avatar.InstantMessage
         {
             get { return "MuteListModule"; }
         }
-
-        public Type ReplaceableInterface
-        {
-            get { return null; }
-        }
         
         public void Close()
         {

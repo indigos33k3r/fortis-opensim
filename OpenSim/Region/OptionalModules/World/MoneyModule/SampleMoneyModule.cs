@@ -219,11 +219,6 @@ namespace OpenSim.Region.OptionalModules.World.MoneyModule
         {
         }
 
-        public Type ReplaceableInterface
-        {
-            get { return typeof(IMoneyModule); }
-        }
-
         public string Name
         {
             get { return "BetaGridLikeMoneyModule"; }

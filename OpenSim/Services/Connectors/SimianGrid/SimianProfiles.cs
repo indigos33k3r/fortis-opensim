@@ -69,8 +69,7 @@ namespace OpenSim.Services.Connectors.SimianGrid
         private bool m_Enabled = false;
 
         #region INonSharedRegionModule
-        
-        public Type ReplaceableInterface { get { return null; } }
+
         public void RegionLoaded(Scene scene) { }
         public void Close() { }
 

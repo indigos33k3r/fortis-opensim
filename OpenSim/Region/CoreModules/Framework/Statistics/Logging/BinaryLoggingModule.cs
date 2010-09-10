@@ -48,8 +48,7 @@ namespace OpenSim.Region.CoreModules.Avatar.Attachments
         protected bool m_collectStats;
         protected Scene m_scene = null;
         
-        public string Name { get { return "Binary Statistics Logging Module"; } }        
-        public Type ReplaceableInterface { get { return null; } }        
+        public string Name { get { return "Binary Statistics Logging Module"; } }    
 
         public void Initialise(IConfigSource source) 
         {

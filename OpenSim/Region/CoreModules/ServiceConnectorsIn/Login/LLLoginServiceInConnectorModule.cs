@@ -83,11 +83,6 @@ namespace OpenSim.Region.CoreModules.ServiceConnectorsIn.Login
         {
         }
 
-        public Type ReplaceableInterface 
-        {
-            get { return null; }
-        }
-
         public string Name
         {
             get { return "LLLoginServiceInConnectorModule"; }

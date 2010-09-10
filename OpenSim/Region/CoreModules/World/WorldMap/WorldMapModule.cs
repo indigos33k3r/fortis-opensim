@@ -129,11 +129,6 @@ namespace OpenSim.Region.CoreModules.World.WorldMap
         {
         }
 
-        public Type ReplaceableInterface 
-        {
-            get { return null; }
-        }
-
         public virtual string Name
         {
             get { return "WorldMapModule"; }

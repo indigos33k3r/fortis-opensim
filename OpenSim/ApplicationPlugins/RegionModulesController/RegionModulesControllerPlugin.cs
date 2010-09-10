@@ -164,52 +164,16 @@ namespace OpenSim.ApplicationPlugins.RegionModulesController
 
         // The root of all evil.
         // This is where we handle adding the modules to scenes when they
-        // load. This means that here we deal with replaceable interfaces,
-        // nonshared modules, etc.
-        //
+        // load
         public void AddRegionToModules (Scene scene)
         {
-            Dictionary<Type, ISharedRegionModule> deferredSharedModules =
-                    new Dictionary<Type, ISharedRegionModule>();
-            Dictionary<Type, INonSharedRegionModule> deferredNonSharedModules =
-                    new Dictionary<Type, INonSharedRegionModule>();
-
-            // We need this to see if a module has already been loaded and
-            // has defined a replaceable interface. It's a generic call,
-            // so this can't be used directly. It will be used later
-            Type s = scene.GetType();
-            MethodInfo mi = s.GetMethod("RequestModuleInterface");
-
             // This will hold the shared modules we actually load
-            List<ISharedRegionModule> sharedlist =
-                    new List<ISharedRegionModule>();
+            List<ISharedRegionModule> sharedlist = new List<ISharedRegionModule>();
 
             // Iterate over the shared modules that have been loaded
             // Add them to the new Scene
             foreach (ISharedRegionModule module in m_sharedModules)
             {
-                // Here is where we check if a replaceable interface
-                // is defined. If it is, the module is checked against
-                // the interfaces already defined. If the interface is
-                // defined, we simply skip the module. Else, if the module
-                // defines a replaceable interface, we add it to the deferred
-                // list.
-                Type replaceableInterface = module.ReplaceableInterface;
-                if (replaceableInterface != null)
-                {
-                    MethodInfo mii = mi.MakeGenericMethod(replaceableInterface);
-
-                    if (mii.Invoke(scene, new object[0]) != null)
-                    {
-                        m_log.DebugFormat("[REGIONMODULE]: Not loading {0} because another module has registered {1}", module.Name, replaceableInterface.ToString());
-                        continue;
-                    }
-
-                    deferredSharedModules[replaceableInterface] = module;
-                    m_log.DebugFormat("[REGIONMODULE]: Deferred load of {0}", module.Name);
-                    continue;
-                }
-
                 m_log.DebugFormat("[REGIONMODULE]: Adding scene {0} to shared module {1}",
                                   scene.RegionInfo.RegionName, module.Name);
 
@@ -226,23 +190,6 @@ namespace OpenSim.ApplicationPlugins.RegionModulesController
             List<INonSharedRegionModule> list = new List<INonSharedRegionModule>();
             foreach (INonSharedRegionModule module in m_nonSharedModules)
             {
-                // Check for replaceable interfaces
-                Type replaceableInterface = module.ReplaceableInterface;
-                if (replaceableInterface != null)
-                {
-                    MethodInfo mii = mi.MakeGenericMethod(replaceableInterface);
-
-                    if (mii.Invoke(scene, new object[0]) != null)
-                    {
-                        m_log.DebugFormat("[REGIONMODULE]: Not loading {0} because another module has registered {1}", module.Name, replaceableInterface.ToString());
-                        continue;
-                    }
-
-                    deferredNonSharedModules[replaceableInterface] = module;
-                    m_log.DebugFormat("[REGIONMODULE]: Deferred load of {0}", module.Name);
-                    continue;
-                }
-
                 m_log.DebugFormat("[REGIONMODULE]: Adding scene {0} to non-shared module {1}",
                                   scene.RegionInfo.RegionName, module.Name);
 
@@ -252,71 +199,8 @@ namespace OpenSim.ApplicationPlugins.RegionModulesController
                 list.Add(module);
             }
 
-            // Now add the modules that we found to the scene. If a module
-            // wishes to override a replaceable interface, it needs to
-            // register it in Initialise, so that the deferred module
-            // won't load.
+            // Now add the modules that we found to the scene
             foreach (INonSharedRegionModule module in list)
-            {
-                module.AddRegion(scene);
-                scene.AddRegionModule(module.Name, module);
-            }
-
-            // Now all modules without a replaceable base interface are loaded
-            // Replaceable modules have either been skipped, or omitted.
-            // Now scan the deferred modules here
-            foreach (ISharedRegionModule module in deferredSharedModules.Values)
-            {
-                // Determine if the interface has been replaced
-                Type replaceableInterface = module.ReplaceableInterface;
-                MethodInfo mii = mi.MakeGenericMethod(replaceableInterface);
-
-                if (mii.Invoke(scene, new object[0]) != null)
-                {
-                    m_log.DebugFormat("[REGIONMODULE]: Not loading {0} because another module has registered {1}", module.Name, replaceableInterface.ToString());
-                    continue;
-                }
-
-                m_log.DebugFormat("[REGIONMODULE]: Adding scene {0} to shared module {1} (deferred)",
-                                  scene.RegionInfo.RegionName, module.Name);
-
-                // Not replaced, load the module
-                module.AddRegion(scene);
-                scene.AddRegionModule(module.Name, module);
-
-                sharedlist.Add(module);
-            }
-
-            // Same thing for nonshared modules, load them unless overridden
-            List<INonSharedRegionModule> deferredlist =
-                    new List<INonSharedRegionModule>();
-
-            foreach (INonSharedRegionModule module in deferredNonSharedModules.Values)
-            {
-                // Check interface override
-                Type replaceableInterface = module.ReplaceableInterface;
-                if (replaceableInterface != null)
-                {
-                    MethodInfo mii = mi.MakeGenericMethod(replaceableInterface);
-
-                    if (mii.Invoke(scene, new object[0]) != null)
-                    {
-                        m_log.DebugFormat("[REGIONMODULE]: Not loading {0} because another module has registered {1}", module.Name, replaceableInterface.ToString());
-                        continue;
-                    }
-                }
-
-                m_log.DebugFormat("[REGIONMODULE]: Adding scene {0} to non-shared module {1} (deferred)",
-                                  scene.RegionInfo.RegionName, module.Name);
-
-                module.Initialise(m_openSim.ConfigSource.Source);
-
-                list.Add(module);
-                deferredlist.Add(module);
-            }
-
-            // Finally, load valid deferred modules
-            foreach (INonSharedRegionModule module in deferredlist)
             {
                 module.AddRegion(scene);
                 scene.AddRegionModule(module.Name, module);
@@ -331,16 +215,11 @@ namespace OpenSim.ApplicationPlugins.RegionModulesController
             // to ugly kludges to attempt to request interfaces when needed
             // and unneccessary caching logic repeated in all modules.
             // The extra function stub is just that much cleaner
-            //
             foreach (ISharedRegionModule module in sharedlist)
-            {
                 module.RegionLoaded(scene);
-            }
 
             foreach (INonSharedRegionModule module in list)
-            {
                 module.RegionLoaded(scene);
-            }
         }
 
         public void RemoveRegionFromModules (Scene scene)

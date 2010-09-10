@@ -55,11 +55,6 @@ namespace OpenSim.Region.OptionalModules.Scripting.RegionReady
         Scene m_scene = null;
         
         #region INonSharedRegionModule interface
-
-        public Type ReplaceableInterface 
-        { 
-            get { return null; }
-        }
             
         public void Initialise(IConfigSource config)
         {

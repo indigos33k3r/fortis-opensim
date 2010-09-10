@@ -104,11 +104,6 @@ namespace OpenSim.Region.CoreModules.Avatar.InstantMessage
             get { return "PresenceModule"; }
         }
 
-        public Type ReplaceableInterface
-        {
-            get { return null; }
-        }
-
         public void RequestBulkPresenceData(UUID[] users)
         {
         }

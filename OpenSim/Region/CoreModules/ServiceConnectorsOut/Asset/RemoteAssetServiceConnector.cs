@@ -46,13 +46,8 @@ namespace OpenSim.Region.CoreModules.ServiceConnectorsOut.Asset
                 LogManager.GetLogger(
                 MethodBase.GetCurrentMethod().DeclaringType);
 
-        private bool m_Enabled = false;
+        private bool m_Enabled;
         private IImprovedAssetCache m_Cache;
-
-        public Type ReplaceableInterface 
-        {
-            get { return null; }
-        }
 
         public string Name
         {

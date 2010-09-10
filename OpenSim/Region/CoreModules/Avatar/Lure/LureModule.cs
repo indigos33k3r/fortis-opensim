@@ -126,11 +126,6 @@ namespace OpenSim.Region.CoreModules.Avatar.Lure
             get { return "LureModule"; }
         }
 
-        public Type ReplaceableInterface
-        {
-            get { return null; }
-        }
-
         public void OnInstantMessage(IClientAPI client, GridInstantMessage im)
         {
         }

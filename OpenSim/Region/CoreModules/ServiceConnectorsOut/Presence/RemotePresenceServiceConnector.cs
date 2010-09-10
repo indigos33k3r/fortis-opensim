@@ -53,11 +53,6 @@ namespace OpenSim.Region.CoreModules.ServiceConnectorsOut.Presence
         private PresenceDetector m_PresenceDetector;
         private IPresenceService m_RemoteConnector;
 
-        public Type ReplaceableInterface
-        {
-            get { return null; }
-        }
-
         public string Name
         {
             get { return "RemotePresenceServicesConnector"; }

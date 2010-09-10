@@ -76,11 +76,6 @@ namespace OpenSim.Region.CoreModules.ServiceConnectorsIn.Authentication
         {
         }
 
-        public Type ReplaceableInterface 
-        {
-            get { return null; }
-        }
-
         public string Name
         {
             get { return "AuthenticationServiceInConnectorModule"; }

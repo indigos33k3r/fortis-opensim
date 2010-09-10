@@ -57,11 +57,6 @@ namespace OpenSim.Region.CoreModules.Framework.InventoryAccess
 
         #region INonSharedRegionModule
 
-        public Type ReplaceableInterface
-        {
-            get { return null; }
-        }
-
         public virtual string Name
         {
             get { return "BasicInventoryAccessModule"; }

@@ -50,11 +50,6 @@ namespace OpenSim.Region.RegionCombinerModule
             get { return "RegionCombinerModule"; }
         }
 
-        public Type ReplaceableInterface
-        {
-            get { return null; }
-        }
-
         private Dictionary<UUID, RegionConnections> m_regions = new Dictionary<UUID, RegionConnections>();
         private bool enabledYN = false;
         private Dictionary<UUID, Scene> m_startingScenes = new Dictionary<UUID, Scene>();

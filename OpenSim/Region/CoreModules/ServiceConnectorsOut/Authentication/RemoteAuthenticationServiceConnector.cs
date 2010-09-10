@@ -44,12 +44,7 @@ namespace OpenSim.Region.CoreModules.ServiceConnectorsOut.Authentication
                 LogManager.GetLogger(
                 MethodBase.GetCurrentMethod().DeclaringType);
 
-        private bool m_Enabled = false;
-
-        public Type ReplaceableInterface 
-        {
-            get { return null; }
-        }
+        private bool m_Enabled;
 
         public string Name
         {

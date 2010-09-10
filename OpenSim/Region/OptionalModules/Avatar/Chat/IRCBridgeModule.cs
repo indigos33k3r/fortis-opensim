@@ -55,11 +55,6 @@ namespace OpenSim.Region.OptionalModules.Avatar.Chat
 
         #region INonSharedRegionModule Members
 
-        public Type ReplaceableInterface 
-        {
-            get { return null; }
-        }
-
         public string Name
         {
             get { return "IRCBridgeModule"; }

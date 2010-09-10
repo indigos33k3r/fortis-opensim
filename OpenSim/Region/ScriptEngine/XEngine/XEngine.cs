@@ -411,11 +411,6 @@ namespace OpenSim.Region.ScriptEngine.XEngine
             return 0;
         }
 
-        public Type ReplaceableInterface 
-        {
-            get { return null; }
-        }
-
         public string Name
         {
             get { return "XEngine"; }

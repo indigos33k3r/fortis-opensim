@@ -49,14 +49,9 @@ namespace OpenSim.Region.CoreModules.ServiceConnectorsOut.UserAccounts
         private IUserAccountService m_UserService;
         private UserAccountCache m_Cache;
 
-        private bool m_Enabled = false;
+        private bool m_Enabled;
 
         #region ISharedRegionModule
-
-        public Type ReplaceableInterface 
-        {
-            get { return null; }
-        }
 
         public string Name
         {

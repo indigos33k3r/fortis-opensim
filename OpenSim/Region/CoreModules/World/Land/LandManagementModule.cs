@@ -93,11 +93,6 @@ namespace OpenSim.Region.CoreModules.World.Land
 
         #region INonSharedRegionModule Members
 
-        public Type ReplaceableInterface 
-        { 
-            get { return null; }
-        }
-
         public void Initialise(IConfigSource source)
         {
         }

@@ -54,11 +54,6 @@ namespace OpenSim.Region.CoreModules.World.Serialiser
 
         #region ISharedRegionModule Members
 
-        public Type ReplaceableInterface 
-        { 
-            get { return null; }
-        }
-
         public void Initialise(IConfigSource source)
         {
             IConfig config = source.Configs["Serialiser"];

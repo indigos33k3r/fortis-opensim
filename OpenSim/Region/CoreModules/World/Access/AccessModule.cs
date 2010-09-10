@@ -83,11 +83,6 @@ namespace OpenSim.Region.CoreModules.World
             get { return "AccessModule"; }
         }
 
-        public Type ReplaceableInterface
-        {
-            get { return null; }
-        }
-
         public void AddRegion(Scene scene)
         {
             if (!m_SceneList.Contains(scene))

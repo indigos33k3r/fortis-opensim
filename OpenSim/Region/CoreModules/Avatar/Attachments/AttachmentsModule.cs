@@ -47,8 +47,7 @@ namespace OpenSim.Region.CoreModules.Avatar.Attachments
         
         protected Scene m_scene = null;
         
-        public string Name { get { return "Attachments Module"; } }        
-        public Type ReplaceableInterface { get { return null; } }        
+        public string Name { get { return "Attachments Module"; } }
 
         public void Initialise(IConfigSource source) {}
         

@@ -47,13 +47,8 @@ namespace OpenSim.Region.CoreModules.ServiceConnectorsOut.Authorization
                 LogManager.GetLogger(
                 MethodBase.GetCurrentMethod().DeclaringType);
 
-        private bool m_Enabled = false;
+        private bool m_Enabled;
         private List<Scene> m_scenes = new List<Scene>();
-
-        public Type ReplaceableInterface 
-        {
-            get { return null; }
-        }
 
         public string Name
         {

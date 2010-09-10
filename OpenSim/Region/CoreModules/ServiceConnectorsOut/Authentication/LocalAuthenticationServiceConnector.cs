@@ -48,14 +48,9 @@ namespace OpenSim.Region.CoreModules.ServiceConnectorsOut.Authentication
 
         private IAuthenticationService m_AuthenticationService;
 
-        private bool m_Enabled = false;
+        private bool m_Enabled;
 
         #region ISharedRegionModule
-
-        public Type ReplaceableInterface 
-        {
-            get { return null; }
-        }
 
         public string Name
         {

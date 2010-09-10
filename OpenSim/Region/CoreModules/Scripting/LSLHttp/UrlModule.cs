@@ -83,11 +83,6 @@ namespace OpenSim.Region.CoreModules.Scripting.LSLHttp
 
         private string m_ExternalHostNameForLSL = "";
 
-        public Type ReplaceableInterface 
-        {
-            get { return null; }
-        }
-
         private Hashtable HandleHttpPoll(Hashtable request)
         {
             return new Hashtable();

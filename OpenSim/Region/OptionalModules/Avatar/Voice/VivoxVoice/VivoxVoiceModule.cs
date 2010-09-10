@@ -389,11 +389,6 @@ namespace OpenSim.Region.OptionalModules.Avatar.Voice.VivoxVoice
                 VivoxLogout();
         }
 
-        public Type ReplaceableInterface 
-        {
-            get { return null; }
-        }
-
         public string Name
         {
             get { return "VivoxVoiceModule"; }

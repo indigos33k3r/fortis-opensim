@@ -53,11 +53,6 @@ namespace OpenSim.Region.CoreModules.Asset
             get { return "CoreAssetCache"; }
         }
 
-        public Type ReplaceableInterface 
-        {
-            get { return null; }
-        }
-
         public void Initialise(IConfigSource source)
         {
             IConfig moduleConfig = source.Configs["Modules"];

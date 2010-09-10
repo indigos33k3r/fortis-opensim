@@ -285,11 +285,6 @@ namespace OpenSim.Region.CoreModules.Asset
             get { return "CenomeMemoryAssetCache"; }
         }
 
-        public Type ReplaceableInterface 
-        {
-            get { return null; }
-        }
-
         /// <summary>
         /// New region is being added to server.
         /// </summary>

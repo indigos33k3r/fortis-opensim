@@ -51,11 +51,6 @@ namespace OpenSim.Region.CoreModules.ServiceConnectorsOut.Inventory
 //        private Scene m_Scene;
         private InventoryServicesConnector m_RemoteConnector;
 
-        public Type ReplaceableInterface 
-        {
-            get { return null; }
-        }
-
         public string Name
         {
             get { return "RemoteInventoryServicesConnector"; }

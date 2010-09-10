@@ -43,16 +43,11 @@ namespace OpenSim.Region.CoreModules.ServiceConnectorsOut.Asset
     {
         private static readonly ILog m_log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 
-        private IImprovedAssetCache m_Cache = null;
+        private IImprovedAssetCache m_Cache;
 
         private IAssetService m_AssetService;
 
-        private bool m_Enabled = false;
-
-        public Type ReplaceableInterface 
-        {
-            get { return null; }
-        }
+        private bool m_Enabled;
 
         public string Name
         {
