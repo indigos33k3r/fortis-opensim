@@ -72,7 +72,8 @@ namespace OpenSim.Services.AssetService
                     m_AssetLoader.ForEachDefaultXmlAsset(loaderArgs,
                             delegate(AssetBase a)
                             {
-                                Store(a);
+                                if (GetMetadata(a.ID) == null)
+                                    Store(a);
                             });
                 }
                 
