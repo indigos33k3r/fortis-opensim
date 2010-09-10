@@ -26,18 +26,16 @@
  */
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Net;
 using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Timers;
-using System.Xml;
 using log4net;
 using OpenMetaverse;
-using OpenMetaverse.Packets;
 using OpenMetaverse.Messages.Linden;
+using OpenMetaverse.Packets;
 using OpenMetaverse.StructuredData;
 using OpenSim.Framework;
 using OpenSim.Framework.Client;
@@ -45,9 +43,9 @@ using OpenSim.Framework.Statistics;
 using OpenSim.Region.Framework.Interfaces;
 using OpenSim.Region.Framework.Scenes;
 using OpenSim.Services.Interfaces;
-using Timer = System.Timers.Timer;
+
 using AssetLandmark = OpenSim.Framework.AssetLandmark;
-using Nini.Config;
+using Timer = System.Timers.Timer;
 
 namespace OpenSim.Region.ClientStack.LindenUDP
 {
@@ -10783,21 +10781,9 @@ namespace OpenSim.Region.ClientStack.LindenUDP
 
         private void InitDefaultAnimations()
         {
-            using (XmlTextReader reader = new XmlTextReader("data/avataranimations.xml"))
-            {
-                XmlDocument doc = new XmlDocument();
-                doc.Load(reader);
-                if (doc.DocumentElement != null)
-                    foreach (XmlNode nod in doc.DocumentElement.ChildNodes)
-                    {
-                        if (nod.Attributes["name"] != null)
-                        {
-                            string name = nod.Attributes["name"].Value.ToLower();
-                            string id = nod.InnerText;
-                            m_defaultAnimations.Add(name, (UUID)id);
-                        }
-                    }
-            }
+            Dictionary<UUID, string> animations = Animations.ToDictionary();
+            foreach (KeyValuePair<UUID, string> anim in animations)
+                m_defaultAnimations[anim.Value] = anim.Key;
         }
 
         public UUID GetDefaultAnimation(string name)
