@@ -754,6 +754,7 @@
 
       <ReferencePath>../../../lib/</ReferencePath>
       <Reference name="System"/>
+      <Reference name="System.Core"/>
       <Reference name="System.Xml"/>
       <Reference name="System.Drawing"/>
       <Reference name="OpenMetaverseTypes" path="../../../lib/" localCopy="true"/>
@@ -1217,7 +1218,7 @@
       <Reference name="System.Xml"/>
       <Reference name="System.Drawing"/>
       <Reference name="System.Web"/>
-      <Reference name="NDesk.Options"/>
+      <Reference name="NDesk.Options" path="../../../lib"/>
       <Reference name="OpenMetaverseTypes" path="../../../lib/" localCopy="true"/>
       <Reference name="OpenMetaverse.StructuredData" path="../../../lib/" localCopy="true"/>
       <Reference name="OpenMetaverse" path="../../../lib/" localCopy="true"/>
@@ -1459,6 +1460,7 @@
 
       <ReferencePath>../../../lib/</ReferencePath>
       <Reference name="System"/>
+      <Reference name="System.Core"/>
       <Reference name="System.Xml"/>
       <Reference name="OpenMetaverseTypes" path="../../../lib/" localCopy="true"/>
       <Reference name="OpenMetaverse.StructuredData" path="../../../lib/" localCopy="true"/>
