@@ -48,6 +48,8 @@ namespace OpenSim.Region.CoreModules.Framework.Library
     [RegionModule("LibraryModule")]
     public class LibraryModule : ISharedRegionModule
     {
+        private const string LIBRARY_PATH = "Library";
+
         private static readonly ILog m_log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
         private static bool m_HasRunOnce = false;
 
@@ -140,7 +142,6 @@ namespace OpenSim.Region.CoreModules.Framework.Library
         #endregion ISharedRegionModule
 
         #region LoadLibraries
-        private string pathToLibraries = "Library";
 
         protected void LoadLibrariesFromArchives()
         {
@@ -162,38 +163,40 @@ namespace OpenSim.Region.CoreModules.Framework.Library
             uinfo.LastName = "Library";
             uinfo.ServiceURLs = new Dictionary<string, object>();
 
-            foreach (string iarFileName in Directory.GetFiles(pathToLibraries, "*.iar"))
+            if (Directory.Exists(LIBRARY_PATH))
             {
-                string simpleName = Path.GetFileNameWithoutExtension(iarFileName);
-
-                m_log.InfoFormat("[LIBRARY MODULE]: Loading library archive {0} ({1})...", iarFileName, simpleName);
-                simpleName = GetInventoryPathFromName(simpleName);
-
-                InventoryArchiveReadRequest archread = new InventoryArchiveReadRequest(m_MockScene, uinfo, simpleName, iarFileName, false);
-                try
+                foreach (string iarFileName in Directory.GetFiles(LIBRARY_PATH, "*.iar"))
                 {
-                    HashSet<InventoryNodeBase> nodes = archread.Execute();
-                    if (nodes != null && nodes.Count == 0)
+                    string simpleName = Path.GetFileNameWithoutExtension(iarFileName);
+
+                    m_log.InfoFormat("[LIBRARY MODULE]: Loading library archive {0} ({1})...", iarFileName, simpleName);
+                    simpleName = GetInventoryPathFromName(simpleName);
+
+                    InventoryArchiveReadRequest archread = new InventoryArchiveReadRequest(m_MockScene, uinfo, simpleName, iarFileName, false);
+                    try
                     {
-                        // didn't find the subfolder with the given name; place it on the top
-                        m_log.InfoFormat("[LIBRARY MODULE]: Didn't find {0} in library. Placing archive on the top level", simpleName);
-                        archread.Close();
-                        archread = new InventoryArchiveReadRequest(m_MockScene, uinfo, "/", iarFileName, false);
-                        archread.Execute();
+                        HashSet<InventoryNodeBase> nodes = archread.Execute();
+                        if (nodes != null && nodes.Count == 0)
+                        {
+                            // didn't find the subfolder with the given name; place it on the top
+                            m_log.InfoFormat("[LIBRARY MODULE]: Didn't find {0} in library. Placing archive on the top level", simpleName);
+                            archread.Close();
+                            archread = new InventoryArchiveReadRequest(m_MockScene, uinfo, "/", iarFileName, false);
+                            archread.Execute();
+                        }
+                        foreach (InventoryNodeBase node in nodes)
+                            FixPerms(node);
                     }
-                    foreach (InventoryNodeBase node in nodes)
-                        FixPerms(node);
-                }
-                catch (Exception e)
-                {
-                    m_log.DebugFormat("[LIBRARY MODULE]: Exception when processing archive {0}: {1}", iarFileName, e.StackTrace);
-                }
-                finally
-                {
-                    archread.Close();
+                    catch (Exception e)
+                    {
+                        m_log.DebugFormat("[LIBRARY MODULE]: Exception when processing archive {0}: {1}", iarFileName, e.StackTrace);
+                    }
+                    finally
+                    {
+                        archread.Close();
+                    }
                 }
             }
-
         }
 
         private void FixPerms(InventoryNodeBase node)

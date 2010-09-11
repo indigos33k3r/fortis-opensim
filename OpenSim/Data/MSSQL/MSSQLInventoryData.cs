@@ -64,7 +64,6 @@ namespace OpenSim.Data.MSSQL
         /// Loads and initialises the MSSQL inventory storage interface
         /// </summary>
         /// <param name="connectionString">connect string</param>
-        /// <remarks>use mssql_connection.ini</remarks>
         public void Initialise(string connectionString)
         {
             m_connectionString = connectionString;

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-mono bin/Prebuild.exe /target vs2010
+mono Prebuild.exe /target vs2010
 
 if [[ $1 == build ]] ; then
     xbuild OpenSim.sln

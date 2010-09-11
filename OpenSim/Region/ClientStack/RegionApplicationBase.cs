@@ -317,7 +317,7 @@ namespace OpenSim.Region.ClientStack
         {
             PhysicsPluginManager physicsPluginManager;
             physicsPluginManager = new PhysicsPluginManager();
-            physicsPluginManager.LoadPluginsFromAssemblies("Physics");
+            physicsPluginManager.LoadPluginsFromAssemblies(Util.dataDir());
             
             return physicsPluginManager.GetPhysicsScene(engine, meshEngine, config, osSceneIdentifier);
         }

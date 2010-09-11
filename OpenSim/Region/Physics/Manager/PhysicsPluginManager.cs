@@ -111,7 +111,7 @@ namespace OpenSim.Region.Physics.Manager
         {
             // Walk all assemblies (DLLs effectively) and see if they are home
             // of a plugin that is of interest for us
-            string[] pluginFiles = Directory.GetFiles(assembliesPath, "*.dll");
+            string[] pluginFiles = Directory.GetFiles(assembliesPath, "OpenSim.Region.Physics.*.dll");
 
             for (int i = 0; i < pluginFiles.Length; i++)
             {
