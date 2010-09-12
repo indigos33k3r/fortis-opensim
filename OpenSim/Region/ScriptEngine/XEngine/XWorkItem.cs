@@ -54,7 +54,7 @@ namespace OpenSim.Region.ScriptEngine.XEngine
 
         public void Abort()
         {
-            wr.Abort();
+            wr.Cancel(true);
         }
 
         public bool Wait(TimeSpan t)

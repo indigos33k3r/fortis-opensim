@@ -1443,14 +1443,13 @@ namespace OpenSim.Framework
             }
         }
 
-        private static object SmartThreadPoolCallback(object o)
+        private static void SmartThreadPoolCallback(object o)
         {
             object[] array = (object[])o;
             WaitCallback callback = (WaitCallback)array[0];
             object obj = array[1];
 
             callback(obj);
-            return null;
         }
 
         #endregion FireAndForget Threading Pattern

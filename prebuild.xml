@@ -95,28 +95,6 @@
       </Files>
     </Project>
 
-    <Project frameworkVersion="v3_5" name="SmartThreadPool" path="ThirdParty/SmartThreadPool" type="Library">
-      <Configuration name="Debug">
-        <Options>
-          <OutputPath>../../bin/Debug/</OutputPath>
-        </Options>
-      </Configuration>
-      <Configuration name="Release">
-        <Options>
-          <OutputPath>../../bin/Release/</OutputPath>
-        </Options>
-      </Configuration>
-
-      <ReferencePath>../../lib/</ReferencePath>
-      <Reference name="System"/>
-      <Reference name="System.Xml"/>
-      <Reference name="System.Data"/>
-      <Reference name="System.Web"/>
-      <Files>
-        <Match pattern="*.cs" recurse="false"/>
-      </Files>
-    </Project>
-
     <Project frameworkVersion="v3_5" name="OpenSim.Framework" path="OpenSim/Framework" type="Library">
       <Configuration name="Debug">
         <Options>
@@ -145,7 +123,7 @@
       <Reference name="OpenSim.Framework.Servers.HttpServer"/>
       <Reference name="Nini" path="../../lib/" localCopy="true"/>
       <Reference name="log4net" path="../../lib/" localCopy="true"/>
-      <Reference name="SmartThreadPool" path="../../lib/" localCopy="true"/>
+      <Reference name="SmartThreadPoolMono" path="../../lib/" localCopy="true"/>
       <Reference name="System.ComponentModel.Composition" path="../../lib/" localCopy="true"/>
       
       <Files>
@@ -1974,7 +1952,7 @@
       <Reference name="RAIL" path="../../../../lib/" localCopy="true"/>
       <Reference name="Nini" path="../../../../lib/" localCopy="true"/>
       <Reference name="log4net" path="../../../../lib/" localCopy="true"/>
-      <Reference name="SmartThreadPool"/>
+      <Reference name="SmartThreadPoolMono" path="../../../../lib/" localCopy="true"/>
 
       <Files>
         <Match pattern="*.cs" recurse="false"/>
@@ -2151,7 +2129,7 @@
       <Reference name="OpenSim.Region.ScriptEngine.Shared.CodeTools"/>
       <Reference name="OpenSim.Region.ScriptEngine.Shared.Api"/>
       <Reference name="OpenSim.Region.ScriptEngine.Shared.Api.Runtime"/>
-      <Reference name="SmartThreadPool"/>
+      <Reference name="SmartThreadPoolMono" path="../../../../../lib/" localCopy="true"/>
       <Reference name="Axiom.MathLib" path="../../../../../lib/" localCopy="true"/>
       <Reference name="Nini" path="../../../../../lib/" localCopy="true"/>
       <Reference name="RAIL" path="../../../../../lib/" localCopy="true"/>
@@ -2191,7 +2169,7 @@
       <Reference name="OpenSim.Region.ScriptEngine.Shared.CodeTools"/>
       <Reference name="OpenSim.Region.ScriptEngine.Shared.Instance"/>
       <Reference name="OpenSim.Region.ScriptEngine.Shared.Api"/>
-      <Reference name="SmartThreadPool"/>
+      <Reference name="SmartThreadPoolMono" path="../../../../lib/" localCopy="true"/>
       <Reference name="Nini" path="../../../../lib/" localCopy="true"/>
       <Reference name="RAIL" path="../../../../lib/" localCopy="true"/>
       <Reference name="log4net" path="../../../../lib/" localCopy="true"/>
