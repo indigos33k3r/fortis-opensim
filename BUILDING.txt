@@ -1,30 +1,25 @@
-=== Building OpenSim ===
+==Building OpenSim==
 
-=== Building on Windows ===
+===Building on Windows===
 
 Steps:
- * runprebuild.bat
+ * runprebuild2008.bat or runprebuild2010.bat depending on your version of Visual Studio
  * Load OpenSim.sln into Visual Studio .NET and build the solution.
- * chdir bin 
- * copy OpenSim.ini.example to OpenSim.ini and other appropriate files in bin/config-include
- * run OpenSim.exe
+ * Open the bin/Debug/ folder
+ * Copy OpenSim.ini.example to OpenSim.ini and other appropriate files in bin/config-include
+ * Run OpenSim.exe
 
-=== Building on Linux ===
+===Building on Linux===
 
 Prereqs:
- * Mono >= 2.4.2
- * Nant >= 0.85
- * On some Linux distributions you may need to install additional packages.  
-    See http://opensimulator.org/wiki/Dependencies for more information.
+ * Mono >= 2.6.x
+ * On some Linux distributions you may need to install additional packages or compile Mono
+   from source code.
+   - See http://opensimulator.org/wiki/Dependencies for more information.
 
 From the distribution type:
  * ./runprebuild.sh
- * nant
- * cd bin 
- * copy OpenSim.ini.example to OpenSim.ini and other appropriate files in bin/config-include
- * run mono OpenSim.exe
-
-=== References ===
- 
-Helpful resources:
-* http://opensimulator.org/wiki/Build_Instructions
+ * xbuild
+ * cd bin/Debug/ 
+ * Copy OpenSim.ini.example to OpenSim.ini and other appropriate files in bin/config-include
+ * Run mono OpenSim.exe

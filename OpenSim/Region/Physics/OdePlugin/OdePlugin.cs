@@ -179,8 +179,8 @@ namespace OpenSim.Region.Physics.OdePlugin
 
         private readonly IntPtr contactgroup;
 
-        internal IntPtr LandGeom;
-        internal IntPtr WaterGeom;
+        internal IntPtr LandGeom = IntPtr.Zero;
+        internal IntPtr WaterGeom = IntPtr.Zero;
 
         private float nmTerrainContactFriction = 255.0f;
         private float nmTerrainContactBounce = 0.1f;

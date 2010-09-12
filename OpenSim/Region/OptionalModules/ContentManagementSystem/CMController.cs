@@ -728,7 +728,7 @@ namespace OpenSim.Region.OptionalModules.ContentManagement
             #region Fields
 
             public Object Data1; //Just space for holding data.
-            public Object Data2; //Just more space for holding data.
+            //public Object Data2; //Just more space for holding data.
             public uint LocalId; //Convenient
             public WorkType Type;
             public UUID UUID; //Convenient

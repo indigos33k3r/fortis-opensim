@@ -48,7 +48,7 @@ namespace OpenSim
         /// <summary>
         /// Performs initialisation of the scene, such as loading configuration from disk.
         /// </summary>
-        public void Startup()
+        public override void Startup()
         {
             m_gui = false;
 

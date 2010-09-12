@@ -208,7 +208,7 @@ namespace Amib.Threading
         /// <summary>
         /// Event to send that the thread pool is idle
         /// </summary>
-        private event EventHandler _stpIdle;
+        //private event EventHandler _stpIdle;
 
         /// <summary>
         /// On idle event
@@ -1387,18 +1387,18 @@ namespace Amib.Threading
         }
 
 
-        public event EventHandler Idle
-        {
-            add
-            {
-                _stpIdle += value;
-            }
+        //public event EventHandler Idle
+        //{
+        //    add
+        //    {
+        //        _stpIdle += value;
+        //    }
 
-            remove
-            {
-                _stpIdle -= value;
-            }
-        }
+        //    remove
+        //    {
+        //        _stpIdle -= value;
+        //    }
+        //}
 
         #endregion
 
