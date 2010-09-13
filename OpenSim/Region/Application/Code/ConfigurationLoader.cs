@@ -58,23 +58,15 @@ namespace OpenSim
         protected OpenSimConfigSource m_config;
 
         /// <summary>
-        /// Grid Service Information.  This refers to classes and addresses of the grid service
-        /// </summary>
-        protected NetworkServersInfo m_networkServersInfo;
-
-        /// <summary>
         /// Loads the region configuration
         /// </summary>
         /// <param name="argvSource">Parameters passed into the process when started</param>
         /// <param name="configSettings"></param>
-        /// <param name="networkInfo"></param>
         /// <returns>A configuration that gets passed to modules</returns>
         public OpenSimConfigSource LoadConfigSettings(
-                IConfigSource argvSource, out ConfigSettings configSettings,
-                out NetworkServersInfo networkInfo)
+                IConfigSource argvSource, out ConfigSettings configSettings)
         {
             m_configSettings = configSettings = new ConfigSettings();
-            m_networkServersInfo = networkInfo = new NetworkServersInfo();
 
             bool iniFileExists = false;
 
@@ -363,7 +355,15 @@ namespace OpenSim
                 m_configSettings.LibrariesXMLFile = standaloneConfig.GetString("LibrariesXMLFile");
             }
 
-            m_networkServersInfo.loadFromConfiguration(m_config.Source);
+            IConfigSource config = m_config.Source;
+            IConfig networkConfig = config.Configs["Network"];
+            if (networkConfig != null)
+            {
+                m_configSettings.HttpListenerPort = (uint)networkConfig.GetInt("http_listener_port", (int)ConfigSettings.DefaultRegionHttpPort);
+                m_configSettings.httpSSLPort = (uint)networkConfig.GetInt("http_listener_sslport", ((int)ConfigSettings.DefaultRegionHttpPort + 1));
+                m_configSettings.HttpUsesSSL = networkConfig.GetBoolean("http_listener_ssl", false);
+                m_configSettings.HttpSSLCN = networkConfig.GetString("http_listener_cn", "localhost");
+            }
         }
     }
 }

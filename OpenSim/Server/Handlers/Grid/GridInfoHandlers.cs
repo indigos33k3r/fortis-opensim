@@ -79,21 +79,6 @@ namespace OpenSim.Server.Handlers.Grid
                         _info[k] = gridCfg.GetString(k);
                     }
                 }
-                else if (null != netCfg)
-                {
-                    if (grid)
-                        _info["login"] 
-                            = netCfg.GetString(
-                                "user_server_url", "http://127.0.0.1:" + ConfigSettings.DefaultUserServerHttpPort.ToString());
-                    else
-                        _info["login"] 
-                            = String.Format(
-                                "http://127.0.0.1:{0}/", 
-                                netCfg.GetString(
-                                    "http_listener_port", ConfigSettings.DefaultRegionHttpPort.ToString()));
-                    
-                    IssueWarning();
-                }
                 else
                 {
                     _info["login"] = "http://127.0.0.1:9000/";

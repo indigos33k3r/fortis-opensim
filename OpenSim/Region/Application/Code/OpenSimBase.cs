@@ -110,7 +110,6 @@ namespace OpenSim
         protected IStatsCollector m_stats;
 
         protected Dictionary<EndPoint, uint> m_clientCircuits = new Dictionary<EndPoint, uint>();
-        protected NetworkServersInfo m_networkServersInfo;
         protected uint m_httpServerPort;
         protected ISimulationDataService m_simulationDataService;
         protected IEstateDataService m_estateDataService;
@@ -131,7 +130,6 @@ namespace OpenSim
         protected CompositionContainer m_moduleContainer;
 
         public SceneManager SceneManager { get { return m_sceneManager; } }
-        public NetworkServersInfo NetServersInfo { get { return m_networkServersInfo; } }
         public ISimulationDataService SimulationDataService { get { return m_simulationDataService; } }
         public IEstateDataService EstateDataService { get { return m_estateDataService; } }
 
@@ -190,6 +188,29 @@ namespace OpenSim
         /// </summary>
         public OpenSimBase(IConfigSource configSource)
         {
+            m_startuptime = DateTime.Now;
+            m_version = VersionInfo.Version;
+
+            // Random uuid for private data
+            m_osSecret = UUID.Random().ToString();
+
+            m_periodicDiagnosticsTimer.Elapsed += new ElapsedEventHandler(LogDiagnostics);
+            m_periodicDiagnosticsTimer.Enabled = true;
+
+            // This thread will go on to become the console listening thread
+            Thread.CurrentThread.Name = "ConsoleThread";
+
+            ILoggerRepository repository = LogManager.GetRepository();
+            IAppender[] appenders = repository.GetAppenders();
+
+            foreach (IAppender appender in appenders)
+            {
+                if (appender.Name == "LogFileAppender")
+                {
+                    m_logFileAppender = appender;
+                }
+            }
+
             LoadConfigSettings(configSource);
 
             m_clientStackManager = CreateClientStackManager();
@@ -197,10 +218,10 @@ namespace OpenSim
             Initialize();
 
             m_httpServer = new BaseHttpServer(
-                m_httpServerPort, m_networkServersInfo.HttpUsesSSL, m_networkServersInfo.httpSSLPort,
-                m_networkServersInfo.HttpSSLCN);
+                m_httpServerPort, m_configSettings.HttpUsesSSL, m_configSettings.httpSSLPort,
+                m_configSettings.HttpSSLCN);
 
-            if (m_networkServersInfo.HttpUsesSSL && (m_networkServersInfo.HttpListenerPort == m_networkServersInfo.httpSSLPort))
+            if (m_configSettings.HttpUsesSSL && (m_configSettings.HttpListenerPort == m_configSettings.httpSSLPort))
             {
                 m_log.Error("[REGION SERVER]: HTTP Server config failed.   HTTP Server and HTTPS server must be on different ports");
             }
@@ -209,72 +230,6 @@ namespace OpenSim
             m_httpServer.Start();
 
             MainServer.Instance = m_httpServer;
-
-            #region Console Setup
-
-            if (m_console != null)
-            {
-                ILoggerRepository repository = LogManager.GetRepository();
-                IAppender[] appenders = repository.GetAppenders();
-
-                foreach (IAppender appender in appenders)
-                {
-                    if (appender.Name == "Console")
-                    {
-                        m_consoleAppender = (OpenSimAppender)appender;
-                        break;
-                    }
-                }
-
-                if (null == m_consoleAppender)
-                {
-                    Notice("No appender named Console found (see the log4net config file for this executable)!");
-                }
-                else
-                {
-                    m_consoleAppender.Console = m_console;
-
-                    // If there is no threshold set then the threshold is effectively everything.
-                    if (null == m_consoleAppender.Threshold)
-                        m_consoleAppender.Threshold = Level.All;
-
-                    Notice(String.Format("Console log level is {0}", m_consoleAppender.Threshold));
-                }
-
-                m_console.Commands.AddCommand("base", false, "quit",
-                        "quit",
-                        "Quit the application", HandleQuit);
-
-                m_console.Commands.AddCommand("base", false, "shutdown",
-                        "shutdown",
-                        "Quit the application", HandleQuit);
-
-                m_console.Commands.AddCommand("base", false, "set log level",
-                        "set log level <level>",
-                        "Set the console logging level", HandleLogLevel);
-
-                m_console.Commands.AddCommand("base", false, "show info",
-                        "show info",
-                        "Show general information", HandleShow);
-
-                m_console.Commands.AddCommand("base", false, "show stats",
-                        "show stats",
-                        "Show statistics", HandleShow);
-
-                m_console.Commands.AddCommand("base", false, "show threads",
-                        "show threads",
-                        "Show thread status", HandleShow);
-
-                m_console.Commands.AddCommand("base", false, "show uptime",
-                        "show uptime",
-                        "Show server uptime", HandleShow);
-
-                m_console.Commands.AddCommand("base", false, "show version",
-                        "show version",
-                        "Show server version", HandleShow);
-            }
-
-            #endregion Console Setup
         }
 
         /// <summary>
@@ -325,7 +280,7 @@ namespace OpenSim
         protected virtual void LoadConfigSettings(IConfigSource configSource)
         {
             m_configLoader = new ConfigurationLoader();
-            m_config = m_configLoader.LoadConfigSettings(configSource, out m_configSettings, out m_networkServersInfo);
+            m_config = m_configLoader.LoadConfigSettings(configSource, out m_configSettings);
             ReadExtraConfigSettings();
         }
 
@@ -703,6 +658,72 @@ namespace OpenSim
         /// </summary>
         protected virtual void StartupSpecific()
         {
+            #region Console Setup
+
+            if (m_console != null)
+            {
+                ILoggerRepository repository = LogManager.GetRepository();
+                IAppender[] appenders = repository.GetAppenders();
+
+                foreach (IAppender appender in appenders)
+                {
+                    if (appender.Name == "Console")
+                    {
+                        m_consoleAppender = (OpenSimAppender)appender;
+                        break;
+                    }
+                }
+
+                if (null == m_consoleAppender)
+                {
+                    Notice("No appender named Console found (see the log4net config file for this executable)!");
+                }
+                else
+                {
+                    m_consoleAppender.Console = m_console;
+
+                    // If there is no threshold set then the threshold is effectively everything.
+                    if (null == m_consoleAppender.Threshold)
+                        m_consoleAppender.Threshold = Level.All;
+
+                    Notice(String.Format("Console log level is {0}", m_consoleAppender.Threshold));
+                }
+
+                m_console.Commands.AddCommand("base", false, "quit",
+                        "quit",
+                        "Quit the application", HandleQuit);
+
+                m_console.Commands.AddCommand("base", false, "shutdown",
+                        "shutdown",
+                        "Quit the application", HandleQuit);
+
+                m_console.Commands.AddCommand("base", false, "set log level",
+                        "set log level <level>",
+                        "Set the console logging level", HandleLogLevel);
+
+                m_console.Commands.AddCommand("base", false, "show info",
+                        "show info",
+                        "Show general information", HandleShow);
+
+                m_console.Commands.AddCommand("base", false, "show stats",
+                        "show stats",
+                        "Show statistics", HandleShow);
+
+                m_console.Commands.AddCommand("base", false, "show threads",
+                        "show threads",
+                        "Show thread status", HandleShow);
+
+                m_console.Commands.AddCommand("base", false, "show uptime",
+                        "show uptime",
+                        "Show server uptime", HandleShow);
+
+                m_console.Commands.AddCommand("base", false, "show version",
+                        "show version",
+                        "Show server version", HandleShow);
+            }
+
+            #endregion Console Setup
+
             IConfig startupConfig = m_config.Source.Configs["Startup"];
             if (startupConfig != null)
             {
@@ -805,7 +826,7 @@ namespace OpenSim
 
         protected void Initialize()
         {
-            m_httpServerPort = m_networkServersInfo.HttpListenerPort;
+            m_httpServerPort = m_configSettings.HttpListenerPort;
             m_sceneManager.OnRestartSim += handleRestartRegion;
         }
 
