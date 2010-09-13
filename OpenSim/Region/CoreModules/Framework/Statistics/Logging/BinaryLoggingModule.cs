@@ -77,7 +77,7 @@ namespace OpenSim.Region.CoreModules.Avatar.Attachments
             catch
             {
                 // if it doesn't work, we don't collect anything
-            }         
+            }
         }
         
         public void AddRegion(Scene scene)
@@ -92,12 +92,12 @@ namespace OpenSim.Region.CoreModules.Avatar.Attachments
         public void RegionLoaded(Scene scene) 
         {
             if (m_collectStats)
-                m_scene.StatsReporter.OnSendStatsResult += LogSimStats;                
+                m_scene.StatsReporter.OnSendStatsResult += LogSimStats;
         }
         
         public void Close() 
         {
-        }                        
+        }
 
         public class StatLogger
         {
@@ -162,6 +162,6 @@ namespace OpenSim.Region.CoreModules.Avatar.Attachments
                 }
             }
             return;
-        }      
+        }
     }
 }

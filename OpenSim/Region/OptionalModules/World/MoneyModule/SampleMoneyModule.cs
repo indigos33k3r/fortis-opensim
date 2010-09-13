@@ -817,5 +817,5 @@ namespace OpenSim.Region.OptionalModules.World.MoneyModule
         RegionMoneyRequest = 1,
         Gift = 2,
         Purchase = 3
-    }  
+    }
 }

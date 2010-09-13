@@ -139,7 +139,7 @@ namespace OpenSim.Region.CoreModules.Framework.EventQueue
             {
                 if (!queues.ContainsKey(agentId))
                 {
-					/*
+                    /*
                     m_log.DebugFormat(
                         "[EVENTQUEUE]: Adding new queue for agent {0} in region {1}", 
                         agentId, m_scene.RegionInfo.RegionName);
@@ -702,7 +702,7 @@ namespace OpenSim.Region.CoreModules.Framework.EventQueue
 
         public void ParcelProperties(ParcelPropertiesMessage parcelPropertiesMessage, UUID avatarID)
         {
-			OSD item = EventQueueHelper.ParcelProperties(parcelPropertiesMessage);
+            OSD item = EventQueueHelper.ParcelProperties(parcelPropertiesMessage);
             Enqueue(item, avatarID);
         }
 

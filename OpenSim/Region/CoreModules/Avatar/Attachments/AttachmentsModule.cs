@@ -78,7 +78,7 @@ namespace OpenSim.Region.CoreModules.Avatar.Attachments
             client.OnRezMultipleAttachmentsFromInv += RezMultipleAttachmentsFromInventory;
             client.OnObjectAttach += AttachObject;
             client.OnObjectDetach += DetachObject;
-            client.OnDetachAttachmentIntoInv += ShowDetachInUserInventory;             
+            client.OnDetachAttachmentIntoInv += ShowDetachInUserInventory;
         }
         
         public void UnsubscribeFromClientEvents(IClientAPI client)
@@ -87,7 +87,7 @@ namespace OpenSim.Region.CoreModules.Avatar.Attachments
             client.OnRezMultipleAttachmentsFromInv -= RezMultipleAttachmentsFromInventory;
             client.OnObjectAttach -= AttachObject;
             client.OnObjectDetach -= DetachObject;
-            client.OnDetachAttachmentIntoInv -= ShowDetachInUserInventory;       
+            client.OnDetachAttachmentIntoInv -= ShowDetachInUserInventory;
         }
         
         /// <summary>
@@ -171,12 +171,12 @@ namespace OpenSim.Region.CoreModules.Avatar.Attachments
                 UUID itemID = UUID.Zero;
                 if (sp != null)
                 {
-                    foreach(SceneObjectGroup grp in sp.GetAttachments(AttachmentPt))
+                    foreach (SceneObjectGroup grp in sp.GetAttachments(AttachmentPt))
                     {
                         itemID = grp.GetFromItemID();
                         if (itemID != UUID.Zero)
                             DetachSingleAttachmentToInv(itemID, remoteClient);
-                    }                    
+                    }
                 }
 
                 if (group.GetFromItemID() == UUID.Zero)
@@ -223,7 +223,7 @@ namespace OpenSim.Region.CoreModules.Avatar.Attachments
 
         public UUID RezSingleAttachmentFromInventory(
             IClientAPI remoteClient, UUID itemID, uint AttachmentPt, bool updateInventoryStatus)
-        {                        
+        {
             SceneObjectGroup att = RezSingleAttachmentFromInventoryInternal(remoteClient, itemID, AttachmentPt);
 
             if (updateInventoryStatus)
@@ -239,8 +239,8 @@ namespace OpenSim.Region.CoreModules.Avatar.Attachments
             if (null == att)
                 return UUID.Zero;
             else
-                return att.UUID;            
-        }        
+                return att.UUID;
+        }
 
         protected SceneObjectGroup RezSingleAttachmentFromInventoryInternal(
             IClientAPI remoteClient, UUID itemID, uint AttachmentPt)
@@ -296,7 +296,7 @@ namespace OpenSim.Region.CoreModules.Avatar.Attachments
             }
             
             return null;
-        }        
+        }
         
         public UUID SetAttachmentInventoryStatus(
             SceneObjectGroup att, IClientAPI remoteClient, UUID itemID, uint AttachmentPt)
@@ -471,7 +471,7 @@ namespace OpenSim.Region.CoreModules.Avatar.Attachments
             sog.RootPart.IsAttachment = false;
             sog.AbsolutePosition = sog.RootPart.AttachedPos;
             UpdateKnownItem(client, sog, sog.GetFromItemID(), sog.OwnerID);
-            sog.SetAttachmentPoint(attachmentPoint);            
+            sog.SetAttachmentPoint(attachmentPoint);
         }
         
         /// <summary>
@@ -598,7 +598,7 @@ namespace OpenSim.Region.CoreModules.Avatar.Attachments
             // In case it is later dropped again, don't let
             // it get cleaned up
             so.RootPart.RemFlag(PrimFlags.TemporaryOnRez);
-            so.HasGroupChanged = false;            
+            so.HasGroupChanged = false;
         }
     }
 }

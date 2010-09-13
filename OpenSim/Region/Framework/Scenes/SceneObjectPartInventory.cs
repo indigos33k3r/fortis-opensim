@@ -848,7 +848,7 @@ namespace OpenSim.Region.Framework.Scenes
         /// Process inventory backup
         /// </summary>
         /// <param name="datastore"></param>
-        public void ProcessInventoryBackup(IRegionDataStore datastore)
+        public void ProcessInventoryBackup(ISimulationDataService datastore)
         {
             if (HasInventoryChanged)
             {
@@ -1094,7 +1094,7 @@ namespace OpenSim.Region.Framework.Scenes
                         item.OwnerChanged = false;
                         engine.ResumeScript(item.ItemID);
                     }
-                }  
+                }
             }
         }
     }

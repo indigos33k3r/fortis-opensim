@@ -738,13 +738,15 @@
       <Reference name="OpenMetaverseTypes" path="../../../lib/" localCopy="true"/>
       <Reference name="OpenMetaverse" path="../../../lib/" localCopy="true"/>
       <Reference name="OpenMetaverse.StructuredData" path="../../../lib/" localCopy="true"/>
-      <Reference name="OpenSim.Services.Interfaces"/>
+      <Reference name="OpenSim.Data"/>
       <Reference name="OpenSim.Framework"/>
       <Reference name="OpenSim.Framework.Communications"/>
       <Reference name="OpenSim.Framework.Console"/>
       <Reference name="OpenSim.Framework.Servers.HttpServer"/>
       <Reference name="OpenSim.Region.Framework"/>
       <Reference name="OpenSim.Server.Base"/>
+      <Reference name="OpenSim.Services.Base"/>
+      <Reference name="OpenSim.Services.Interfaces"/>
       <Reference name="Nini" path="../../../lib/" localCopy="true"/>
       <Reference name="log4net" path="../../../lib/" localCopy="true"/>
       <Reference name="XMLRPC" path="../../../lib/" localCopy="true"/>
@@ -1452,6 +1454,7 @@
       <Reference name="OpenSim.Region.Framework"/>
       <Reference name="OpenSim.Region.CoreModules"/>
       <Reference name="OpenSim.Region.ClientStack"/>
+      <Reference name="OpenSim.Server.Base"/>
       <Reference name="OpenSim.Framework.Communications"/>
       <Reference name="XMLRPC" path="../../../lib/" localCopy="true"/>
       <Reference name="Nini" path="../../../lib/" localCopy="true"/>

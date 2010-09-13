@@ -223,7 +223,7 @@ namespace OpenSim.Region.CoreModules.ServiceConnectorsOut.Inventory
         public  bool AddItem(InventoryItemBase item)
         {
             if (item == null)
-                return false;         
+                return false;
 
             return m_RemoteConnector.AddItem(item);
         }

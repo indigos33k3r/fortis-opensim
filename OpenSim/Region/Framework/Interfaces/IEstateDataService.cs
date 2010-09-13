@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright (c) Contributors, http://opensimulator.org/
  * See CONTRIBUTORS.TXT for a full list of copyright holders.
  *
@@ -25,48 +25,21 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using System.Reflection;
-using System.Threading;
-using log4net;
-using Nini.Config;
+using System;
+using System.Collections.Generic;
+using OpenSim.Framework;
+using OpenMetaverse;
 
-namespace OpenSim
+namespace OpenSim.Region.Framework.Interfaces
 {
-    /// <summary>
-    /// Consoleless OpenSimulator region server
-    /// </summary>
-    public class OpenSimBackground : OpenSim
+    public interface IEstateDataService
     {
-        private static readonly ILog m_log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
-
-        private ManualResetEvent WorldHasComeToAnEnd = new ManualResetEvent(false);
-
-        public OpenSimBackground(IConfigSource configSource) : base(configSource)
-        {
-        }
-
-        /// <summary>
-        /// Performs initialisation of the scene, such as loading configuration from disk.
-        /// </summary>
-        public override void Startup()
-        {
-            m_gui = false;
-
-            m_log.InfoFormat("[OPENSIM MAIN]: Startup complete, serving {0} region{1}",
-                             m_clientServers.Count.ToString(), m_clientServers.Count > 1 ? "s" : "");
-
-            WorldHasComeToAnEnd.WaitOne();
-            WorldHasComeToAnEnd.Close();
-        }
-
-        /// <summary>
-        /// Performs any last-minute sanity checking and shuts down the region server
-        /// </summary>
-        public override void Shutdown()
-        {
-            WorldHasComeToAnEnd.Set();
-            m_log.Info("[OPENSIM MAIN]: World has come to an end");
-            base.Shutdown();
-        }
+        EstateSettings LoadEstateSettings(UUID regionID, bool create);
+        EstateSettings LoadEstateSettings(int estateID);
+        void StoreEstateSettings(EstateSettings es);
+        List<int> GetEstates(string search);
+        bool LinkRegion(UUID regionID, int estateID);
+        List<UUID> GetRegions(int estateID);
+        bool DeleteEstate(int estateID);
     }
 }
