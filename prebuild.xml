@@ -1468,6 +1468,7 @@
         <Match path="config-include" pattern="*.*" recurse="true" buildAction="Content" copyToOutput="Always"/>
         <Match path="inventory" pattern="*.*" recurse="true" buildAction="Content" copyToOutput="Always"/>
         <Match path="ScriptEngines" pattern="*.*" recurse="true" buildAction="Content" copyToOutput="Always"/>
+        <Match path="." pattern="*.ini" recurse="true" buildAction="Content" copyToOutput="Always"/>
         <Match path="." pattern="*.example" recurse="true" buildAction="Content" copyToOutput="Always"/>
         <Match path="." pattern="*.config" recurse="true" buildAction="Content" copyToOutput="Always"/>
         <Match path="." pattern="*.txt" recurse="true" buildAction="Content" copyToOutput="Always"/>
