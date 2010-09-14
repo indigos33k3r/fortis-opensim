@@ -1114,40 +1114,6 @@
       </Files>
     </Project>
 
-
-    <Project frameworkVersion="v3_5" name="Robust" path="OpenSim/Server" type="Exe">
-      <Configuration name="Debug">
-        <Options>
-          <OutputPath>../../bin/Debug/</OutputPath>
-        </Options>
-      </Configuration>
-      <Configuration name="Release">
-        <Options>
-          <OutputPath>../../bin/Release/</OutputPath>
-        </Options>
-      </Configuration>
-
-      <ReferencePath>../../lib/</ReferencePath>
-      <Reference name="System"/>
-      <Reference name="System.Xml"/>
-      <Reference name="OpenMetaverseTypes" path="../../lib/" localCopy="true"/>
-      <Reference name="OpenMetaverse" path="../../lib/" localCopy="true"/>
-      <Reference name="OpenMetaverse.StructuredData" path="../../lib/" localCopy="true"/>
-      <Reference name="OpenSim.Framework"/>
-      <Reference name="OpenSim.Framework.Console"/>
-      <Reference name="OpenSim.Framework.Servers.HttpServer"/>
-      <Reference name="OpenSim.Server.Base"/>
-      <Reference name="OpenSim.Server.Handlers"/>
-      <Reference name="Nini" path="../../lib/" localCopy="true"/>
-      <Reference name="log4net" path="../../lib/" localCopy="true"/>
-
-      <Files>
-        <Match pattern="*.cs" recurse="false">
-          <Exclude pattern="Tests"/>
-        </Match>
-      </Files>
-    </Project>
-
     <Project frameworkVersion="v3_5" name="OpenSim.ConsoleClient" path="OpenSim/ConsoleClient" type="Exe">
       <Configuration name="Debug">
         <Options>
