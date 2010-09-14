@@ -1465,7 +1465,6 @@
         <Match pattern="*.cs" recurse="true"/>
         <Match path="addon-modules" pattern="*.*" recurse="true" buildAction="Content" copyToOutput="Always"/>
         <Match path="assets" pattern="*.*" recurse="true" buildAction="Content" copyToOutput="Always"/>
-        <Match path="config-include" pattern="*.*" recurse="true" buildAction="Content" copyToOutput="Always"/>
         <Match path="inventory" pattern="*.*" recurse="true" buildAction="Content" copyToOutput="Always"/>
         <Match path="ScriptEngines" pattern="*.*" recurse="true" buildAction="Content" copyToOutput="Always"/>
         <Match path="." pattern="*.ini" recurse="true" buildAction="Content" copyToOutput="Always"/>
