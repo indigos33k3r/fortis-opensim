@@ -2265,29 +2265,6 @@
       </Files>
     </Project>
 
-    <Project frameworkVersion="v3_5" name="OpenSim.Tools.Configger" path="OpenSim/Tools/Configger" type="Exe">
-      <Configuration name="Debug">
-        <Options>
-          <OutputPath>../../../bin/Debug/</OutputPath>
-        </Options>
-      </Configuration>
-      <Configuration name="Release">
-        <Options>
-          <OutputPath>../../../bin/Release/</OutputPath>
-        </Options>
-      </Configuration>
-
-      <ReferencePath>../../../lib/</ReferencePath>
-      <Reference name="System"/>
-      <Reference name="System.Xml"/>
-      <Reference name="Nini" path="../../../lib/" localCopy="true"/>
-      <Reference name="log4net" path="../../../lib/" localCopy="true"/>
-
-      <Files>
-        <Match pattern="*.cs" recurse="true"/>
-      </Files>
-    </Project>
-
     <!-- Test Suite -->
     <Project frameworkVersion="v3_5" name="OpenSim.TestSuite" path="OpenSim/TestSuite" type="Exe">
       <Configuration name="Debug">
