@@ -82,7 +82,6 @@ namespace OpenSim.Region.ScriptEngine.Interfaces
         IConfig Config { get; }
         IConfigSource ConfigSource { get; }
         string ScriptEngineName { get; }
-        string ScriptEnginePath { get; }
         IScriptApi GetApi(UUID itemID, string name);
     }
 }
