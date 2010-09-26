@@ -81,7 +81,7 @@ namespace OpenSim.Region.Physics.Manager
             if (_MeshPlugins.ContainsKey(meshEngineName))
             {
                 m_log.Info("[PHYSICS]: creating meshing engine " + meshEngineName);
-                meshEngine = _MeshPlugins[meshEngineName].GetMesher();
+                meshEngine = _MeshPlugins[meshEngineName].GetMesher(config);
             }
             else
             {
@@ -111,7 +111,7 @@ namespace OpenSim.Region.Physics.Manager
         {
             // Walk all assemblies (DLLs effectively) and see if they are home
             // of a plugin that is of interest for us
-            string[] pluginFiles = Directory.GetFiles(assembliesPath, "OpenSim.Region.Physics.*.dll");
+            string[] pluginFiles = Directory.GetFiles(assembliesPath, "*.dll");
 
             for (int i = 0; i < pluginFiles.Length; i++)
             {
@@ -234,6 +234,6 @@ namespace OpenSim.Region.Physics.Manager
     public interface IMeshingPlugin
     {
         string GetName();
-        IMesher GetMesher();
+        IMesher GetMesher(IConfigSource config);
     }
 }
