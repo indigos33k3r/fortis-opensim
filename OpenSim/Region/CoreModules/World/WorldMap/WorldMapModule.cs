@@ -1007,7 +1007,7 @@ namespace OpenSim.Region.CoreModules.World.WorldMap
             if (terrain == null)
                 return;
 
-            byte[] data = terrain.WriteJpeg2000Image("defaultstripe.png");
+            byte[] data = terrain.WriteJpeg2000Image();
             if (data == null)
                 return;
             

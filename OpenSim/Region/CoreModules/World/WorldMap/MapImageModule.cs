@@ -28,108 +28,41 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Imaging;
+using System.IO;
 using System.Reflection;
-using log4net;
+using CSJ2K;
 using Nini.Config;
+using log4net;
+using Rednettle.Warp3D;
 using OpenMetaverse;
 using OpenMetaverse.Imaging;
+using OpenMetaverse.Rendering;
+using OpenMetaverse.StructuredData;
 using OpenSim.Framework;
 using OpenSim.Region.Framework.Interfaces;
 using OpenSim.Region.Framework.Scenes;
+using OpenSim.Region.Physics.Manager;
+using OpenSim.Services.Interfaces;
+
+using WarpRenderer = global::Warp3D.Warp3D;
 
 namespace OpenSim.Region.CoreModules.World.WorldMap
 {
-    public enum DrawRoutine
-    {
-        Rectangle,
-        Polygon,
-        Ellipse
-    }
-
-    public struct face
-    {
-        public Point[] pts;
-    }
-
-    public struct DrawStruct
-    {
-        public DrawRoutine dr;
-        public Rectangle rect;
-        public SolidBrush brush;
-        public face[] trns;
-    }
-
     [RegionModuleDeprecated("MapImageModule")]
     public class MapImageModule : IMapImageGenerator, IRegionModule
     {
+        private static readonly UUID TEXTURE_METADATA_MAGIC = new UUID("802dc0e0-f080-4931-8b57-d1be8611c4f3");
+        private static readonly Color4 WATER_COLOR = new Color4(29, 71, 95, 216);
+
         private static readonly ILog m_log =
             LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 
         private Scene m_scene;
+        private IRendering m_primMesher;
         private IConfigSource m_config;
-        private IMapTileTerrainRenderer terrainRenderer;
-
-        #region IMapImageGenerator Members
-
-        public Bitmap CreateMapTile(string gradientmap)
-        {
-            bool drawPrimVolume = true;
-            bool textureTerrain = false;
-
-            try
-            {
-                IConfig startupConfig = m_config.Configs["Startup"];
-                drawPrimVolume = startupConfig.GetBoolean("DrawPrimOnMapTile", drawPrimVolume);
-                textureTerrain = startupConfig.GetBoolean("TextureOnMapTile", textureTerrain);
-            }
-            catch
-            {
-                m_log.Warn("[MAPTILE]: Failed to load StartupConfig");
-            }
-
-            if (textureTerrain)
-            {
-                terrainRenderer = new TexturedMapTileRenderer();
-            }
-            else
-            {
-                terrainRenderer = new ShadedMapTileRenderer();
-            }
-            terrainRenderer.Initialise(m_scene, m_config);
-
-            Bitmap mapbmp = new Bitmap((int)Constants.RegionSize, (int)Constants.RegionSize, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
-            //long t = System.Environment.TickCount;
-            //for (int i = 0; i < 10; ++i) {
-            terrainRenderer.TerrainToBitmap(mapbmp);
-            //}
-            //t = System.Environment.TickCount - t;
-            //m_log.InfoFormat("[MAPTILE] generation of 10 maptiles needed {0} ms", t);
-
-
-            if (drawPrimVolume)
-            {
-                DrawObjectVolume(m_scene, mapbmp);
-            }
-
-            return mapbmp;
-        }
-
-        public byte[] WriteJpeg2000Image(string gradientmap)
-        {
-            try
-            {
-                using (Bitmap mapbmp = CreateMapTile(gradientmap))
-                    return OpenJPEG.EncodeFromImage(mapbmp, true);
-            }
-            catch (Exception e) // LEGIT: Catching problems caused by OpenJPEG p/invoke
-            {
-                m_log.Error("Failed generating terrain map: " + e);
-            }
-
-            return null;
-        }
-
-        #endregion
+        private Dictionary<UUID, Color4> m_colors = new Dictionary<UUID, Color4>();
+        private bool m_useAntiAliasing = true; // TODO: Make this a config option
 
         #region IRegionModule Members
 
@@ -139,9 +72,19 @@ namespace OpenSim.Region.CoreModules.World.WorldMap
             m_config = source;
 
             IConfig startupConfig = m_config.Configs["Startup"];
-            if (startupConfig.GetString("MapImageModule", "MapImageModule") !=
-                    "MapImageModule")
+            if (startupConfig.GetString("MapImageModule", "MapImageModule") != "MapImageModule")
                 return;
+
+            List<string> renderers = RenderingLoader.ListRenderers(Util.ExecutingDirectory());
+            if (renderers.Count > 0)
+            {
+                m_primMesher = RenderingLoader.LoadRenderer(renderers[0]);
+                m_log.Info("[MAPTILE]: Loaded prim mesher " + m_primMesher.ToString());
+            }
+            else
+            {
+                m_log.Info("[MAPTILE]: No prim mesher loaded, prim rendering will be disabled");
+            }
 
             m_scene.RegisterModuleInterface<IMapImageGenerator>(this);
         }
@@ -166,428 +109,517 @@ namespace OpenSim.Region.CoreModules.World.WorldMap
 
         #endregion
 
-// TODO: unused:
-//         private void ShadeBuildings(Bitmap map)
-//         {
-//             lock (map)
-//             {
-//                 lock (m_scene.Entities)
-//                 {
-//                     foreach (EntityBase entity in m_scene.Entities.Values)
-//                     {
-//                         if (entity is SceneObjectGroup)
-//                         {
-//                             SceneObjectGroup sog = (SceneObjectGroup) entity;
-//
-//                             foreach (SceneObjectPart primitive in sog.Children.Values)
-//                             {
-//                                 int x = (int) (primitive.AbsolutePosition.X - (primitive.Scale.X / 2));
-//                                 int y = (int) (primitive.AbsolutePosition.Y - (primitive.Scale.Y / 2));
-//                                 int w = (int) primitive.Scale.X;
-//                                 int h = (int) primitive.Scale.Y;
-//
-//                                 int dx;
-//                                 for (dx = x; dx < x + w; dx++)
-//                                 {
-//                                     int dy;
-//                                     for (dy = y; dy < y + h; dy++)
-//                                     {
-//                                         if (x < 0 || y < 0)
-//                                             continue;
-//                                         if (x >= map.Width || y >= map.Height)
-//                                             continue;
-//
-//                                         map.SetPixel(dx, dy, Color.DarkGray);
-//                                     }
-//                                 }
-//                             }
-//                         }
-//                     }
-//                 }
-//             }
-//         }
+        #region IMapImageGenerator Members
 
-        private Bitmap DrawObjectVolume(Scene whichScene, Bitmap mapbmp)
+        public Bitmap CreateMapTile()
         {
-            int tc = 0;
-            double[,] hm = whichScene.Heightmap.GetDoubles();
-            tc = Environment.TickCount;
-            m_log.Info("[MAPTILE]: Generating Maptile Step 2: Object Volume Profile");
-            EntityBase[] objs = whichScene.GetEntities();
-            Dictionary<uint, DrawStruct> z_sort = new Dictionary<uint, DrawStruct>();
-            //SortedList<float, RectangleDrawStruct> z_sort = new SortedList<float, RectangleDrawStruct>();
-            List<float> z_sortheights = new List<float>();
-            List<uint> z_localIDs = new List<uint>();
+            bool drawPrimVolume = true;
+            bool textureTerrain = true;
 
-            lock (objs)
+            try
             {
-                foreach (EntityBase obj in objs)
+                IConfig startupConfig = m_config.Configs["Startup"];
+                drawPrimVolume = startupConfig.GetBoolean("DrawPrimOnMapTile", drawPrimVolume);
+                textureTerrain = startupConfig.GetBoolean("TextureOnMapTile", textureTerrain);
+            }
+            catch
+            {
+                m_log.Warn("[MAPTILE]: Failed to load StartupConfig");
+            }
+
+            m_colors.Clear();
+
+            Vector3 camPos = new Vector3(127.5f, 127.5f, 221.7025033688163f);
+            Viewport viewport = new Viewport(camPos, -Vector3.UnitZ, 1024f, 0.1f, (int)Constants.RegionSize, (int)Constants.RegionSize, (float)Constants.RegionSize, (float)Constants.RegionSize);
+
+            int width = viewport.Width;
+            int height = viewport.Height;
+
+            if (m_useAntiAliasing)
+            {
+                width *= 2;
+                height *= 2;
+            }
+
+            WarpRenderer renderer = new WarpRenderer();
+            renderer.CreateScene(width, height);
+            renderer.Scene.autoCalcNormals = false;
+
+            #region Camera
+
+            warp_Vector pos = ConvertVector(viewport.Position);
+            pos.z -= 0.001f; // Works around an issue with the Warp3D camera
+            warp_Vector lookat = warp_Vector.add(ConvertVector(viewport.Position), ConvertVector(viewport.LookDirection));
+
+            renderer.Scene.defaultCamera.setPos(pos);
+            renderer.Scene.defaultCamera.lookAt(lookat);
+
+            if (viewport.Orthographic)
+            {
+                renderer.Scene.defaultCamera.isOrthographic = true;
+                renderer.Scene.defaultCamera.orthoViewWidth = viewport.OrthoWindowWidth;
+                renderer.Scene.defaultCamera.orthoViewHeight = viewport.OrthoWindowHeight;
+            }
+            else
+            {
+                float fov = viewport.FieldOfView;
+                fov *= 1.75f; // FIXME: ???
+                renderer.Scene.defaultCamera.setFov(fov);
+            }
+
+            #endregion Camera
+
+            renderer.Scene.addLight("Light1", new warp_Light(new warp_Vector(0.2f, 0.2f, 1f), 0xffffff, 320, 80));
+            renderer.Scene.addLight("Light2", new warp_Light(new warp_Vector(-1f, -1f, 1f), 0xffffff, 100, 40));
+
+            CreateWater(renderer);
+            CreateTerrain(renderer, textureTerrain);
+            if (drawPrimVolume)
+                CreateAllPrims(renderer);
+
+            renderer.Render();
+            Bitmap bitmap = renderer.Scene.getImage();
+
+            if (m_useAntiAliasing)
+                bitmap = ImageUtils.ResizeImage(bitmap, viewport.Width, viewport.Height);
+
+            return bitmap;
+        }
+
+        public byte[] WriteJpeg2000Image()
+        {
+            try
+            {
+                using (Bitmap mapbmp = CreateMapTile())
+                    return OpenJPEG.EncodeFromImage(mapbmp, true);
+            }
+            catch (Exception e)
+            {
+                // JPEG2000 encoder failed
+                m_log.Error("[MAPTILE]: Failed generating terrain map: " + e);
+            }
+
+            return null;
+        }
+
+        #endregion
+
+        #region Rendering Methods
+
+        private void CreateWater(WarpRenderer renderer)
+        {
+            float waterHeight = (float)m_scene.RegionInfo.RegionSettings.WaterHeight;
+
+            renderer.AddPlane("Water", 256f * 0.5f);
+            renderer.Scene.sceneobject("Water").setPos(127.5f, waterHeight, 127.5f);
+
+            renderer.AddMaterial("WaterColor", ConvertColor(WATER_COLOR));
+            renderer.Scene.material("WaterColor").setTransparency((byte)((1f - WATER_COLOR.A) * 255f));
+            renderer.SetObjectMaterial("Water", "WaterColor");
+        }
+
+        private void CreateTerrain(WarpRenderer renderer, bool textureTerrain)
+        {
+            ITerrainChannel terrain = m_scene.Heightmap;
+            float[] heightmap = terrain.GetFloatsSerialised();
+
+            warp_Object obj = new warp_Object(256 * 256, 255 * 255 * 2);
+
+            for (int y = 0; y < 256; y++)
+            {
+                for (int x = 0; x < 256; x++)
                 {
-                    // Only draw the contents of SceneObjectGroup
-                    if (obj is SceneObjectGroup)
-                    {
-                        SceneObjectGroup mapdot = (SceneObjectGroup)obj;
-                        Color mapdotspot = Color.Gray; // Default color when prim color is white
-                        
-                        // Loop over prim in group
-                        List<SceneObjectPart> partList = null;
-                        lock (mapdot.Children)
-                            partList = new List<SceneObjectPart>(mapdot.Children.Values);
-                            
-                        foreach (SceneObjectPart part in partList)
-                        {
-                            if (part == null)
-                                continue;
+                    int v = y * 256 + x;
+                    float height = heightmap[v];
 
-                            // Draw if the object is at least 1 meter wide in any direction
-                            if (part.Scale.X > 1f || part.Scale.Y > 1f || part.Scale.Z > 1f)
-                            {
-                                // Try to get the RGBA of the default texture entry..
-                                //
-                                try
-                                {
-                                    // get the null checks out of the way
-                                    // skip the ones that break
-                                    if (part == null)
-                                        continue;
+                    warp_Vector pos = ConvertVector(new Vector3(x, y, height));
+                    obj.addVertex(new warp_Vertex(pos, (float)x / 255f, (float)(255 - y) / 255f));
+                }
+            }
 
-                                    if (part.Shape == null)
-                                        continue;
-
-                                    if (part.Shape.PCode == (byte)PCode.Tree || part.Shape.PCode == (byte)PCode.NewTree || part.Shape.PCode == (byte)PCode.Grass)
-                                        continue; // eliminates trees from this since we don't really have a good tree representation
-                                    // if you want tree blocks on the map comment the above line and uncomment the below line
-                                    //mapdotspot = Color.PaleGreen;
-
-                                    Primitive.TextureEntry textureEntry = part.Shape.Textures;
-
-                                    if (textureEntry == null || textureEntry.DefaultTexture == null)
-                                        continue;
-
-                                    Color4 texcolor = textureEntry.DefaultTexture.RGBA;
-
-                                    // Not sure why some of these are null, oh well.
-
-                                    int colorr = 255 - (int)(texcolor.R * 255f);
-                                    int colorg = 255 - (int)(texcolor.G * 255f);
-                                    int colorb = 255 - (int)(texcolor.B * 255f);
-
-                                    if (!(colorr == 255 && colorg == 255 && colorb == 255))
-                                    {
-                                        //Try to set the map spot color
-                                        try
-                                        {
-                                            // If the color gets goofy somehow, skip it *shakes fist at Color4
-                                            mapdotspot = Color.FromArgb(colorr, colorg, colorb);
-                                        }
-                                        catch (ArgumentException)
-                                        {
-                                        }
-                                    }
-                                }
-                                catch (IndexOutOfRangeException)
-                                {
-                                    // Windows Array
-                                }
-                                catch (ArgumentOutOfRangeException)
-                                {
-                                    // Mono Array
-                                }
-
-                                Vector3 pos = part.GetWorldPosition();
-
-                                // skip prim outside of retion
-                                if (pos.X < 0f || pos.X > 256f || pos.Y < 0f || pos.Y > 256f)
-                                    continue;
-
-                                // skip prim in non-finite position
-                                if (Single.IsNaN(pos.X) || Single.IsNaN(pos.Y) ||
-                                    Single.IsInfinity(pos.X) || Single.IsInfinity(pos.Y))
-                                    continue;
-
-                                // Figure out if object is under 256m above the height of the terrain
-                                bool isBelow256AboveTerrain = false;
-
-                                try
-                                {
-                                    isBelow256AboveTerrain = (pos.Z < ((float)hm[(int)pos.X, (int)pos.Y] + 256f));
-                                }
-                                catch (Exception)
-                                {
-                                }
-
-                                if (isBelow256AboveTerrain)
-                                {
-                                    // Translate scale by rotation so scale is represented properly when object is rotated
-                                    Vector3 lscale = new Vector3(part.Shape.Scale.X, part.Shape.Scale.Y, part.Shape.Scale.Z);
-                                    Vector3 scale = new Vector3();
-                                    Vector3 tScale = new Vector3();
-                                    Vector3 axPos = new Vector3(pos.X,pos.Y,pos.Z);
-
-                                    Quaternion llrot = part.GetWorldRotation();
-                                    Quaternion rot = new Quaternion(llrot.W, llrot.X, llrot.Y, llrot.Z);
-                                    scale = lscale * rot;
-
-                                    // negative scales don't work in this situation
-                                    scale.X = Math.Abs(scale.X);
-                                    scale.Y = Math.Abs(scale.Y);
-                                    scale.Z = Math.Abs(scale.Z);
-
-                                    // This scaling isn't very accurate and doesn't take into account the face rotation :P
-                                    int mapdrawstartX = (int)(pos.X - scale.X);
-                                    int mapdrawstartY = (int)(pos.Y - scale.Y);
-                                    int mapdrawendX = (int)(pos.X + scale.X);
-                                    int mapdrawendY = (int)(pos.Y + scale.Y);
-
-                                    // If object is beyond the edge of the map, don't draw it to avoid errors
-                                    if (mapdrawstartX < 0 || mapdrawstartX > ((int)Constants.RegionSize - 1) || mapdrawendX < 0 || mapdrawendX > ((int)Constants.RegionSize - 1)
-                                                          || mapdrawstartY < 0 || mapdrawstartY > ((int)Constants.RegionSize - 1) || mapdrawendY < 0
-                                                          || mapdrawendY > ((int)Constants.RegionSize - 1))
-                                        continue;
-
-#region obb face reconstruction part duex
-                                    Vector3[] vertexes = new Vector3[8];
-
-                                    // float[] distance = new float[6];
-                                    Vector3[] FaceA = new Vector3[6]; // vertex A for Facei
-                                    Vector3[] FaceB = new Vector3[6]; // vertex B for Facei
-                                    Vector3[] FaceC = new Vector3[6]; // vertex C for Facei
-                                    Vector3[] FaceD = new Vector3[6]; // vertex D for Facei
-
-                                    tScale = new Vector3(lscale.X, -lscale.Y, lscale.Z);
-                                    scale = ((tScale * rot));
-                                    vertexes[0] = (new Vector3((pos.X + scale.X), (pos.Y + scale.Y), (pos.Z + scale.Z)));
-                                    // vertexes[0].x = pos.X + vertexes[0].x;
-                                    //vertexes[0].y = pos.Y + vertexes[0].y;
-                                    //vertexes[0].z = pos.Z + vertexes[0].z;
-
-                                    FaceA[0] = vertexes[0];
-                                    FaceB[3] = vertexes[0];
-                                    FaceA[4] = vertexes[0];
-
-                                    tScale = lscale;
-                                    scale = ((tScale * rot));
-                                    vertexes[1] = (new Vector3((pos.X + scale.X), (pos.Y + scale.Y), (pos.Z + scale.Z)));
-
-                                    // vertexes[1].x = pos.X + vertexes[1].x;
-                                    // vertexes[1].y = pos.Y + vertexes[1].y;
-                                    //vertexes[1].z = pos.Z + vertexes[1].z;
-
-                                    FaceB[0] = vertexes[1];
-                                    FaceA[1] = vertexes[1];
-                                    FaceC[4] = vertexes[1];
-
-                                    tScale = new Vector3(lscale.X, -lscale.Y, -lscale.Z);
-                                    scale = ((tScale * rot));
-
-                                    vertexes[2] = (new Vector3((pos.X + scale.X), (pos.Y + scale.Y), (pos.Z + scale.Z)));
-
-                                    //vertexes[2].x = pos.X + vertexes[2].x;
-                                    //vertexes[2].y = pos.Y + vertexes[2].y;
-                                    //vertexes[2].z = pos.Z + vertexes[2].z;
-
-                                    FaceC[0] = vertexes[2];
-                                    FaceD[3] = vertexes[2];
-                                    FaceC[5] = vertexes[2];
-
-                                    tScale = new Vector3(lscale.X, lscale.Y, -lscale.Z);
-                                    scale = ((tScale * rot));
-                                    vertexes[3] = (new Vector3((pos.X + scale.X), (pos.Y + scale.Y), (pos.Z + scale.Z)));
-
-                                    //vertexes[3].x = pos.X + vertexes[3].x;
-                                    // vertexes[3].y = pos.Y + vertexes[3].y;
-                                    // vertexes[3].z = pos.Z + vertexes[3].z;
-
-                                    FaceD[0] = vertexes[3];
-                                    FaceC[1] = vertexes[3];
-                                    FaceA[5] = vertexes[3];
-
-                                    tScale = new Vector3(-lscale.X, lscale.Y, lscale.Z);
-                                    scale = ((tScale * rot));
-                                    vertexes[4] = (new Vector3((pos.X + scale.X), (pos.Y + scale.Y), (pos.Z + scale.Z)));
-
-                                    // vertexes[4].x = pos.X + vertexes[4].x;
-                                    // vertexes[4].y = pos.Y + vertexes[4].y;
-                                    // vertexes[4].z = pos.Z + vertexes[4].z;
-
-                                    FaceB[1] = vertexes[4];
-                                    FaceA[2] = vertexes[4];
-                                    FaceD[4] = vertexes[4];
-
-                                    tScale = new Vector3(-lscale.X, lscale.Y, -lscale.Z);
-                                    scale = ((tScale * rot));
-                                    vertexes[5] = (new Vector3((pos.X + scale.X), (pos.Y + scale.Y), (pos.Z + scale.Z)));
-
-                                    // vertexes[5].x = pos.X + vertexes[5].x;
-                                    // vertexes[5].y = pos.Y + vertexes[5].y;
-                                    // vertexes[5].z = pos.Z + vertexes[5].z;
-
-                                    FaceD[1] = vertexes[5];
-                                    FaceC[2] = vertexes[5];
-                                    FaceB[5] = vertexes[5];
-
-                                    tScale = new Vector3(-lscale.X, -lscale.Y, lscale.Z);
-                                    scale = ((tScale * rot));
-                                    vertexes[6] = (new Vector3((pos.X + scale.X), (pos.Y + scale.Y), (pos.Z + scale.Z)));
-
-                                    // vertexes[6].x = pos.X + vertexes[6].x;
-                                    // vertexes[6].y = pos.Y + vertexes[6].y;
-                                    // vertexes[6].z = pos.Z + vertexes[6].z;
-
-                                    FaceB[2] = vertexes[6];
-                                    FaceA[3] = vertexes[6];
-                                    FaceB[4] = vertexes[6];
-
-                                    tScale = new Vector3(-lscale.X, -lscale.Y, -lscale.Z);
-                                    scale = ((tScale * rot));
-                                    vertexes[7] = (new Vector3((pos.X + scale.X), (pos.Y + scale.Y), (pos.Z + scale.Z)));
-
-                                    // vertexes[7].x = pos.X + vertexes[7].x;
-                                    // vertexes[7].y = pos.Y + vertexes[7].y;
-                                    // vertexes[7].z = pos.Z + vertexes[7].z;
-
-                                    FaceD[2] = vertexes[7];
-                                    FaceC[3] = vertexes[7];
-                                    FaceD[5] = vertexes[7];
-#endregion
-
-                                    //int wy = 0;
-
-                                    //bool breakYN = false; // If we run into an error drawing, break out of the
-                                    // loop so we don't lag to death on error handling
-                                    DrawStruct ds = new DrawStruct();
-                                    ds.brush = new SolidBrush(mapdotspot);
-                                    //ds.rect = new Rectangle(mapdrawstartX, (255 - mapdrawstartY), mapdrawendX - mapdrawstartX, mapdrawendY - mapdrawstartY);
-
-                                    ds.trns = new face[FaceA.Length];
-
-                                    for (int i = 0; i < FaceA.Length; i++)
-                                    {
-                                        Point[] working = new Point[5];
-                                        working[0] = project(FaceA[i], axPos);
-                                        working[1] = project(FaceB[i], axPos);
-                                        working[2] = project(FaceD[i], axPos);
-                                        working[3] = project(FaceC[i], axPos);
-                                        working[4] = project(FaceA[i], axPos);
-
-                                        face workingface = new face();
-                                        workingface.pts = working;
-
-                                        ds.trns[i] = workingface;
-                                    }
-
-                                    z_sort.Add(part.LocalId, ds);
-                                    z_localIDs.Add(part.LocalId);
-                                    z_sortheights.Add(pos.Z);
-
-                                    //for (int wx = mapdrawstartX; wx < mapdrawendX; wx++)
-                                    //{
-                                        //for (wy = mapdrawstartY; wy < mapdrawendY; wy++)
-                                        //{
-                                            //m_log.InfoFormat("[MAPDEBUG]: {0},{1}({2})", wx, (255 - wy),wy);
-                                            //try
-                                            //{
-                                                // Remember, flip the y!
-                                            //    mapbmp.SetPixel(wx, (255 - wy), mapdotspot);
-                                            //}
-                                            //catch (ArgumentException)
-                                            //{
-                                            //    breakYN = true;
-                                            //}
-
-                                            //if (breakYN)
-                                            //    break;
-                                        //}
-
-                                        //if (breakYN)
-                                        //    break;
-                                    //}
-                                } // Object is within 256m Z of terrain
-                            } // object is at least a meter wide
-                        } // loop over group children
-                    } // entitybase is sceneobject group
-                } // foreach loop over entities
-
-                float[] sortedZHeights = z_sortheights.ToArray();
-                uint[] sortedlocalIds = z_localIDs.ToArray();
-
-                // Sort prim by Z position
-                Array.Sort(sortedZHeights, sortedlocalIds);
-
-                Graphics g = Graphics.FromImage(mapbmp);
-
-                for (int s = 0; s < sortedZHeights.Length; s++)
+            for (int y = 0; y < 256; y++)
+            {
+                for (int x = 0; x < 256; x++)
                 {
-                    if (z_sort.ContainsKey(sortedlocalIds[s]))
+                    if (x < 255 && y < 255)
                     {
-                        DrawStruct rectDrawStruct = z_sort[sortedlocalIds[s]];
-                        for (int r = 0; r < rectDrawStruct.trns.Length; r++)
-                        {
-                            g.FillPolygon(rectDrawStruct.brush,rectDrawStruct.trns[r].pts);
-                        }
-                        //g.FillRectangle(rectDrawStruct.brush , rectDrawStruct.rect);
+                        int v = y * 256 + x;
+
+                        // Normal
+                        Vector3 v1 = new Vector3(x, y, heightmap[y * 256 + x]);
+                        Vector3 v2 = new Vector3(x + 1, y, heightmap[y * 256 + x + 1]);
+                        Vector3 v3 = new Vector3(x, y + 1, heightmap[(y + 1) * 256 + x]);
+                        warp_Vector norm = ConvertVector(SurfaceNormal(v1, v2, v3));
+                        norm = norm.reverse();
+                        obj.vertex(v).n = norm;
+
+                        // Triangle 1
+                        obj.addTriangle(
+                            v,
+                            v + 1,
+                            v + 256);
+
+                        // Triangle 2
+                        obj.addTriangle(
+                            v + 256 + 1,
+                            v + 256,
+                            v + 1);
+                    }
+                }
+            }
+
+            renderer.Scene.addObject("Terrain", obj);
+
+            UUID[] textureIDs = new UUID[4];
+            float[] startHeights = new float[4];
+            float[] heightRanges = new float[4];
+
+            RegionSettings regionInfo = m_scene.RegionInfo.RegionSettings;
+
+            textureIDs[0] = regionInfo.TerrainTexture1;
+            textureIDs[1] = regionInfo.TerrainTexture2;
+            textureIDs[2] = regionInfo.TerrainTexture3;
+            textureIDs[3] = regionInfo.TerrainTexture4;
+
+            startHeights[0] = (float)regionInfo.Elevation1SW;
+            startHeights[1] = (float)regionInfo.Elevation1NW;
+            startHeights[2] = (float)regionInfo.Elevation1SE;
+            startHeights[3] = (float)regionInfo.Elevation1NE;
+
+            heightRanges[0] = (float)regionInfo.Elevation2SW;
+            heightRanges[1] = (float)regionInfo.Elevation2NW;
+            heightRanges[2] = (float)regionInfo.Elevation2SE;
+            heightRanges[3] = (float)regionInfo.Elevation2NE;
+
+            uint globalX, globalY;
+            Utils.LongToUInts(m_scene.RegionInfo.RegionHandle, out globalX, out globalY);
+
+            Bitmap image = TerrainSplat.Splat(heightmap, textureIDs, startHeights, heightRanges, new Vector3d(globalX, globalY, 0.0), m_scene.AssetService, textureTerrain);
+            warp_Texture texture = new warp_Texture(image);
+            warp_Material material = new warp_Material(texture);
+            material.setReflectivity(50);
+            renderer.Scene.addMaterial("TerrainColor", material);
+            renderer.SetObjectMaterial("Terrain", "TerrainColor");
+        }
+
+        private void CreateAllPrims(WarpRenderer renderer)
+        {
+            if (m_primMesher == null)
+                return;
+
+            m_scene.ForEachSOG(
+                delegate(SceneObjectGroup group)
+                {
+                    CreatePrim(renderer, group.RootPart);
+                    foreach (SceneObjectPart child in group.Children.Values)
+                        CreatePrim(renderer, child);
+                }
+            );
+        }
+
+        private void CreatePrim(WarpRenderer renderer, SceneObjectPart prim)
+        {
+            const float MIN_SIZE = 2f;
+
+            if ((PCode)prim.Shape.PCode != PCode.Prim)
+                return;
+            if (prim.Scale.LengthSquared() < MIN_SIZE * MIN_SIZE)
+                return;
+
+            Primitive omvPrim = prim.Shape.ToOmvPrimitive(prim.OffsetPosition, prim.RotationOffset);
+            FacetedMesh renderMesh = m_primMesher.GenerateFacetedMesh(omvPrim, DetailLevel.Medium);
+            if (renderMesh == null)
+                return;
+
+            warp_Vector primPos = ConvertVector(prim.AbsolutePosition);
+            warp_Quaternion primRot = ConvertQuaternion(prim.RotationOffset);
+
+            warp_Matrix m = warp_Matrix.quaternionMatrix(primRot);
+
+            if (prim.ParentID != 0)
+            {
+                SceneObjectGroup group = m_scene.SceneGraph.GetGroupByPrim(prim.LocalId);
+                if (group != null)
+                    m.transform(warp_Matrix.quaternionMatrix(ConvertQuaternion(group.RootPart.RotationOffset)));
+            }
+
+            warp_Vector primScale = ConvertVector(prim.Scale);
+
+            string primID = prim.UUID.ToString();
+
+            // Create the prim faces
+            for (int i = 0; i < renderMesh.Faces.Count; i++)
+            {
+                Face face = renderMesh.Faces[i];
+                string meshName = primID + "-Face-" + i.ToString();
+
+                warp_Object faceObj = new warp_Object(face.Vertices.Count, face.Indices.Count / 3);
+
+                for (int j = 0; j < face.Vertices.Count; j++)
+                {
+                    Vertex v = face.Vertices[j];
+
+                    warp_Vector pos = ConvertVector(v.Position);
+                    warp_Vector norm = ConvertVector(v.Normal);
+                    
+                    if (prim.Shape.SculptTexture == UUID.Zero)
+                        norm = norm.reverse();
+                    warp_Vertex vert = new warp_Vertex(pos, norm, v.TexCoord.X, v.TexCoord.Y);
+
+                    faceObj.addVertex(vert);
+                }
+
+                for (int j = 0; j < face.Indices.Count; j += 3)
+                {
+                    faceObj.addTriangle(
+                        face.Indices[j + 0],
+                        face.Indices[j + 1],
+                        face.Indices[j + 2]);
+                }
+
+                Primitive.TextureEntryFace teFace = prim.Shape.Textures.GetFace((uint)i);
+                Color4 faceColor = GetFaceColor(teFace);
+                string materialName = GetOrCreateMaterial(renderer, faceColor);
+
+                faceObj.transform(m);
+                faceObj.setPos(primPos);
+                faceObj.scaleSelf(primScale.x, primScale.y, primScale.z);
+
+                renderer.Scene.addObject(meshName, faceObj);
+
+                renderer.SetObjectMaterial(meshName, materialName);
+            }
+        }
+
+        private Color4 GetFaceColor(Primitive.TextureEntryFace face)
+        {
+            Color4 color;
+
+            if (face.TextureID == UUID.Zero)
+                return face.RGBA;
+
+            if (!m_colors.TryGetValue(face.TextureID, out color))
+            {
+                bool fetched = false;
+
+                // Attempt to fetch the texture metadata
+                UUID metadataID = UUID.Combine(face.TextureID, TEXTURE_METADATA_MAGIC);
+                AssetBase metadata = m_scene.AssetService.GetCached(metadataID.ToString());
+                if (metadata != null)
+                {
+                    OSDMap map = null;
+                    try { map = OSDParser.Deserialize(metadata.Data) as OSDMap; } catch { }
+
+                    if (map != null)
+                    {
+                        color = map["X-JPEG2000-RGBA"].AsColor4();
+                        fetched = true;
                     }
                 }
 
-                g.Dispose();
-            } // lock entities objs
+                if (!fetched)
+                {
+                    // Fetch the texture, decode and get the average color, 
+                    // then save it to a temporary metadata asset
+                    AssetBase textureAsset = m_scene.AssetService.Get(face.TextureID.ToString());
+                    if (textureAsset != null)
+                    {
+                        int width, height;
+                        color = GetAverageColor(textureAsset.FullID, textureAsset.Data, out width, out height);
 
-            m_log.Info("[MAPTILE]: Generating Maptile Step 2: Done in " + (Environment.TickCount - tc) + " ms");
-            return mapbmp;
+                        OSDMap data = new OSDMap { { "X-JPEG2000-RGBA", OSD.FromColor4(color) } };
+                        metadata = new AssetBase
+                        {
+                            Data = System.Text.Encoding.UTF8.GetBytes(OSDParser.SerializeJsonString(data)),
+                            Description = "Metadata for JPEG2000 texture " + face.TextureID.ToString(),
+                            Flags = AssetFlags.Collectable,
+                            FullID = metadataID,
+                            ID = metadataID.ToString(),
+                            Local = true,
+                            Temporary = true,
+                            Name = String.Empty,
+                            Type = (sbyte)AssetType.Unknown
+                        };
+                        m_scene.AssetService.Store(metadata);
+                    }
+                    else
+                    {
+                        color = new Color4(0.5f, 0.5f, 0.5f, 1.0f);
+                    }
+                }
+
+                m_colors[face.TextureID] = color;
+            }
+
+            return color * face.RGBA;
         }
 
-        private Point project(Vector3 point3d, Vector3 originpos)
+        private string GetOrCreateMaterial(WarpRenderer renderer, Color4 color)
         {
-            Point returnpt = new Point();
-            //originpos = point3d;
-            //int d = (int)(256f / 1.5f);
+            string name = color.ToString();
 
-            //Vector3 topos = new Vector3(0, 0, 0);
-           // float z = -point3d.z - topos.z;
+            warp_Material material = renderer.Scene.material(name);
+            if (material != null)
+                return name;
 
-            returnpt.X = (int)point3d.X;//(int)((topos.x - point3d.x) / z * d);
-            returnpt.Y = (int)(((int)Constants.RegionSize - 1) - point3d.Y);//(int)(255 - (((topos.y - point3d.y) / z * d)));
-
-            return returnpt;
+            renderer.AddMaterial(name, ConvertColor(color));
+            if (color.A < 1f)
+                renderer.Scene.material(name).setTransparency((byte)((1f - color.A) * 255f));
+            return name;
         }
 
-// TODO: unused:
-//         #region Deprecated Maptile Generation.  Adam may update this
-//         private Bitmap TerrainToBitmap(string gradientmap)
-//         {
-//             Bitmap gradientmapLd = new Bitmap(gradientmap);
-//
-//             int pallete = gradientmapLd.Height;
-//
-//             Bitmap bmp = new Bitmap(m_scene.Heightmap.Width, m_scene.Heightmap.Height);
-//             Color[] colours = new Color[pallete];
-//
-//             for (int i = 0; i < pallete; i++)
-//             {
-//                 colours[i] = gradientmapLd.GetPixel(0, i);
-//             }
-//
-//             lock (m_scene.Heightmap)
-//             {
-//                 ITerrainChannel copy = m_scene.Heightmap;
-//                 for (int y = 0; y < copy.Height; y++)
-//                 {
-//                     for (int x = 0; x < copy.Width; x++)
-//                     {
-//                         // 512 is the largest possible height before colours clamp
-//                         int colorindex = (int) (Math.Max(Math.Min(1.0, copy[x, y] / 512.0), 0.0) * (pallete - 1));
-//
-//                         // Handle error conditions
-//                         if (colorindex > pallete - 1 || colorindex < 0)
-//                             bmp.SetPixel(x, copy.Height - y - 1, Color.Red);
-//                         else
-//                             bmp.SetPixel(x, copy.Height - y - 1, colours[colorindex]);
-//                     }
-//                 }
-//                 ShadeBuildings(bmp);
-//                 return bmp;
-//             }
-//         }
-//         #endregion
+        #endregion Rendering Methods
+
+        #region Static Helpers
+
+        private static warp_Vector ConvertVector(Vector3 vector)
+        {
+            return new warp_Vector(vector.X, vector.Z, vector.Y);
+        }
+
+        private static warp_Quaternion ConvertQuaternion(Quaternion quat)
+        {
+            return new warp_Quaternion(quat.X, quat.Z, quat.Y, -quat.W);
+        }
+
+        private static int ConvertColor(Color4 color)
+        {
+            int c = warp_Color.getColor((byte)(color.R * 255f), (byte)(color.G * 255f), (byte)(color.B * 255f));
+            if (color.A < 1f)
+                c |= (byte)(color.A * 255f) << 24;
+
+            return c;
+        }
+
+        private static Vector3 SurfaceNormal(Vector3 c1, Vector3 c2, Vector3 c3)
+        {
+            Vector3 edge1 = new Vector3(c2.X - c1.X, c2.Y - c1.Y, c2.Z - c1.Z);
+            Vector3 edge2 = new Vector3(c3.X - c1.X, c3.Y - c1.Y, c3.Z - c1.Z);
+
+            Vector3 normal = Vector3.Cross(edge1, edge2);
+            normal.Normalize();
+
+            return normal;
+        }
+
+        public static Color4 GetAverageColor(UUID textureID, byte[] j2kData, out int width, out int height)
+        {
+            ulong r = 0;
+            ulong g = 0;
+            ulong b = 0;
+            ulong a = 0;
+
+            using (MemoryStream stream = new MemoryStream(j2kData))
+            {
+                try
+                {
+                    Bitmap bitmap = (Bitmap)J2kImage.FromStream(stream);
+                    width = bitmap.Width;
+                    height = bitmap.Height;
+
+                    BitmapData bitmapData = bitmap.LockBits(new Rectangle(0, 0, width, height), ImageLockMode.ReadOnly, bitmap.PixelFormat);
+                    int pixelBytes = (bitmap.PixelFormat == PixelFormat.Format24bppRgb) ? 3 : 4;
+
+                    // Sum up the individual channels
+                    unsafe
+                    {
+                        if (pixelBytes == 4)
+                        {
+                            for (int y = 0; y < height; y++)
+                            {
+                                byte* row = (byte*)bitmapData.Scan0 + (y * bitmapData.Stride);
+
+                                for (int x = 0; x < width; x++)
+                                {
+                                    b += row[x * pixelBytes + 0];
+                                    g += row[x * pixelBytes + 1];
+                                    r += row[x * pixelBytes + 2];
+                                    a += row[x * pixelBytes + 3];
+                                }
+                            }
+                        }
+                        else
+                        {
+                            for (int y = 0; y < height; y++)
+                            {
+                                byte* row = (byte*)bitmapData.Scan0 + (y * bitmapData.Stride);
+
+                                for (int x = 0; x < width; x++)
+                                {
+                                    b += row[x * pixelBytes + 0];
+                                    g += row[x * pixelBytes + 1];
+                                    r += row[x * pixelBytes + 2];
+                                }
+                            }
+                        }
+                    }
+
+                    // Get the averages for each channel
+                    const decimal OO_255 = 1m / 255m;
+                    decimal totalPixels = (decimal)(width * height);
+
+                    decimal rm = ((decimal)r / totalPixels) * OO_255;
+                    decimal gm = ((decimal)g / totalPixels) * OO_255;
+                    decimal bm = ((decimal)b / totalPixels) * OO_255;
+                    decimal am = ((decimal)a / totalPixels) * OO_255;
+
+                    if (pixelBytes == 3)
+                        am = 1m;
+
+                    return new Color4((float)rm, (float)gm, (float)bm, (float)am);
+                }
+                catch (Exception ex)
+                {
+                    m_log.WarnFormat("[MAPTILE]: Error decoding JPEG2000 texture {0} ({1} bytes): {2}", textureID, j2kData.Length, ex.Message);
+                    width = 0;
+                    height = 0;
+                    return new Color4(0.5f, 0.5f, 0.5f, 1.0f);
+                }
+            }
+        }
+
+        #endregion Static Helpers
+    }
+
+    public static class ImageUtils
+    {
+        /// <summary>
+        /// Performs bilinear interpolation between four values
+        /// </summary>
+        /// <param name="v00">First, or top left value</param>
+        /// <param name="v01">Second, or top right value</param>
+        /// <param name="v10">Third, or bottom left value</param>
+        /// <param name="v11">Fourth, or bottom right value</param>
+        /// <param name="xPercent">Interpolation value on the X axis, between 0.0 and 1.0</param>
+        /// <param name="yPercent">Interpolation value on fht Y axis, between 0.0 and 1.0</param>
+        /// <returns>The bilinearly interpolated result</returns>
+        public static float Bilinear(float v00, float v01, float v10, float v11, float xPercent, float yPercent)
+        {
+            return Utils.Lerp(Utils.Lerp(v00, v01, xPercent), Utils.Lerp(v10, v11, xPercent), yPercent);
+        }
+
+        /// <summary>
+        /// Performs a high quality image resize
+        /// </summary>
+        /// <param name="image">Image to resize</param>
+        /// <param name="width">New width</param>
+        /// <param name="height">New height</param>
+        /// <returns>Resized image</returns>
+        public static Bitmap ResizeImage(Image image, int width, int height)
+        {
+            Bitmap result = new Bitmap(width, height);
+
+            using (Graphics graphics = Graphics.FromImage(result))
+            {
+                graphics.CompositingQuality = System.Drawing.Drawing2D.CompositingQuality.HighQuality;
+                graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+                graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
+                graphics.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.HighQuality;
+
+                graphics.DrawImage(image, 0, 0, result.Width, result.Height);
+            }
+
+            return result;
+        }
     }
 }
