@@ -590,10 +590,6 @@ namespace OpenSim.Region.CoreModules.Framework.InventoryAccess
                     rootPart.Name = item.Name;
                     rootPart.Description = item.Description;
 
-                    List<SceneObjectPart> partList = null;
-                    lock (group.Children)
-                        partList = new List<SceneObjectPart>(group.Children.Values);
-
                     group.SetGroup(remoteClient.ActiveGroupId, remoteClient);
                     if ((rootPart.OwnerID != item.Owner) || (item.CurrentPermissions & 16) != 0)
                     {
@@ -603,7 +599,7 @@ namespace OpenSim.Region.CoreModules.Framework.InventoryAccess
 
                         if (m_Scene.Permissions.PropagatePermissions())
                         {
-                            foreach (SceneObjectPart part in partList)
+                            foreach (SceneObjectPart part in group.Parts)
                             {
                                 part.EveryoneMask = item.EveryOnePermissions;
                                 part.NextOwnerMask = item.NextPermissions;
@@ -614,7 +610,7 @@ namespace OpenSim.Region.CoreModules.Framework.InventoryAccess
                         }
                     }
 
-                    foreach (SceneObjectPart part in partList)
+                    foreach (SceneObjectPart part in group.Parts)
                     {
                         if ((part.OwnerID != item.Owner) || (item.CurrentPermissions & 16) != 0)
                         {

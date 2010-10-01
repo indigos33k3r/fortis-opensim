@@ -832,6 +832,12 @@ namespace OpenSim.Region.Framework.Scenes
             if (!Permissions.CanCreateUserInventory(invType, remoteClient.AgentId))
                 return;
 
+            InventoryFolderBase f = new InventoryFolderBase(folderID, remoteClient.AgentId);
+            InventoryFolderBase folder = InventoryService.GetFolder(f);
+
+            if (folder == null || folder.Owner != remoteClient.AgentId)
+                return;
+
             if (transactionID == UUID.Zero)
             {
                 ScenePresence presence;
@@ -1533,16 +1539,6 @@ namespace OpenSim.Region.Framework.Scenes
                 if (part == null)
                     return;
 
-                if (part.OwnerID != remoteClient.AgentId)
-                {
-                    // Group permissions
-                    if ((part.GroupID == UUID.Zero) || (remoteClient.GetGroupPowers(part.GroupID) == 0) || ((part.GroupMask & (uint)PermissionMask.Modify) == 0))
-                        return;
-                } else {
-                    if ((part.OwnerMask & (uint)PermissionMask.Modify) == 0)
-                        return;
-                }
-
                 if (!Permissions.CanCreateObjectInventory(
                     itemBase.InvType, part.UUID, remoteClient.AgentId))
                     return;
@@ -2051,9 +2047,7 @@ namespace OpenSim.Region.Framework.Scenes
                     sog.SetGroup(groupID, remoteClient);
                     sog.ScheduleGroupForFullUpdate();
 
-                    List<SceneObjectPart> partList = null;
-                    lock (sog.Children)
-                        partList = new List<SceneObjectPart>(sog.Children.Values);
+                    SceneObjectPart[] partList = sog.Parts;
                     
                     foreach (SceneObjectPart child in partList)
                         child.Inventory.ChangeInventoryOwner(ownerID);
@@ -2066,9 +2060,7 @@ namespace OpenSim.Region.Framework.Scenes
                     if (sog.GroupID != groupID)
                         continue;
                     
-                    List<SceneObjectPart> partList = null;
-                    lock (sog.Children)
-                        partList = new List<SceneObjectPart>(sog.Children.Values);
+                    SceneObjectPart[] partList = sog.Parts;
 
                     foreach (SceneObjectPart child in partList)
                     {

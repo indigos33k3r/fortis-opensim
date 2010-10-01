@@ -161,11 +161,8 @@ namespace OpenSim.Region.Framework.Scenes
                         bool foundPrim = false;
                         
                         SceneObjectGroup sog = ent as SceneObjectGroup;
-                        
-                        List<SceneObjectPart> partList = null;
-                        lock (sog.Children)
-                            partList = new List<SceneObjectPart>(sog.Children.Values);
 
+                        SceneObjectPart[] partList = sog.Parts;
                         foreach (SceneObjectPart part in partList)
                         {
                             if (part.LocalId == primLocalID) 
@@ -518,6 +515,9 @@ namespace OpenSim.Region.Framework.Scenes
         public void HandleFetchInventoryDescendents(IClientAPI remoteClient, UUID folderID, UUID ownerID,
                                                     bool fetchFolders, bool fetchItems, int sortOrder)
         {
+            if (folderID == UUID.Zero)
+                return;
+
             // FIXME MAYBE: We're not handling sortOrder!
 
             // TODO: This code for looking in the folder for the library should be folded somewhere else

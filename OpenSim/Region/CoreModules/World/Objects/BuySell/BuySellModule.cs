@@ -89,6 +89,9 @@ namespace OpenSim.Region.CoreModules.World.Objects.BuySell
             if (part.ParentGroup.IsDeleted)
                 return;
 
+            if (part.OwnerID != client.AgentId && (!m_scene.Permissions.IsGod(client.AgentId)))
+                return;
+
             part = part.ParentGroup.RootPart;
 
             part.ObjectSaleType = saleType;
@@ -99,7 +102,7 @@ namespace OpenSim.Region.CoreModules.World.Objects.BuySell
             part.GetProperties(client);
         }
 
-        public bool BuyObject(IClientAPI remoteClient, UUID categoryID, uint localID, byte saleType)
+        public bool BuyObject(IClientAPI remoteClient, UUID categoryID, uint localID, byte saleType, int salePrice)
         {
             SceneObjectPart part = m_scene.GetSceneObjectPart(localID);
 
@@ -108,6 +111,18 @@ namespace OpenSim.Region.CoreModules.World.Objects.BuySell
 
             if (part.ParentGroup == null)
                 return false;
+
+            if (part.ObjectSaleType != saleType)
+            {
+                m_dialogModule.SendAlertToUser(remoteClient, "This item is not available for the type of sale specified");
+                return false;
+            }
+            
+            if (part.SalePrice != salePrice)
+            {
+                m_dialogModule.SendAlertToUser(remoteClient, "This item is not available for the price specified");
+                return false;
+            }
 
             SceneObjectGroup group = part.ParentGroup;
 
@@ -126,14 +141,9 @@ namespace OpenSim.Region.CoreModules.World.Objects.BuySell
                 group.SetOwnerId(remoteClient.AgentId);
                 group.SetRootPartOwner(part, remoteClient.AgentId, remoteClient.ActiveGroupId);
 
-                List<SceneObjectPart> partList = null;
-                
-                lock (group.Children)
-                    partList = new List<SceneObjectPart>(group.Children.Values);
-
                 if (m_scene.Permissions.PropagatePermissions())
                 {
-                    foreach (SceneObjectPart child in partList)
+                    foreach (SceneObjectPart child in group.Parts)
                     {
                         child.Inventory.ChangeInventoryOwner(remoteClient.AgentId);
                         child.TriggerScriptChangedEvent(Changed.OWNER);

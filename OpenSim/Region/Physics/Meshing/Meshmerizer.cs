@@ -35,6 +35,7 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using PrimMesher;
 using log4net;
+using Nini.Config;
 using System.Reflection;
 using System.IO;
 
@@ -51,9 +52,9 @@ namespace OpenSim.Region.Physics.Meshing
             return "Meshmerizer";
         }
 
-        public IMesher GetMesher()
+        public IMesher GetMesher(IConfigSource config)
         {
-            return new Meshmerizer();
+            return new Meshmerizer(config);
         }
     }
 
@@ -70,22 +71,26 @@ namespace OpenSim.Region.Physics.Meshing
 #endif
 
         private bool cacheSculptMaps = true;
-        private string decodedScultMapPath = "j2kDecodeCache";
+        private string decodedSculptMapPath = null;
 
         private float minSizeForComplexMesh = 0.2f; // prims with all dimensions smaller than this will have a bounding box mesh
 
         private Dictionary<ulong, Mesh> m_uniqueMeshes = new Dictionary<ulong, Mesh>();
 
-        public Meshmerizer()
+        public Meshmerizer(IConfigSource config)
         {
+            IConfig start_config = config.Configs["Startup"];
+
+            decodedSculptMapPath = start_config.GetString("DecodedSculptMapPath","j2kDecodeCache");
+
             try
             {
-                if (!Directory.Exists(decodedScultMapPath))
-                    Directory.CreateDirectory(decodedScultMapPath);
+                if (!Directory.Exists(decodedSculptMapPath))
+                    Directory.CreateDirectory(decodedSculptMapPath);
             }
             catch (Exception e)
             {
-                m_log.WarnFormat("[SCULPT]: Unable to create {0} directory: ", decodedScultMapPath, e.Message);
+                m_log.WarnFormat("[SCULPT]: Unable to create {0} directory: ", decodedSculptMapPath, e.Message);
             }
 
         }
@@ -260,7 +265,7 @@ namespace OpenSim.Region.Physics.Meshing
             {
                 if (cacheSculptMaps && primShape.SculptTexture != UUID.Zero)
                 {
-                    decodedSculptFileName = System.IO.Path.Combine(decodedScultMapPath, "smap_" + primShape.SculptTexture.ToString());
+                    decodedSculptFileName = System.IO.Path.Combine(decodedSculptMapPath, "smap_" + primShape.SculptTexture.ToString());
                     try
                     {
                         if (File.Exists(decodedSculptFileName))

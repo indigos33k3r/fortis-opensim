@@ -75,8 +75,23 @@ namespace OpenSim.Services.Connectors.SimianGrid
 
         public SimianProfiles() { }
         public string Name { get { return "SimianProfiles"; } }
-        public void AddRegion(Scene scene) { if (m_Enabled) { CheckEstateManager(scene); scene.EventManager.OnClientConnect += ClientConnectHandler; } }
-        public void RemoveRegion(Scene scene) { if (m_Enabled) { scene.EventManager.OnClientConnect -= ClientConnectHandler; } }
+
+        public void AddRegion(Scene scene)
+        {
+            if (m_Enabled)
+            {
+                CheckEstateManager(scene);
+                scene.EventManager.OnClientConnect += ClientConnectHandler;
+            }
+        }
+
+        public void RemoveRegion(Scene scene)
+        {
+            if (m_Enabled)
+            {
+                scene.EventManager.OnClientConnect -= ClientConnectHandler;
+            }
+        }
 
         #endregion INonSharedRegionModule
 
@@ -87,12 +102,15 @@ namespace OpenSim.Services.Connectors.SimianGrid
 
         public void Initialise(IConfigSource source)
         {
-            IConfig profileConfig = source.Configs["Profile"];
+            IConfig profileConfig = source.Configs["Profiles"];
             if (profileConfig == null)
                 return;
 
             if (profileConfig.GetString("Module", String.Empty) != Name)
                 return;
+
+            m_log.DebugFormat("[SIMIAN PROFILES] module enabled");
+            m_Enabled = true;
 
             IConfig gridConfig = source.Configs["UserAccountService"];
             if (gridConfig != null)
@@ -263,6 +281,8 @@ namespace OpenSim.Services.Connectors.SimianGrid
 
         private void RequestAvatarPropertiesHandler(IClientAPI client, UUID avatarID)
         {
+            m_log.DebugFormat("[SIMIAN PROFILES]: Request avatar properties for {0}",avatarID);
+            
             OSDMap user = FetchUserData(avatarID);
 
             ProfileFlags flags = ProfileFlags.AllowPublish | ProfileFlags.MaturePublish;
@@ -272,8 +292,14 @@ namespace OpenSim.Services.Connectors.SimianGrid
                 OSDMap about = null;
                 if (user.ContainsKey("LLAbout"))
                 {
-                    try { about = OSDParser.DeserializeJson(user["LLAbout"].AsString()) as OSDMap; }
-                    catch { }
+                    try
+                    {
+                        about = OSDParser.DeserializeJson(user["LLAbout"].AsString()) as OSDMap;
+                    }
+                    catch
+                    {
+                        m_log.WarnFormat("[SIMIAN PROFILES]: Unable to decode LLAbout");
+                    }
                 }
 
                 if (about == null)
@@ -289,8 +315,8 @@ namespace OpenSim.Services.Connectors.SimianGrid
                 // Check if the user is online
                 if (client.Scene is Scene)
                 {
-                    OpenSim.Services.Interfaces.PresenceInfo presence = ((Scene)client.Scene).PresenceService.GetAgent(avatarID);
-                    if (presence != null)
+                    OpenSim.Services.Interfaces.PresenceInfo[] presences = ((Scene)client.Scene).PresenceService.GetAgents(new string[] { avatarID.ToString() });
+                    if (presences != null && presences.Length > 0)
                         flags |= ProfileFlags.Online;
                 }
 
@@ -426,6 +452,8 @@ namespace OpenSim.Services.Connectors.SimianGrid
 
         private OSDMap FetchUserData(UUID userID)
         {
+            m_log.DebugFormat("[SIMIAN PROFILES]: Fetch information about {0}",userID);
+            
             NameValueCollection requestArgs = new NameValueCollection
             {
                 { "RequestMethod", "GetUser" },
