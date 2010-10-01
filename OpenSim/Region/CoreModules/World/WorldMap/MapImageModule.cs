@@ -423,7 +423,7 @@ namespace OpenSim.Region.CoreModules.World.WorldMap
                             Local = true,
                             Temporary = true,
                             Name = String.Empty,
-                            Type = (sbyte)AssetType.Unknown
+                            Type = (sbyte)AssetType.Simstate // Make something up to get around OpenSim's myopic treatment of assets
                         };
                         m_scene.AssetService.Store(metadata);
                     }

@@ -41,8 +41,8 @@ namespace OpenSim
     /// </summary>
     public class ConfigurationLoader
     {
-        private const string DEFAULT_INI_MASTER_FILE = "OpenSimDefaults.ini";
-        private const string DEFAULT_INI_OVERRIDES_FILE = "OpenSim.ini";
+        private const string DEFAULT_INI_FILE = "OpenSim.ini";
+        private const string DEFAULT_INI_BASE_FILE = "OpenSimDefaults.ini";
 
         private static readonly ILog m_log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 
@@ -63,21 +63,31 @@ namespace OpenSim
                 IConfigSource argvSource, out ConfigSettings configSettings)
         {
             IConfig startupConfig = argvSource.Configs["Startup"];
-            string masterFilename = startupConfig.GetString("inimaster", DEFAULT_INI_MASTER_FILE);
-            string iniFilename = startupConfig.GetString("inifile", DEFAULT_INI_OVERRIDES_FILE);
+            string iniFilename = startupConfig.GetString("inifile", DEFAULT_INI_FILE);
 
-            // Load the master ini file
-            IniConfigSource masterConfig = LoadConfig(masterFilename);
+            // If we are using the default ini file path and it doesn't exist, create an initial 
+            // file that includes the base ini file
+            if (iniFilename == DEFAULT_INI_FILE)
+            {
+                try
+                {
+                    if (!File.Exists(iniFilename))
+                    {
+                        using (StreamWriter writer = new StreamWriter(iniFilename))
+                            writer.WriteLine("Include " + DEFAULT_INI_BASE_FILE);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    m_log.Error("Failed to create initial OpenSim.ini file. Please check file permissions " +
+                        "and pass the inifile parameter if necessary. Error: " + ex.Message);
+                    Environment.Exit(-1);
+                }
+            }
 
-            // Load the overrides ini file
-            IniConfigSource overridesConfig = LoadConfig(iniFilename);
-
-            // Merge
-            masterConfig.Merge(overridesConfig);
-
-            // Create m_config and assign masterConfig to it
+            // Create a configuration source and load the ini file
             m_config = new OpenSimConfigSource();
-            m_config.Source = masterConfig;
+            m_config.Source = LoadConfig(iniFilename);
 
             // Create m_configSettings and set it up
             configSettings = new ConfigSettings();
@@ -166,10 +176,7 @@ namespace OpenSim
                 }
                 catch (Exception ex)
                 {
-                    // Don't print out an error message if there is no OpenSim.ini, this is the 
-                    // default setup
-                    if (location != DEFAULT_INI_OVERRIDES_FILE)
-                        m_log.Error("Failed to load config file " + location + ": " + ex.Message);
+                    m_log.Error("Failed to load config file " + location + ": " + ex.Message);
                 }
             }
 

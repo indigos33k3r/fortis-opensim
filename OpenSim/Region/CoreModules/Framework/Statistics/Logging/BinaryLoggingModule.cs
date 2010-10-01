@@ -52,31 +52,20 @@ namespace OpenSim.Region.CoreModules.Avatar.Attachments
 
         public void Initialise(IConfigSource source) 
         {
-            try
+            IConfig statConfig = source.Configs["Statistics.Binary"];
+            if (statConfig != null && statConfig.GetBoolean("enabled", false))
             {
-                IConfig statConfig = source.Configs["Statistics.Binary"];
-                if (statConfig.Contains("enabled") && statConfig.GetBoolean("enabled"))
+                if (statConfig.Contains("collect_region_stats"))
                 {
-                    if (statConfig.Contains("collect_region_stats"))
-                    {
-                        if (statConfig.GetBoolean("collect_region_stats"))
-                        {
-                            m_collectStats = true;
-                        }
-                    }
-                    if (statConfig.Contains("region_stats_period_seconds"))
-                    {
-                        m_statLogPeriod = TimeSpan.FromSeconds(statConfig.GetInt("region_stats_period_seconds"));
-                    }
-                    if (statConfig.Contains("stats_dir"))
-                    {
-                        m_statsDir = statConfig.GetString("stats_dir");
-                    }
+                    if (statConfig.GetBoolean("collect_region_stats"))
+                        m_collectStats = true;
                 }
-            }
-            catch
-            {
-                // if it doesn't work, we don't collect anything
+
+                if (statConfig.Contains("region_stats_period_seconds"))
+                    m_statLogPeriod = TimeSpan.FromSeconds(statConfig.GetInt("region_stats_period_seconds"));
+
+                if (statConfig.Contains("stats_dir"))
+                    m_statsDir = statConfig.GetString("stats_dir");
             }
         }
         

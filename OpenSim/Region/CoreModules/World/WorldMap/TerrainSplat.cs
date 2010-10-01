@@ -159,7 +159,7 @@ namespace OpenSim.Region.CoreModules.World.WorldMap
                                     Local = true,
                                     Name = String.Empty,
                                     Temporary = true,
-                                    Type = (sbyte)AssetType.Unknown
+                                    Type = (sbyte)AssetType.Simstate // Make something up to get around OpenSim's myopic treatment of assets
                                 };
                                 newAsset.Metadata.ContentType = "image/png";
                                 assetService.Store(newAsset);
