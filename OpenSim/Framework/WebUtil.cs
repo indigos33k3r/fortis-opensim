@@ -199,7 +199,7 @@ namespace OpenSim.Framework
                         catch (Exception ex)
                         {
                             if (!String.IsNullOrEmpty(responseStr))
-                                errorMessage = "Failed to parse the response:\n" + responseStr;
+                                errorMessage = "Failed to parse the response: " + responseStr;
                             else
                                 errorMessage = "Failed to retrieve the response: " + ex.Message;
                         }
@@ -212,7 +212,7 @@ namespace OpenSim.Framework
                 errorMessage = ex.Message;
             }
 
-            return new OSDMap { { "Message", OSD.FromString("Service request failed. " + errorMessage) } };
+            return new OSDMap { { "Message", OSD.FromString("Service request failed. " + errorMessage.Replace("\n", String.Empty)) } };
         }
 
         #region Uri
