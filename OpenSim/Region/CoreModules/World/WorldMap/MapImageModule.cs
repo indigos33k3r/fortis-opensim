@@ -174,8 +174,8 @@ namespace OpenSim.Region.CoreModules.World.WorldMap
 
             CreateWater(renderer);
             CreateTerrain(renderer, textureTerrain);
-            if (drawPrimVolume)
-                CreateAllPrims(renderer);
+            if (drawPrimVolume && m_primMesher != null)
+                m_scene.ForEachSOG(group => group.ForEachPart(part => CreatePrim(renderer, part)));
 
             renderer.Render();
             Bitmap bitmap = renderer.Scene.getImage();
@@ -300,21 +300,6 @@ namespace OpenSim.Region.CoreModules.World.WorldMap
             material.setReflectivity(50);
             renderer.Scene.addMaterial("TerrainColor", material);
             renderer.SetObjectMaterial("Terrain", "TerrainColor");
-        }
-
-        private void CreateAllPrims(WarpRenderer renderer)
-        {
-            if (m_primMesher == null)
-                return;
-
-            m_scene.ForEachSOG(
-                delegate(SceneObjectGroup group)
-                {
-                    CreatePrim(renderer, group.RootPart);
-                    foreach (SceneObjectPart child in group.Children.Values)
-                        CreatePrim(renderer, child);
-                }
-            );
         }
 
         private void CreatePrim(WarpRenderer renderer, SceneObjectPart prim)
