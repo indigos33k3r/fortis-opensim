@@ -64,8 +64,8 @@ namespace OpenSim.Region.Framework.Scenes.Animation
             { new UUID("2d6daa51-3192-6794-8e2e-a15f8338ec30"), "Turning Right" },
             { new UUID("6ed24bd8-91aa-4b12-ccc7-c97c857ab4e0"), "Walking" },
         };
-        public static readonly Dictionary<string, UUID> AnimsUUID;
-        public static readonly Dictionary<UUID, string> AnimsNames;
+        public static Dictionary<string, UUID> AnimsUUID = new Dictionary<string, UUID>();
+        public static Dictionary<UUID, string> AnimsNames = new Dictionary<UUID, string>();
 
         static AvatarAnimations()
         {
