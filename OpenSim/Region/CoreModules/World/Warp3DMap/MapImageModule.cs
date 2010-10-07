@@ -47,10 +47,9 @@ using OpenSim.Services.Interfaces;
 
 using WarpRenderer = global::Warp3D.Warp3D;
 
-namespace OpenSim.Region.CoreModules.World.WorldMap
+namespace OpenSim.Region.CoreModules.World.Warp3DMap
 {
-    [RegionModuleDeprecated("MapImageModule")]
-    public class MapImageModule : IMapImageGenerator, IRegionModule
+    public class Warp3DImageModule : IMapImageGenerator, IRegionModule
     {
         private static readonly UUID TEXTURE_METADATA_MAGIC = new UUID("802dc0e0-f080-4931-8b57-d1be8611c4f3");
         private static readonly Color4 WATER_COLOR = new Color4(29, 71, 95, 216);
@@ -72,7 +71,7 @@ namespace OpenSim.Region.CoreModules.World.WorldMap
             m_config = source;
 
             IConfig startupConfig = m_config.Configs["Startup"];
-            if (startupConfig.GetString("MapImageModule", "MapImageModule") != "MapImageModule")
+            if (startupConfig.GetString("MapImageModule", "MapImageModule") != "Warp3DImageModule")
                 return;
 
             List<string> renderers = RenderingLoader.ListRenderers(Util.ExecutingDirectory());
@@ -99,7 +98,7 @@ namespace OpenSim.Region.CoreModules.World.WorldMap
 
         public string Name
         {
-            get { return "MapImageModule"; }
+            get { return "Warp3DImageModule"; }
         }
 
         public bool IsSharedModule
@@ -174,8 +173,8 @@ namespace OpenSim.Region.CoreModules.World.WorldMap
 
             CreateWater(renderer);
             CreateTerrain(renderer, textureTerrain);
-            if (drawPrimVolume && m_primMesher != null)
-                m_scene.ForEachSOG(group => group.ForEachPart(part => CreatePrim(renderer, part)));
+            if (drawPrimVolume)
+                CreateAllPrims(renderer);
 
             renderer.Render();
             Bitmap bitmap = renderer.Scene.getImage();
@@ -302,6 +301,21 @@ namespace OpenSim.Region.CoreModules.World.WorldMap
             renderer.SetObjectMaterial("Terrain", "TerrainColor");
         }
 
+        private void CreateAllPrims(WarpRenderer renderer)
+        {
+            if (m_primMesher == null)
+                return;
+
+            m_scene.ForEachSOG(
+                delegate(SceneObjectGroup group)
+                {
+                    CreatePrim(renderer, group.RootPart);
+                    foreach (SceneObjectPart child in group.Parts)
+                        CreatePrim(renderer, child);
+                }
+            );
+        }
+
         private void CreatePrim(WarpRenderer renderer, SceneObjectPart prim)
         {
             const float MIN_SIZE = 2f;
@@ -423,7 +437,7 @@ namespace OpenSim.Region.CoreModules.World.WorldMap
                             Local = true,
                             Temporary = true,
                             Name = String.Empty,
-                            Type = (sbyte)AssetType.Simstate // Make something up to get around OpenSim's myopic treatment of assets
+                            Type = (sbyte)AssetType.Unknown
                         };
                         m_scene.AssetService.Store(metadata);
                     }
