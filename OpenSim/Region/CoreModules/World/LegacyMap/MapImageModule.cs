@@ -46,6 +46,7 @@ using OpenSim.Region.Physics.Manager;
 using OpenSim.Services.Interfaces;
 
 using WarpRenderer = global::Warp3D.Warp3D;
+using OpenSim.Region.CoreModules.World.WorldMap;
 
 namespace OpenSim.Region.CoreModules.World.LegacyMap
 {

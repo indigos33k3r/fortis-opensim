@@ -33,6 +33,7 @@ using log4net;
 using OpenMetaverse;
 using OpenSim.Framework;
 using OpenSim.Services.Interfaces;
+using OpenSim.Region.CoreModules.World.Warp3DMap;
 
 namespace OpenSim.Region.CoreModules.World.WorldMap
 {
