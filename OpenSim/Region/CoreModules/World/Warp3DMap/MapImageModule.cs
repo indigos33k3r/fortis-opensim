@@ -50,7 +50,7 @@ using WarpRenderer = global::Warp3D.Warp3D;
 namespace OpenSim.Region.CoreModules.World.Warp3DMap
 {
     [RegionModuleDeprecated("Warp3DImageModule")]
-    public class Warp3DImageModule : IMapImageGenerator, IRegionModule
+    public class Warp3DImageModule : IMapImageGenerator, INonSharedRegionModule
     {
         private static readonly UUID TEXTURE_METADATA_MAGIC = new UUID("802dc0e0-f080-4931-8b57-d1be8611c4f3");
         private static readonly Color4 WATER_COLOR = new Color4(29, 71, 95, 216);
@@ -63,17 +63,27 @@ namespace OpenSim.Region.CoreModules.World.Warp3DMap
         private IConfigSource m_config;
         private Dictionary<UUID, Color4> m_colors = new Dictionary<UUID, Color4>();
         private bool m_useAntiAliasing = true; // TODO: Make this a config option
+        private bool m_Enabled = false;
 
         #region IRegionModule Members
 
-        public void Initialise(Scene scene, IConfigSource source)
+        public void Initialise(IConfigSource source)
         {
-            m_scene = scene;
             m_config = source;
 
             IConfig startupConfig = m_config.Configs["Startup"];
             if (startupConfig.GetString("MapImageModule", "MapImageModule") != "Warp3DImageModule")
                 return;
+
+            m_Enabled = true;
+        }
+
+        public void AddRegion(Scene scene)
+        {
+            if (!m_Enabled)
+                return;
+
+            m_scene = scene;
 
             List<string> renderers = RenderingLoader.ListRenderers(Util.ExecutingDirectory());
             if (renderers.Count > 0)
@@ -89,7 +99,11 @@ namespace OpenSim.Region.CoreModules.World.Warp3DMap
             m_scene.RegisterModuleInterface<IMapImageGenerator>(this);
         }
 
-        public void PostInitialise()
+        public void RegionLoaded(Scene scene)
+        {
+        }
+
+        public void RemoveRegion(Scene scene)
         {
         }
 
@@ -102,9 +116,9 @@ namespace OpenSim.Region.CoreModules.World.Warp3DMap
             get { return "Warp3DImageModule"; }
         }
 
-        public bool IsSharedModule
+        public Type ReplaceableInterface
         {
-            get { return false; }
+            get { return null; }
         }
 
         #endregion
@@ -112,6 +126,19 @@ namespace OpenSim.Region.CoreModules.World.Warp3DMap
         #region IMapImageGenerator Members
 
         public Bitmap CreateMapTile()
+        {
+            Vector3 camPos = new Vector3(127.5f, 127.5f, 221.7025033688163f);
+            Viewport viewport = new Viewport(camPos, -Vector3.UnitZ, 1024f, 0.1f, (int)Constants.RegionSize, (int)Constants.RegionSize, (float)Constants.RegionSize, (float)Constants.RegionSize);
+            return CreateMapTile(viewport, false);
+        }
+
+        public Bitmap CreateViewImage(Vector3 camPos, Vector3 camDir, float fov, int width, int height, bool useTextures)
+        {
+            Viewport viewport = new Viewport(camPos, camDir, fov, (float)Constants.RegionSize, 0.1f, width, height);
+            return CreateMapTile(viewport, useTextures);
+        }
+
+        public Bitmap CreateMapTile(Viewport viewport, bool useTextures)
         {
             bool drawPrimVolume = true;
             bool textureTerrain = true;
@@ -128,9 +155,6 @@ namespace OpenSim.Region.CoreModules.World.Warp3DMap
             }
 
             m_colors.Clear();
-
-            Vector3 camPos = new Vector3(127.5f, 127.5f, 221.7025033688163f);
-            Viewport viewport = new Viewport(camPos, -Vector3.UnitZ, 1024f, 0.1f, (int)Constants.RegionSize, (int)Constants.RegionSize, (float)Constants.RegionSize, (float)Constants.RegionSize);
 
             int width = viewport.Width;
             int height = viewport.Height;
@@ -175,7 +199,7 @@ namespace OpenSim.Region.CoreModules.World.Warp3DMap
             CreateWater(renderer);
             CreateTerrain(renderer, textureTerrain);
             if (drawPrimVolume)
-                CreateAllPrims(renderer);
+                CreateAllPrims(renderer, useTextures);
 
             renderer.Render();
             Bitmap bitmap = renderer.Scene.getImage();
@@ -302,7 +326,7 @@ namespace OpenSim.Region.CoreModules.World.Warp3DMap
             renderer.SetObjectMaterial("Terrain", "TerrainColor");
         }
 
-        private void CreateAllPrims(WarpRenderer renderer)
+        private void CreateAllPrims(WarpRenderer renderer, bool useTextures)
         {
             if (m_primMesher == null)
                 return;
@@ -310,14 +334,15 @@ namespace OpenSim.Region.CoreModules.World.Warp3DMap
             m_scene.ForEachSOG(
                 delegate(SceneObjectGroup group)
                 {
-                    CreatePrim(renderer, group.RootPart);
+                    CreatePrim(renderer, group.RootPart, useTextures);
                     foreach (SceneObjectPart child in group.Parts)
-                        CreatePrim(renderer, child);
+                        CreatePrim(renderer, child, useTextures);
                 }
             );
         }
 
-        private void CreatePrim(WarpRenderer renderer, SceneObjectPart prim)
+        private void CreatePrim(WarpRenderer renderer, SceneObjectPart prim,
+                bool useTextures)
         {
             const float MIN_SIZE = 2f;
 
@@ -348,10 +373,17 @@ namespace OpenSim.Region.CoreModules.World.Warp3DMap
             string primID = prim.UUID.ToString();
 
             // Create the prim faces
+            // TODO: Implement the useTextures flag behavior
             for (int i = 0; i < renderMesh.Faces.Count; i++)
             {
                 Face face = renderMesh.Faces[i];
                 string meshName = primID + "-Face-" + i.ToString();
+
+                // Avoid adding duplicate meshes to the scene
+                if (renderer.Scene.objectData.ContainsKey(meshName))
+                {
+                    continue;
+                }
 
                 warp_Object faceObj = new warp_Object(face.Vertices.Count, face.Indices.Count / 3);
 

@@ -50,8 +50,28 @@ using OpenSim.Region.CoreModules.World.WorldMap;
 
 namespace OpenSim.Region.CoreModules.World.LegacyMap
 {
+    public enum DrawRoutine
+    {
+        Rectangle,
+        Polygon,
+        Ellipse
+    }
+
+    public struct face
+    {
+        public Point[] pts;
+    }
+
+    public struct DrawStruct
+    {
+        public DrawRoutine dr;
+        public Rectangle rect;
+        public SolidBrush brush;
+        public face[] trns;
+    }
+
     [RegionModuleDeprecated("MapImageModule")]
-    public class MapImageModule : IMapImageGenerator, IRegionModule
+    public class MapImageModule : IMapImageGenerator, INonSharedRegionModule
     {
         private static readonly UUID TEXTURE_METADATA_MAGIC = new UUID("802dc0e0-f080-4931-8b57-d1be8611c4f3");
         private static readonly Color4 WATER_COLOR = new Color4(29, 71, 95, 216);
@@ -62,6 +82,7 @@ namespace OpenSim.Region.CoreModules.World.LegacyMap
         private Scene m_scene;
         private IRendering m_primMesher;
         private IConfigSource m_config;
+<<<<<<< HEAD
         private Dictionary<UUID, Color4> m_colors = new Dictionary<UUID, Color4>();
         private bool m_useAntiAliasing = true; // TODO: Make this a config option
 
@@ -109,6 +130,10 @@ namespace OpenSim.Region.CoreModules.World.LegacyMap
         }
 
         #endregion
+=======
+        private IMapTileTerrainRenderer terrainRenderer;
+        private bool m_Enabled = false;
+>>>>>>> core/master
 
         #region IMapImageGenerator Members
 
@@ -207,9 +232,15 @@ namespace OpenSim.Region.CoreModules.World.LegacyMap
 
         #region Rendering Methods
 
+<<<<<<< HEAD
         private void CreateWater(WarpRenderer renderer)
         {
             float waterHeight = (float)m_scene.RegionInfo.RegionSettings.WaterHeight;
+=======
+        public void Initialise(IConfigSource source)
+        {
+            m_config = source;
+>>>>>>> core/master
 
             renderer.AddPlane("Water", 256f * 0.5f);
             renderer.Scene.sceneobject("Water").setPos(127.5f, waterHeight, 127.5f);
@@ -312,6 +343,7 @@ namespace OpenSim.Region.CoreModules.World.LegacyMap
             if (prim.Scale.LengthSquared() < MIN_SIZE * MIN_SIZE)
                 return;
 
+<<<<<<< HEAD
             Primitive omvPrim = prim.Shape.ToOmvPrimitive(prim.OffsetPosition, prim.RotationOffset);
             FacetedMesh renderMesh = m_primMesher.GenerateFacetedMesh(omvPrim, DetailLevel.Medium);
             if (renderMesh == null)
@@ -378,6 +410,26 @@ namespace OpenSim.Region.CoreModules.World.LegacyMap
         }
 
         private Color4 GetFaceColor(Primitive.TextureEntryFace face)
+=======
+            m_Enabled = true;
+        }
+
+        public void AddRegion(Scene scene)
+        {
+            if (!m_Enabled)
+                return;
+
+            m_scene = scene;
+
+            m_scene.RegisterModuleInterface<IMapImageGenerator>(this);
+        }
+
+        public void RegionLoaded(Scene scene)
+        {
+        }
+
+        public void RemoveRegion(Scene scene)
+>>>>>>> core/master
         {
             Color4 color;
 
@@ -463,9 +515,15 @@ namespace OpenSim.Region.CoreModules.World.LegacyMap
             return new warp_Vector(vector.X, vector.Z, vector.Y);
         }
 
+<<<<<<< HEAD
         private static warp_Quaternion ConvertQuaternion(Quaternion quat)
         {
             return new warp_Quaternion(quat.X, quat.Z, quat.Y, -quat.W);
+=======
+        public Type ReplaceableInterface
+        {
+            get { return null; }
+>>>>>>> core/master
         }
 
         private static int ConvertColor(Color4 color)
@@ -606,6 +664,11 @@ namespace OpenSim.Region.CoreModules.World.LegacyMap
             }
 
             return result;
+        }
+
+        public Bitmap CreateViewImage(Vector3 camPos, Vector3 camDir, float fov, int width, int height, bool useTextures)
+        {
+            return null;
         }
     }
 }
