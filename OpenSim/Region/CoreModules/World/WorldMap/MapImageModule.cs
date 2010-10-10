@@ -49,7 +49,7 @@ using WarpRenderer = global::Warp3D.Warp3D;
 
 namespace OpenSim.Region.CoreModules.World.Warp3DMap
 {
-    [RegionModuleDeprecated("Warp3DImageModule")]
+    [RegionModule("MapImageModule")]
     public class Warp3DImageModule : IMapImageGenerator, INonSharedRegionModule
     {
         private static readonly UUID TEXTURE_METADATA_MAGIC = new UUID("802dc0e0-f080-4931-8b57-d1be8611c4f3");

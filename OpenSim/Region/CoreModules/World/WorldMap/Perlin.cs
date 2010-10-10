@@ -28,7 +28,7 @@
 using System;
 using OpenMetaverse;
 
-namespace OpenSim.Region.CoreModules.World.WorldMap
+namespace OpenSim.Region.CoreModules.World.Warp3DMap
 {
     public static class Perlin
     {

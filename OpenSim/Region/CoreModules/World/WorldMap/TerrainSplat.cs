@@ -33,9 +33,8 @@ using log4net;
 using OpenMetaverse;
 using OpenSim.Framework;
 using OpenSim.Services.Interfaces;
-using OpenSim.Region.CoreModules.World.Warp3DMap;
 
-namespace OpenSim.Region.CoreModules.World.WorldMap
+namespace OpenSim.Region.CoreModules.World.Warp3DMap
 {
     public static class TerrainSplat
     {
@@ -160,7 +159,7 @@ namespace OpenSim.Region.CoreModules.World.WorldMap
                                     Local = true,
                                     Name = String.Empty,
                                     Temporary = true,
-                                    Type = (sbyte)AssetType.Simstate // Make something up to get around OpenSim's myopic treatment of assets
+                                    Type = (sbyte)AssetType.Unknown
                                 };
                                 newAsset.Metadata.ContentType = "image/png";
                                 assetService.Store(newAsset);
