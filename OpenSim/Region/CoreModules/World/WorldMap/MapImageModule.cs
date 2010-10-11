@@ -50,7 +50,7 @@ using WarpRenderer = global::Warp3D.Warp3D;
 namespace OpenSim.Region.CoreModules.World.Warp3DMap
 {
     [RegionModule("MapImageModule")]
-    public class Warp3DImageModule : IMapImageGenerator, INonSharedRegionModule
+    public class MapImageModule : IMapImageGenerator, INonSharedRegionModule
     {
         private static readonly UUID TEXTURE_METADATA_MAGIC = new UUID("802dc0e0-f080-4931-8b57-d1be8611c4f3");
         private static readonly Color4 WATER_COLOR = new Color4(29, 71, 95, 216);
@@ -72,7 +72,7 @@ namespace OpenSim.Region.CoreModules.World.Warp3DMap
             m_config = source;
 
             IConfig startupConfig = m_config.Configs["Startup"];
-            if (startupConfig.GetString("MapImageModule", "MapImageModule") != "Warp3DImageModule")
+            if (startupConfig.GetString("MapImageModule", "MapImageModule") != "MapImageModule")
                 return;
 
             m_Enabled = true;
@@ -113,7 +113,7 @@ namespace OpenSim.Region.CoreModules.World.Warp3DMap
 
         public string Name
         {
-            get { return "Warp3DImageModule"; }
+            get { return "MapImageModule"; }
         }
 
         public Type ReplaceableInterface
