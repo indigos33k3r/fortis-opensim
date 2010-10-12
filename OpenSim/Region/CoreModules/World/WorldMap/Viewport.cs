@@ -29,7 +29,7 @@ using System;
 using System.Drawing;
 using OpenMetaverse;
 
-namespace OpenSim.Region.CoreModules.World.WorldMap
+namespace OpenSim.Region.CoreModules.World.Warp3DMap
 {
     public class Viewport
     {

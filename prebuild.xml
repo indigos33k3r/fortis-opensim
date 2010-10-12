@@ -1203,9 +1203,10 @@
       <Reference name="System.Xml"/>
       <Reference name="System.Drawing"/>
       <Reference name="System.Web"/>
-      <Reference name="NDesk.Options" path="../../../lib"/>
+      <Reference name="NDesk.Options" path="../../../lib" localCopy="true" />
       <Reference name="OpenMetaverseTypes" path="../../../lib/" localCopy="true"/>
       <Reference name="OpenMetaverse.StructuredData" path="../../../lib/" localCopy="true"/>
+      <Reference name="OpenMetaverse.Rendering.Meshmerizer" path="../../../lib" localCopy="true" />?
       <Reference name="OpenMetaverse" path="../../../lib/" localCopy="true"/>
       <Reference name="CSJ2K" path="../../../lib/" localCopy="true"/>
       <Reference name="Warp3D" path="../../../lib/" localCopy="true"/>
@@ -1757,7 +1758,6 @@
     </Project>
 
     <!-- Client Stack Modules -->
-
     <Project frameworkVersion="v3_5" name="OpenSim.Client.Linden" path="OpenSim/Client/Linden" type="Library">
       <Configuration name="Debug">
         <Options>

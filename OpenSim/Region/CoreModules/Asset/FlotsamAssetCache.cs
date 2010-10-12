@@ -243,7 +243,7 @@ namespace Flotsam.RegionModules.AssetCache
                 }
                 else
                 {
-                    m_MemoryCache.AddOrUpdate(key, asset, DateTime.MaxValue);
+                    m_MemoryCache.AddOrUpdate(key, asset, Double.MaxValue);
                 }
             }
         }
