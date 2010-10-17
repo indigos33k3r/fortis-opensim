@@ -31,7 +31,6 @@ using System.Collections.Specialized;
 using System.Reflection;
 using System.IO;
 using System.Web;
-using Mono.Addins;
 using log4net;
 using Nini.Config;
 using OpenMetaverse;
@@ -47,7 +46,7 @@ using OpenSim.Framework.Capabilities;
 
 namespace OpenSim.Region.CoreModules.Avatar.Assets
 {
-    [Extension(Path = "/OpenSim/RegionModules", NodeName = "RegionModule")]
+    [RegionModule("NewFileAgentInventoryVariablePriceModule")]
     public class NewFileAgentInventoryVariablePriceModule : INonSharedRegionModule
     {
         private static readonly ILog m_log =
