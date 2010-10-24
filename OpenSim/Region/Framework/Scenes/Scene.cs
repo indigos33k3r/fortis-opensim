@@ -608,8 +608,6 @@ namespace OpenSim.Region.Framework.Scenes
             StatsReporter.OnSendStatsResult += SendSimStatsPackets;
             StatsReporter.OnStatsIncorrect += m_sceneGraph.RecalculateStats;
 
-            StatsReporter.SetObjectCapacity(RegionInfo.ObjectCapacity);
-
             // Old
             /*
             m_simulatorVersion = simulatorVersion
@@ -2406,7 +2404,7 @@ namespace OpenSim.Region.Framework.Scenes
             }
             catch (Exception e)
             {
-                m_log.WarnFormat("[SCENE]: Problem casting object: {0}", e.Message);
+                m_log.WarnFormat("[SCENE]: Problem casting object: " + e.ToString());
                 return false;
             }
 
@@ -3358,7 +3356,7 @@ namespace OpenSim.Region.Framework.Scenes
                 }
                 catch (Exception e)
                 {
-                    m_log.DebugFormat("[CONNECTION BEGIN]: Exception verifying presence {0}", e.Message);
+                    m_log.ErrorFormat("[CONNECTION BEGIN]: Exception verifying presence " + e.ToString());
                     return false;
                 }
 
@@ -3369,7 +3367,7 @@ namespace OpenSim.Region.Framework.Scenes
                 }
                 catch (Exception e)
                 {
-                    m_log.DebugFormat("[CONNECTION BEGIN]: Exception authorizing user {0}", e.Message);
+                    m_log.ErrorFormat("[CONNECTION BEGIN]: Exception authorizing user " + e.ToString());
                     return false;
                 }
 

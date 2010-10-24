@@ -438,6 +438,7 @@
       <Reference name="OpenMetaverseTypes" path="../../../../lib/" localCopy="true"/>
       <Reference name="OpenMetaverse" path="../../../../lib/" localCopy="true"/>
       <Reference name="Nini" path="../../../../lib/" localCopy="true"/>
+      <Reference name="zlib.net" path="../../../../lib/" localCopy="true"/>
       <Reference name="OpenSim.Framework"/>
       <Reference name="OpenSim.Framework.Console"/>
       <Reference name="OpenSim.Region.Physics.Manager"/>
@@ -1198,6 +1199,7 @@
       <Reference name="System"/>
       <Reference name="System.Core"/>
       <Reference name="System.Xml"/>
+      <Reference name="System.Xml.Linq"/>
       <Reference name="System.Drawing"/>
       <Reference name="System.Web"/>
       <Reference name="NDesk.Options" path="../../../lib" localCopy="true" />
