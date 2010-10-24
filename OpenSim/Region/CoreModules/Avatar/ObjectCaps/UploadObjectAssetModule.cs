@@ -31,7 +31,6 @@ using System.Collections.Specialized;
 using System.Reflection;
 using System.IO;
 using System.Web;
-using Mono.Addins;
 using log4net;
 using Nini.Config;
 using OpenMetaverse;
@@ -51,7 +50,7 @@ using ExtraParamType = OpenMetaverse.ExtraParamType;
 
 namespace OpenSim.Region.CoreModules.Avatar.ObjectCaps
 {
-    [Extension(Path = "/OpenSim/RegionModules", NodeName = "RegionModule")]
+    [RegionModule("UploadObjectAssetModule")]
     public class UploadObjectAssetModule : INonSharedRegionModule
     {
         private static readonly ILog m_log =

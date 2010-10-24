@@ -436,6 +436,7 @@
       <Reference name="System.Drawing"/>
       <Reference name="CSJ2K" path="../../../../lib/" localCopy="true"/>
       <Reference name="OpenMetaverseTypes" path="../../../../lib/" localCopy="true"/>
+      <Reference name="OpenMetaverse.StructuredData" path="../../../../lib/" localCopy="true"/>
       <Reference name="OpenMetaverse" path="../../../../lib/" localCopy="true"/>
       <Reference name="Nini" path="../../../../lib/" localCopy="true"/>
       <Reference name="zlib.net" path="../../../../lib/" localCopy="true"/>
@@ -500,6 +501,8 @@
       <Reference name="OpenSim.Services.Interfaces"/>
       <Reference name="OpenMetaverseTypes" path="../../../lib/" localCopy="true"/>
       <!-- FIXME: The OpenMetaverse.dll reference can be dropped when the TransferRequestPacket reference is removed from the code -->
+      <Reference name="OpenMetaverse" path="../../../lib/" localCopy="true"/>
+      <Reference name="OpenMetaverse.StructuredData" path="../../../lib/" localCopy="true"/>
       <Reference name="Nini" path="../../../lib/" localCopy="true"/>
       <Reference name="log4net" path="../../../lib/" localCopy="true"/>
 
