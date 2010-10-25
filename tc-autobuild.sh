@@ -16,13 +16,19 @@ while [ "$1" != "" ]; do
 done
 
 if [ "$makebuild" = "yes" ]; then
-    xbuild OpenSim.sln
+    xbuild /t:Rebuild OpenSim.sln
+    res=$?
+
+    if [ "$res" != "0" ]; then
+	exit $res
+    fi
 
     if [ "$makedist" = "yes" ]; then
 	cd bin
 	mv Debug fortis-opensim-autobuild
 	tar cjf fortis-opensim-autobuild.tar.bz2 fortis-opensim-autobuild
 	rm -rf fortis-opensim-autobuild
+	cd ..
     fi
 fi
 
