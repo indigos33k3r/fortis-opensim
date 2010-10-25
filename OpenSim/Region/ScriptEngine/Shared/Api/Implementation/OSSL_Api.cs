@@ -654,6 +654,8 @@ namespace OpenSim.Region.ScriptEngine.Shared.Api
 
                         // Check for hostname , attempt to make a hglink
                         // and convert the regionName to the target region
+                        // This has broken in 0.7x and will need to be 
+                        // refactored to handle gatekeeper_host:port:region
                         if (regionName.Contains(".") && regionName.Contains(":"))
                         {
                             List<GridRegion> regions = World.GridService.GetRegionsByName(World.RegionInfo.ScopeID, regionName, 1);
