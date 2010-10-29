@@ -1038,7 +1038,8 @@ namespace OpenSim.Region.Framework.Scenes
                 if (IsAttachment)
                     return GroupPosition;
 
-                return m_offsetPosition + m_groupPosition; }
+                return GetWorldPosition();
+            }
         }
 
         public SceneObjectGroup ParentGroup
