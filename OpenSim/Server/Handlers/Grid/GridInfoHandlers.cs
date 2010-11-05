@@ -27,6 +27,7 @@
 
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Reflection;
@@ -44,6 +45,7 @@ namespace OpenSim.Server.Handlers.Grid
         private static readonly ILog _log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 
         private Hashtable _info = new Hashtable();
+        private Dictionary<string, Hashtable> gridInfos = new Dictionary<string, Hashtable>();
 
         /// <summary>
         /// Instantiate a GridInfoService object.
@@ -67,37 +69,31 @@ namespace OpenSim.Server.Handlers.Grid
             try
             {
                 IConfig startupCfg = configSource.Configs["Startup"];
-                IConfig gridCfg = configSource.Configs["GridInfoService"];
-                IConfig netCfg = configSource.Configs["Network"];
+                string infosIni = "";
 
                 bool grid = startupCfg.GetBoolean("gridmode", false);
 
-                if (null != gridCfg)
+                if (grid != false)
                 {
-                    foreach (string k in gridCfg.GetKeys())
-                    {
-                        _info[k] = gridCfg.GetString(k);
+                    infosIni = startupCfg.GetString ("GridInfos", "");
+                }
+                if (infosIni != "" && grid == true) {
+
+                    IConfigSource infoSource = new IniConfigSource (infosIni);
+
+                    foreach (IConfig iSrc in infoSource.Configs) {
+
+                        Hashtable _inf = new Hashtable ();
+
+                        foreach (string k in iSrc.GetKeys ()) {
+                            _inf[k] = iSrc.GetString (k);
+                        }
+
+                        lock (gridInfos) {
+                            gridInfos[iSrc.Name] = _inf;
+                        }
+                        _log.WarnFormat ("[BW Grid Info]: Added GridInfo {0}", iSrc.Name);
                     }
-                }
-                else if (null != netCfg)
-                {
-                    if (grid)
-                        _info["login"] 
-                            = netCfg.GetString(
-                                "user_server_url", "http://127.0.0.1:" + ConfigSettings.DefaultUserServerHttpPort.ToString());
-                    else
-                        _info["login"] 
-                            = String.Format(
-                                "http://127.0.0.1:{0}/", 
-                                netCfg.GetString(
-                                    "http_listener_port", ConfigSettings.DefaultRegionHttpPort.ToString()));
-                    
-                    IssueWarning();
-                }
-                else
-                {
-                    _info["login"] = "http://127.0.0.1:9000/";
-                    IssueWarning();
                 }
             }
             catch (Exception)
@@ -105,7 +101,7 @@ namespace OpenSim.Server.Handlers.Grid
                 _log.Warn("[GRID INFO SERVICE]: Cannot get grid info from config source, using minimal defaults");
             }
             
-            _log.DebugFormat("[GRID INFO SERVICE]: Grid info service initialized with {0} keys", _info.Count);
+            _log.DebugFormat("[GRID INFO SERVICE]: Grid info service initialized with {0} keys", gridInfos.Count);
         }
 
         private void IssueWarning()
@@ -140,10 +136,12 @@ namespace OpenSim.Server.Handlers.Grid
         {
             StringBuilder sb = new StringBuilder();
 
+            Hashtable _inf = gridInfos[httpRequest.Url.Host];
+
             sb.Append("<gridinfo>\n");
-            foreach (string k in _info.Keys)
+            foreach (string k in _inf.Keys)
             {
-                sb.AppendFormat("<{0}>{1}</{0}>\n", k, _info[k]);
+                sb.AppendFormat("<{0}>{1}</{0}>\n", k, _inf[k]);
             }
             sb.Append("</gridinfo>\n");
 
