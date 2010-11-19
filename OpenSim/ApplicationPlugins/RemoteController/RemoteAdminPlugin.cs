@@ -1473,9 +1473,12 @@ namespace OpenSim.ApplicationPlugins.RemoteController
         {
             m_log.DebugFormat("[RADMIN] Initializing inventory for {0} from {1}", destination, source);
             Scene scene = m_application.SceneManager.CurrentOrFirstScene;
+            AvatarAppearance avatarAppearance = null;
+            AvatarData avatar = scene.AvatarService.GetAvatar(source);
+            if (avatar != null)
+                avatarAppearance = avatar.ToAvatarAppearance(source);
 
             // If the model has no associated appearance we're done.
-            AvatarAppearance avatarAppearance = scene.AvatarService.GetAppearance(source);
             if (avatarAppearance == null)
                 return;
 
@@ -1489,7 +1492,8 @@ namespace OpenSim.ApplicationPlugins.RemoteController
                 {
                     CopyWearablesAndAttachments(destination, source, avatarAppearance);
 
-                    scene.AvatarService.SetAppearance(destination, avatarAppearance);
+                    AvatarData avatarData = new AvatarData(avatarAppearance);
+                    scene.AvatarService.SetAvatar(destination, avatarData);
                 }
                 catch (Exception e)
                 {
@@ -1511,16 +1515,17 @@ namespace OpenSim.ApplicationPlugins.RemoteController
 
                 for (int i=0; i<wearables.Length; i++)
                 {
-                    if (inventoryMap.ContainsKey(wearables[i][0].ItemID))
+                    if (inventoryMap.ContainsKey(wearables[i].ItemID))
                     {
                         AvatarWearable wearable = new AvatarWearable();
-                        wearable.Wear(inventoryMap[wearables[i][0].ItemID],
-                                wearables[i][0].AssetID);
+                        wearable.AssetID = wearables[i].AssetID;
+                        wearable.ItemID  = inventoryMap[wearables[i].ItemID];
                         avatarAppearance.SetWearable(i, wearable);
                     }
                 }
 
-                scene.AvatarService.SetAppearance(destination, avatarAppearance);
+                AvatarData avatarData = new AvatarData(avatarAppearance);
+                scene.AvatarService.SetAvatar(destination, avatarData);
             }
             catch (Exception e)
             {
@@ -1569,10 +1574,10 @@ namespace OpenSim.ApplicationPlugins.RemoteController
             for (int i=0; i<wearables.Length; i++)
             {
                 wearable = wearables[i];
-                if (wearable[0].ItemID != UUID.Zero)
+                if (wearable.ItemID != UUID.Zero)
                 {
                     // Get inventory item and copy it
-                    InventoryItemBase item = new InventoryItemBase(wearable[0].ItemID, source);
+                    InventoryItemBase item = new InventoryItemBase(wearable.ItemID, source);
                     item = inventoryService.GetItem(item);
 
                     if (item != null)
@@ -1603,23 +1608,24 @@ namespace OpenSim.ApplicationPlugins.RemoteController
 
                         // Wear item
                         AvatarWearable newWearable = new AvatarWearable();
-                        newWearable.Wear(destinationItem.ID, wearable[0].AssetID);
+                        newWearable.AssetID = wearable.AssetID;
+                        newWearable.ItemID  = destinationItem.ID;
                         avatarAppearance.SetWearable(i, newWearable);
                     }
                     else
                     {
-                        m_log.WarnFormat("[RADMIN]: Error transferring {0} to folder {1}", wearable[0].ItemID, destinationFolder.ID);
+                        m_log.WarnFormat("[RADMIN]: Error transferring {0} to folder {1}", wearable.ItemID, destinationFolder.ID);
                     }
                 }
             }
 
             // Attachments
-            List<AvatarAttachment> attachments = avatarAppearance.GetAttachments();
+            Dictionary<int, UUID[]> attachments = avatarAppearance.GetAttachmentDictionary();
 
-            foreach (AvatarAttachment attachment in attachments)
+            foreach (KeyValuePair<int, UUID[]> attachment in attachments)
             {
-                int attachpoint = attachment.AttachPoint;
-                UUID itemID = attachment.ItemID;
+                int attachpoint = attachment.Key;
+                UUID itemID = attachment.Value[0];
 
                 if (itemID != UUID.Zero)
                 {
@@ -1903,8 +1909,10 @@ namespace OpenSim.ApplicationPlugins.RemoteController
                         if (include)
                         {
                             // Setup for appearance processing
-                            avatarAppearance = scene.AvatarService.GetAppearance(ID);
-                            if (avatarAppearance == null)
+                            AvatarData avatarData = scene.AvatarService.GetAvatar(ID);
+                            if (avatarData != null)
+                                avatarAppearance = avatarData.ToAvatarAppearance(ID);
+                            else
                                 avatarAppearance = new AvatarAppearance();
 
                             AvatarWearable[] wearables = avatarAppearance.Wearables;
@@ -2057,7 +2065,8 @@ namespace OpenSim.ApplicationPlugins.RemoteController
                                         {
                                         if (select && (GetStringAttribute(item, "wear", "false") == "true"))
                                             {
-                                                avatarAppearance.Wearables[inventoryItem.Flags].Wear(inventoryItem.ID, inventoryItem.AssetID);
+                                                avatarAppearance.Wearables[inventoryItem.Flags].ItemID = inventoryItem.ID;
+                                                avatarAppearance.Wearables[inventoryItem.Flags].AssetID = inventoryItem.AssetID;
                                             }
                                         }
                                         catch (Exception e)
@@ -2068,7 +2077,8 @@ namespace OpenSim.ApplicationPlugins.RemoteController
                                     m_log.DebugFormat("[RADMIN] Outfit {0} load completed", outfitName);
                                 } // foreach outfit
                                 m_log.DebugFormat("[RADMIN] Inventory update complete for {0}", name);
-                                scene.AvatarService.SetAppearance(ID, avatarAppearance);
+                                AvatarData avatarData2 = new AvatarData(avatarAppearance);
+                                scene.AvatarService.SetAvatar(ID, avatarData2);
                             }
                             catch (Exception e)
                             {

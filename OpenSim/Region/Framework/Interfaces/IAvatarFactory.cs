@@ -32,8 +32,7 @@ namespace OpenSim.Region.Framework.Interfaces
 {
     public interface IAvatarFactory
     {
-        bool ValidateBakedTextureCache(IClientAPI client);
-        void QueueAppearanceSend(UUID agentid);
-        void QueueAppearanceSave(UUID agentid);
+        bool TryGetAvatarAppearance(UUID avatarId, out AvatarAppearance appearance);
+        void UpdateDatabase(UUID userID, AvatarAppearance avatAppearance);
     }
 }

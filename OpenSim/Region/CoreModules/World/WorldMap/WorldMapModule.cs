@@ -320,7 +320,7 @@ namespace OpenSim.Region.CoreModules.World.WorldMap
             if (threadrunning) return;
             threadrunning = true;
 
-//            m_log.Debug("[WORLD MAP]: Starting remote MapItem request thread");
+            m_log.Debug("[WORLD MAP]: Starting remote MapItem request thread");
 
             Watchdog.StartThread(process, "MapItemRequestThread", ThreadPriority.BelowNormal, true);
         }

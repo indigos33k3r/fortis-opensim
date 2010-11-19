@@ -29,7 +29,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Security;
 using OpenMetaverse;
-using OpenSim.Framework;
 using OpenSim.Region.Framework.Scenes;
 using OpenSim.Region.Framework.Interfaces;
 
@@ -82,12 +81,16 @@ namespace OpenSim.Region.OptionalModules.Scripting.Minimodule
             get {
                 List<IAvatarAttachment> attachments = new List<IAvatarAttachment>();
                 
-                List<AvatarAttachment> internalAttachments = GetSP().Appearance.GetAttachments();
-                foreach (AvatarAttachment attach in internalAttachments)
+                Hashtable internalAttachments = GetSP().Appearance.GetAttachments();
+                if (internalAttachments != null)
                 {
-                    attachments.Add(new SPAvatarAttachment(m_rootScene, this, attach.AttachPoint,
-                                                           new UUID(attach.ItemID),
-                                                           new UUID(attach.AssetID), m_security));
+                    foreach (DictionaryEntry element in internalAttachments)
+                    {
+                        Hashtable attachInfo = (Hashtable)element.Value;
+                        attachments.Add(new SPAvatarAttachment(m_rootScene, this, (int) element.Key,
+                                                               new UUID((string) attachInfo["item"]),
+                                                               new UUID((string) attachInfo["asset"]), m_security));
+                    }
                 }
                 
                 return attachments.ToArray();

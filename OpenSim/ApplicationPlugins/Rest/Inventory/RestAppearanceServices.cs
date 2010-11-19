@@ -27,7 +27,6 @@
 
 using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.Xml;
 using OpenMetaverse;
 using OpenSim.Framework;
@@ -499,7 +498,6 @@ namespace OpenSim.ApplicationPlugins.Rest.Inventory
                                     indata = true;
                                 }
                             break;
-/*
                             case "Body" :
                                 if (xml.MoveToAttribute("Item"))
                                 {
@@ -656,7 +654,6 @@ namespace OpenSim.ApplicationPlugins.Rest.Inventory
                                     indata = true;
                                 }
                             break;
-*/
                             case "Attachment" :
                                 {
 
@@ -751,7 +748,6 @@ namespace OpenSim.ApplicationPlugins.Rest.Inventory
                     rdata.writer.WriteAttributeString("Owner", rdata.userAppearance.Owner.ToString());
                 rdata.writer.WriteAttributeString("Serial", rdata.userAppearance.Serial.ToString());
 
-/*
                 FormatPart(rdata, "Body", rdata.userAppearance.BodyItem, rdata.userAppearance.BodyAsset);
                 FormatPart(rdata, "Skin", rdata.userAppearance.SkinItem, rdata.userAppearance.SkinAsset);
                 FormatPart(rdata, "Hair", rdata.userAppearance.HairItem, rdata.userAppearance.HairAsset);
@@ -768,20 +764,26 @@ namespace OpenSim.ApplicationPlugins.Rest.Inventory
 
                 FormatPart(rdata, "UnderShirt", rdata.userAppearance.UnderShirtItem, rdata.userAppearance.UnderShirtAsset);
                 FormatPart(rdata, "UnderPants", rdata.userAppearance.UnderPantsItem, rdata.userAppearance.UnderPantsAsset);
-*/
-                Rest.Log.DebugFormat("{0} FormatUserAppearance: Formatting attachments", MsgId);
 
-                rdata.writer.WriteStartElement("Attachments");
-                List<AvatarAttachment> attachments = rdata.userAppearance.GetAttachments();
-                foreach (AvatarAttachment attach in attachments)
+                Hashtable attachments = rdata.userAppearance.GetAttachments();
+
+                if (attachments != null)
                 {
-                    rdata.writer.WriteStartElement("Attachment");
-                    rdata.writer.WriteAttributeString("AtPoint", attach.AttachPoint.ToString());
-                    rdata.writer.WriteAttributeString("Item", attach.ItemID.ToString());
-                    rdata.writer.WriteAttributeString("Asset", attach.AssetID.ToString());
+
+                    Rest.Log.DebugFormat("{0} FormatUserAppearance: Formatting attachments", MsgId);
+
+                    rdata.writer.WriteStartElement("Attachments");
+                    for (int i = 0; i < attachments.Count; i++)
+                    {
+                        Hashtable attachment = attachments[i] as Hashtable;
+                        rdata.writer.WriteStartElement("Attachment");
+                        rdata.writer.WriteAttributeString("AtPoint", i.ToString());
+                        rdata.writer.WriteAttributeString("Item", (string) attachment["item"]);
+                        rdata.writer.WriteAttributeString("Asset", (string) attachment["asset"]);
+                        rdata.writer.WriteEndElement();
+                    }
                     rdata.writer.WriteEndElement();
                 }
-                rdata.writer.WriteEndElement();
 
                 Primitive.TextureEntry texture = rdata.userAppearance.Texture;
 

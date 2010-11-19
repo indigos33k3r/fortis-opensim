@@ -26,9 +26,7 @@
  */
 
 using System;
-using System.Reflection;
 using System.Collections.Generic;
-using log4net;
 using OpenMetaverse;
 using OpenMetaverse.StructuredData;
 
@@ -40,12 +38,6 @@ namespace OpenSim.Framework
     /// </summary>
     public class AgentCircuitData
     {
-// DEBUG ON
-        private static readonly ILog m_log =
-                LogManager.GetLogger(
-                MethodBase.GetCurrentMethod().DeclaringType);
-// DEBUG OFF
-
         /// <summary>
         /// Avatar Unique Agent Identifier
         /// </summary>
@@ -206,6 +198,7 @@ namespace OpenSim.Framework
             
             args["service_session_id"] = OSD.FromString(ServiceSessionID);
             args["start_pos"] = OSD.FromString(startpos.ToString());
+            args["appearance_serial"] = OSD.FromInteger(Appearance.Serial);
             args["client_ip"] = OSD.FromString(IPAddress);
             args["viewer"] = OSD.FromString(Viewer);
             args["channel"] = OSD.FromString(Channel);
@@ -214,12 +207,34 @@ namespace OpenSim.Framework
 
             if (Appearance != null)
             {
-                args["appearance_serial"] = OSD.FromInteger(Appearance.Serial);
+                //System.Console.WriteLine("XXX Before packing Wearables");
+                if ((Appearance.Wearables != null) && (Appearance.Wearables.Length > 0))
+                {
+                    OSDArray wears = new OSDArray(Appearance.Wearables.Length * 2);
+                    foreach (AvatarWearable awear in Appearance.Wearables)
+                    {
+                        wears.Add(OSD.FromUUID(awear.ItemID));
+                        wears.Add(OSD.FromUUID(awear.AssetID));
+                        //System.Console.WriteLine("XXX ItemID=" + awear.ItemID + " assetID=" + awear.AssetID);
+                    }
+                    args["wearables"] = wears;
+                }
 
-                OSDMap appmap = Appearance.Pack();
-                args["packed_appearance"] = appmap;
+                //System.Console.WriteLine("XXX Before packing Attachments");
+                Dictionary<int, UUID[]> attachments = Appearance.GetAttachmentDictionary();
+                if ((attachments != null) && (attachments.Count > 0))
+                {
+                    OSDArray attachs = new OSDArray(attachments.Count);
+                    foreach (KeyValuePair<int, UUID[]> kvp in attachments)
+                    {
+                        AttachmentData adata = new AttachmentData(kvp.Key, kvp.Value[0], kvp.Value[1]);
+                        attachs.Add(adata.PackUpdateMessage());
+                        //System.Console.WriteLine("XXX att.pt=" + kvp.Key + "; itemID=" + kvp.Value[0] + "; assetID=" + kvp.Value[1]);
+                    }
+                    args["attachments"] = attachs;
+                }
             }
-            
+
             if (ServiceURLs != null && ServiceURLs.Count > 0)
             {
                 OSDArray urls = new OSDArray(ServiceURLs.Count * 2);
@@ -302,35 +317,34 @@ namespace OpenSim.Framework
             if (args["start_pos"] != null)
                 Vector3.TryParse(args["start_pos"].AsString(), out startpos);
 
-// DEBUG ON
-            m_log.WarnFormat("[AGENTCIRCUITDATA] agentid={0}, child={1}, startpos={2}",AgentID,child,startpos.ToString());
-// DEBUG OFF
-            
-            try {
-            // Unpack various appearance elements                                                                           
             Appearance = new AvatarAppearance(AgentID);
-
-            // Eventually this code should be deprecated, use full appearance
-            // packing in packed_appearance
             if (args["appearance_serial"] != null)
                 Appearance.Serial = args["appearance_serial"].AsInteger();
+            if ((args["wearables"] != null) && (args["wearables"]).Type == OSDType.Array)
+            {
+                OSDArray wears = (OSDArray)(args["wearables"]);
+                for (int i = 0; i < wears.Count / 2; i++) 
+                {
+                    Appearance.Wearables[i].ItemID = wears[i*2].AsUUID();
+                    Appearance.Wearables[i].AssetID = wears[(i*2)+1].AsUUID();
+                }
+           }
 
-            if (args.ContainsKey("packed_appearance") && (args["packed_appearance"].Type == OSDType.Map))
+            if ((args["attachments"] != null) && (args["attachments"]).Type == OSDType.Array)
             {
-                Appearance.Unpack((OSDMap)args["packed_appearance"]);
-// DEBUG ON
-                m_log.WarnFormat("[AGENTCIRCUITDATA] unpacked appearance");
-// DEBUG OFF
+                OSDArray attachs = (OSDArray)(args["attachments"]);
+                AttachmentData[] attachments = new AttachmentData[attachs.Count];
+                int i = 0;
+                foreach (OSD o in attachs)
+                {
+                    if (o.Type == OSDType.Map)
+                    {
+                        attachments[i++] = new AttachmentData((OSDMap)o);
+                    }
+                }
+                Appearance.SetAttachments(attachments);
             }
-// DEBUG ON
-            else
-                m_log.Warn("[AGENTCIRCUITDATA] failed to find a valid packed_appearance");
-// DEBUG OFF
-            } catch (Exception e)
-            {
-                m_log.ErrorFormat("[AGENTCIRCUITDATA] failed to unpack appearance; {0}",e.Message);
-            }
-            
+
             ServiceURLs = new Dictionary<string, object>();
             if (args.ContainsKey("service_urls") && args["service_urls"] != null && (args["service_urls"]).Type == OSDType.Array)
             {

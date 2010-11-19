@@ -168,7 +168,6 @@ namespace pCampBot
                     OnConnected(this, EventType.CONNECTED);
                     if (wear == "save")
                     {
-                        client.Appearance.SetPreviousAppearance();
                         SaveDefaultAppearance();
                     }
                     else if (wear != "no")
