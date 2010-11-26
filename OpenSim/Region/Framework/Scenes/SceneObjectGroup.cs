@@ -491,13 +491,15 @@ namespace OpenSim.Region.Framework.Scenes
             XmlNodeList nodes = doc.GetElementsByTagName("SavedScriptState");
             if (nodes.Count > 0)
             {
-                m_savedScriptState = new Dictionary<UUID, string>();
+                if (m_savedScriptState == null)
+                    m_savedScriptState = new Dictionary<UUID, string>();
                 foreach (XmlNode node in nodes)
                 {
                     if (node.Attributes["UUID"] != null)
                     {
                         UUID itemid = new UUID(node.Attributes["UUID"].Value);
-                        m_savedScriptState.Add(itemid, node.InnerXml);
+                        if (itemid != UUID.Zero)
+                            m_savedScriptState[itemid] = node.InnerXml;
                     }
                 } 
             }
@@ -2605,6 +2607,7 @@ namespace OpenSim.Region.Framework.Scenes
                 //if (part.UUID != m_rootPart.UUID)
 
                 HasGroupChanged = true;
+                part.TriggerScriptChangedEvent(Changed.SCALE);
                 ScheduleGroupForFullUpdate();
 
                 //if (part.UUID == m_rootPart.UUID)
@@ -2756,6 +2759,7 @@ namespace OpenSim.Region.Framework.Scenes
                 part.IgnoreUndoUpdate = false;
                 part.StoreUndoState();
                 HasGroupChanged = true;
+                m_rootPart.TriggerScriptChangedEvent(Changed.SCALE);
                 ScheduleGroupForTerseUpdate();
             }
         }

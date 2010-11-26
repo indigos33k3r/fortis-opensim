@@ -174,6 +174,7 @@ namespace OpenSim.Region.Framework.Scenes
         private bool m_firstHeartbeat = true;
 
         private object m_deleting_scene_object = new object();
+        private object m_cleaningAttachments = new object();
 
         private UpdatePrioritizationSchemes m_priorityScheme = UpdatePrioritizationSchemes.Time;
         private bool m_reprioritizationEnabled = true;
@@ -183,6 +184,8 @@ namespace OpenSim.Region.Framework.Scenes
 
         private Timer m_mapGenerationTimer = new Timer();
         private bool m_generateMaptiles;
+
+        private Dictionary<UUID, string[]> m_UserNamesCache = new Dictionary<UUID, string[]>();
 
         #endregion Fields
 
@@ -403,7 +406,7 @@ namespace OpenSim.Region.Framework.Scenes
         {
             get { return m_AvatarFactory; }
         }
-
+        
         public ICapabilitiesModule CapsModule
         {
             get { return m_capsModule; }
@@ -791,36 +794,6 @@ namespace OpenSim.Region.Framework.Scenes
             return m_simulatorVersion;
         }
 
-        public string[] GetUserNames(UUID uuid)
-        {
-            string[] returnstring = new string[0];
-
-            UserAccount account = UserAccountService.GetUserAccount(RegionInfo.ScopeID, uuid);
-
-            if (account != null)
-            {
-                returnstring = new string[2];
-                returnstring[0] = account.FirstName;
-                returnstring[1] = account.LastName;
-            }
-
-            return returnstring;
-        }
-
-        public string GetUserName(UUID uuid)
-        {
-            string[] names = GetUserNames(uuid);
-            if (names.Length == 2)
-            {
-                string firstname = names[0];
-                string lastname = names[1];
-
-                return firstname + " " + lastname;
-
-            }
-            return "(hippos)";
-        }
-
         /// <summary>
         /// Another region is up. 
         ///
@@ -920,60 +893,6 @@ namespace OpenSim.Region.Framework.Scenes
             return new GridRegion(RegionInfo);
         }
 
-        /// <summary>
-        /// Given float seconds, this will restart the region.
-        /// </summary>
-        /// <param name="seconds">float indicating duration before restart.</param>
-        public virtual void Restart(float seconds)
-        {
-            // notifications are done in 15 second increments
-            // so ..   if the number of seconds is less then 15 seconds, it's not really a restart request
-            // It's a 'Cancel restart' request.
-
-            // RestartNow() does immediate restarting.
-            if (seconds < 15)
-            {
-                m_restartTimer.Stop();
-                m_dialogModule.SendGeneralAlert("Restart Aborted");
-            }
-            else
-            {
-                // Now we figure out what to set the timer to that does the notifications and calls, RestartNow()
-                m_restartTimer.Interval = 15000;
-                m_incrementsof15seconds = (int)seconds / 15;
-                m_RestartTimerCounter = 0;
-                m_restartTimer.AutoReset = true;
-                m_restartTimer.Elapsed += new ElapsedEventHandler(RestartTimer_Elapsed);
-                m_log.Info("[REGION]: Restarting Region in " + (seconds / 60) + " minutes");
-                m_restartTimer.Start();
-                m_dialogModule.SendNotificationToUsersInRegion(
-                    UUID.Random(), String.Empty, RegionInfo.RegionName + String.Format(": Restarting in {0} Minutes", (int)(seconds / 60.0)));
-            }
-        }
-
-        // The Restart timer has occured.
-        // We have to figure out if this is a notification or if the number of seconds specified in Restart
-        // have elapsed.
-        // If they have elapsed, call RestartNow()
-        public void RestartTimer_Elapsed(object sender, ElapsedEventArgs e)
-        {
-            m_RestartTimerCounter++;
-            if (m_RestartTimerCounter <= m_incrementsof15seconds)
-            {
-                if (m_RestartTimerCounter == 4 || m_RestartTimerCounter == 6 || m_RestartTimerCounter == 7)
-                    m_dialogModule.SendNotificationToUsersInRegion(
-                        UUID.Random(),
-                        String.Empty,
-                        RegionInfo.RegionName + ": Restarting in " + ((8 - m_RestartTimerCounter) * 15) + " seconds");
-            }
-            else
-            {
-                m_restartTimer.Stop();
-                m_restartTimer.AutoReset = false;
-                RestartNow();
-            }
-        }
-
         // This causes the region to restart immediatley.
         public void RestartNow()
         {
@@ -996,7 +915,8 @@ namespace OpenSim.Region.Framework.Scenes
             Close();
 
             m_log.Error("[REGION]: Firing Region Restart Message");
-            base.Restart(0);
+
+            base.Restart();
         }
 
         // This is a helper function that notifies root agents in this region that a new sim near them has come up
@@ -2807,7 +2727,7 @@ namespace OpenSim.Region.Framework.Scenes
 
         public virtual void SubscribeToClientGridEvents(IClientAPI client)
         {
-            client.OnNameFromUUIDRequest += HandleUUIDNameRequest;
+            //client.OnNameFromUUIDRequest += HandleUUIDNameRequest;
             client.OnMoneyTransferRequest += ProcessMoneyTransferRequest;
             client.OnAvatarPickerRequest += ProcessAvatarPickerRequest;
             client.OnSetStartLocationRequest += SetHomeRezPoint;
@@ -2934,7 +2854,7 @@ namespace OpenSim.Region.Framework.Scenes
 
         public virtual void UnSubscribeToClientGridEvents(IClientAPI client)
         {
-            client.OnNameFromUUIDRequest -= HandleUUIDNameRequest;
+            //client.OnNameFromUUIDRequest -= HandleUUIDNameRequest;
             client.OnMoneyTransferRequest -= ProcessMoneyTransferRequest;
             client.OnAvatarPickerRequest -= ProcessAvatarPickerRequest;
             client.OnSetStartLocationRequest -= SetHomeRezPoint;
@@ -3151,7 +3071,6 @@ namespace OpenSim.Region.Framework.Scenes
                         List<ulong> regions = new List<ulong>(avatar.KnownChildRegionHandles);
                         regions.Remove(RegionInfo.RegionHandle);
                         m_sceneGridService.SendCloseChildAgentConnections(agentID, regions);
-
                     }
                     m_eventManager.TriggerClientClosed(agentID, this);
                 }
@@ -3162,6 +3081,10 @@ namespace OpenSim.Region.Framework.Scenes
                 }
 
                 m_eventManager.TriggerOnRemovePresence(agentID);
+
+                if (avatar != null && (!avatar.IsChildAgent))
+                    avatar.SaveChangedAttachments();
+
                 ForEachClient(
                     delegate(IClientAPI client)
                     {
@@ -3194,6 +3117,7 @@ namespace OpenSim.Region.Framework.Scenes
                 }
 
                 m_authenticateHandler.RemoveCircuit(avatar.ControllingClient.CircuitCode);
+                CleanDroppedAttachments();
                 //m_log.InfoFormat("[SCENE] Memory pre  GC {0}", System.GC.GetTotalMemory(false));
                 //m_log.InfoFormat("[SCENE] Memory post GC {0}", System.GC.GetTotalMemory(true));
             }
@@ -3408,6 +3332,8 @@ namespace OpenSim.Region.Framework.Scenes
 
             if (vialogin) 
             {
+                CleanDroppedAttachments();
+
                 if (TestBorderCross(agent.startpos, Cardinals.E))
                 {
                     Border crossedBorder = GetCrossedBorder(agent.startpos, Cardinals.E);
@@ -3756,6 +3682,13 @@ namespace OpenSim.Region.Framework.Scenes
 
             // We have to wait until the viewer contacts this region after receiving EAC.
             // That calls AddNewClient, which finally creates the ScenePresence
+            ILandObject nearestParcel = GetNearestAllowedParcel(cAgentData.AgentID, Constants.RegionSize / 2, Constants.RegionSize / 2);
+            if (nearestParcel == null)
+            {
+                m_log.DebugFormat("[SCENE]: Denying root agent entry to {0}: no allowed parcel", cAgentData.AgentID);
+                return false;
+            }
+
             ScenePresence childAgentUpdate = WaitGetScenePresence(cAgentData.AgentID);
             if (childAgentUpdate != null)
             {
@@ -4735,7 +4668,6 @@ namespace OpenSim.Region.Framework.Scenes
             Vector3 nearestRegionEdgePoint = GetNearestRegionEdgePosition(avatar);
             //Debug.WriteLine("They are really in a place they don't belong, sending them to: " + nearestRegionEdgePoint.ToString());
             return nearestRegionEdgePoint;
-            return null;
         }
 
         private Vector3 GetParcelCenterAtGround(ILandObject parcel)
@@ -4982,6 +4914,41 @@ namespace OpenSim.Region.Framework.Scenes
 
                 if (error != String.Empty)
                     throw new Exception(error);
+            }
+        }
+
+        public void CleanDroppedAttachments()
+        {
+            List<SceneObjectGroup> objectsToDelete =
+                    new List<SceneObjectGroup>();
+
+            lock (m_cleaningAttachments)
+            {
+                ForEachSOG(delegate (SceneObjectGroup grp)
+                        {
+                            if (grp.RootPart.Shape.PCode == 0 && grp.RootPart.Shape.State != 0 && (!objectsToDelete.Contains(grp)))
+                            {
+                                UUID agentID = grp.OwnerID;
+                                if (agentID == UUID.Zero)
+                                {
+                                    objectsToDelete.Add(grp);
+                                    return;
+                                }
+
+                                ScenePresence sp = GetScenePresence(agentID);
+                                if (sp == null)
+                                {
+                                    objectsToDelete.Add(grp);
+                                    return;
+                                }
+                            }
+                        });
+            }
+
+            foreach (SceneObjectGroup grp in objectsToDelete)
+            {
+                m_log.InfoFormat("[SCENE]: Deleting dropped attachment {0} of user {1}", grp.UUID, grp.OwnerID);
+                DeleteSceneObject(grp, true);
             }
         }
     }

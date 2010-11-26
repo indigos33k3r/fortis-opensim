@@ -435,6 +435,7 @@ namespace OpenSim.Region.Framework.Scenes
         private DateTime m_expires;
         private DateTime m_rezzed;
         private bool m_createSelected = false;
+        private string m_creatorData = string.Empty;
 
         public UUID CreatorID 
         {
@@ -445,6 +446,61 @@ namespace OpenSim.Region.Framework.Scenes
             set
             {
                 _creatorID = value;
+            }
+        }
+
+        public string CreatorData // = <profile url>;<name>
+        {
+            get { return m_creatorData; }
+            set { m_creatorData = value; }
+        }
+
+        /// <summary>
+        /// Used by the DB layer to retrieve / store the entire user identification.
+        /// The identification can either be a simple UUID or a string of the form
+        /// uuid[;profile_url[;name]]
+        /// </summary>
+        public string CreatorIdentification
+        {
+            get
+            {
+                if (m_creatorData != null && m_creatorData != string.Empty)
+                    return _creatorID.ToString() + ';' + m_creatorData;
+                else
+                    return _creatorID.ToString();
+            }
+            set
+            {
+                if ((value == null) || (value != null && value == string.Empty))
+                {
+                    m_creatorData = string.Empty;
+                    return;
+                }
+
+                if (!value.Contains(";")) // plain UUID
+                {
+                    UUID uuid = UUID.Zero;
+                    UUID.TryParse(value, out uuid);
+                    _creatorID = uuid;
+                }
+                else // <uuid>[;<endpoint>[;name]]
+                {
+                    string name = "Unknown User";
+                    string[] parts = value.Split(';');
+                    if (parts.Length >= 1)
+                    {
+                        UUID uuid = UUID.Zero;
+                        UUID.TryParse(parts[0], out uuid);
+                        _creatorID = uuid;
+                    }
+                    if (parts.Length >= 2)
+                        m_creatorData = parts[1];
+                    if (parts.Length >= 3)
+                        name = parts[2];
+
+                    m_creatorData += ';' + name;
+                    
+                }
             }
         }
 
@@ -946,21 +1002,7 @@ namespace OpenSim.Region.Framework.Scenes
         public PrimitiveBaseShape Shape
         {
             get { return m_shape; }
-            set
-            {
-                bool shape_changed = false;
-                // TODO: this should really be restricted to the right
-                // set of attributes on shape change.  For instance,
-                // changing the lighting on a shape shouldn't cause
-                // this.
-                if (m_shape != null)
-                    shape_changed = true;
-
-                m_shape = value;
-
-                if (shape_changed)
-                    TriggerScriptChangedEvent(Changed.SHAPE);
-            }
+            set { m_shape = value; }
         }
         
         public Vector3 Scale
@@ -3100,6 +3142,7 @@ namespace OpenSim.Region.Framework.Scenes
             UUID ownerID = _ownerID;
             UUID objectID = ParentGroup.RootPart.UUID;
             UUID parentID = GetRootPartUUID();
+
             UUID soundID = UUID.Zero;
             Vector3 position = AbsolutePosition; // region local
             ulong regionHandle = m_parentGroup.Scene.RegionInfo.RegionHandle;
@@ -4513,6 +4556,7 @@ namespace OpenSim.Region.Framework.Scenes
                 ParentGroup.RootPart.Rezzed = DateTime.UtcNow;
 
             ParentGroup.HasGroupChanged = true;
+            TriggerScriptChangedEvent(Changed.SHAPE);
             ScheduleFullUpdate();
         }
 

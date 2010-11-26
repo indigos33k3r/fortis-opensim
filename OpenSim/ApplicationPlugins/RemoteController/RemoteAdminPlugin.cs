@@ -116,7 +116,9 @@ namespace OpenSim.ApplicationPlugins.RemoteController
                     int port = m_config.GetInt("port", 0);
 
                     m_application = openSim;
-                    m_httpServer = MainServer.GetHttpServer((uint)port);
+                    string bind_ip_address = m_config.GetString("bind_ip_address", "0.0.0.0");
+                    IPAddress ipaddr = IPAddress.Parse(bind_ip_address);
+                    m_httpServer = MainServer.GetHttpServer((uint)port,ipaddr);
 
                     Dictionary<string, XmlRpcMethod> availableMethods = new Dictionary<string, XmlRpcMethod>();
                     availableMethods["admin_create_region"] = XmlRpcCreateRegionMethod;
@@ -206,18 +208,25 @@ namespace OpenSim.ApplicationPlugins.RemoteController
 
                 UUID regionID = new UUID((string) requestData["regionID"]);
 
-                responseData["accepted"] = true;
-                responseData["success"] = true;
-                response.Value = responseData;
-
                 Scene rebootedScene;
 
+                responseData["success"] = false;
+                responseData["accepted"] = true;
                 if (!m_application.SceneManager.TryGetScene(regionID, out rebootedScene))
                     throw new Exception("region not found");
 
                 responseData["rebooting"] = true;
+
+                IRestartModule restartModule = rebootedScene.RequestModuleInterface<IRestartModule>();
+                if (restartModule != null)
+                {
+                    List<int> times = new List<int> { 30, 15 };
+
+                    restartModule.ScheduleRestart(UUID.Zero, "Region will restart in {0}", times.ToArray(), true);
+                    responseData["success"] = true;
+                }
                 response.Value = responseData;
-                rebootedScene.Restart(30);
+
             }
             catch (Exception e)
             {
@@ -1472,12 +1481,9 @@ namespace OpenSim.ApplicationPlugins.RemoteController
         {
             m_log.DebugFormat("[RADMIN] Initializing inventory for {0} from {1}", destination, source);
             Scene scene = m_application.SceneManager.CurrentOrFirstScene;
-            AvatarAppearance avatarAppearance = null;
-            AvatarData avatar = scene.AvatarService.GetAvatar(source);
-            if (avatar != null)
-                avatarAppearance = avatar.ToAvatarAppearance(source);
 
             // If the model has no associated appearance we're done.
+            AvatarAppearance avatarAppearance = scene.AvatarService.GetAppearance(source);
             if (avatarAppearance == null)
                 return;
 
@@ -1491,8 +1497,7 @@ namespace OpenSim.ApplicationPlugins.RemoteController
                 {
                     CopyWearablesAndAttachments(destination, source, avatarAppearance);
 
-                    AvatarData avatarData = new AvatarData(avatarAppearance);
-                    scene.AvatarService.SetAvatar(destination, avatarData);
+                    scene.AvatarService.SetAppearance(destination, avatarAppearance);
                 }
                 catch (Exception e)
                 {
@@ -1514,17 +1519,16 @@ namespace OpenSim.ApplicationPlugins.RemoteController
 
                 for (int i=0; i<wearables.Length; i++)
                 {
-                    if (inventoryMap.ContainsKey(wearables[i].ItemID))
+                    if (inventoryMap.ContainsKey(wearables[i][0].ItemID))
                     {
                         AvatarWearable wearable = new AvatarWearable();
-                        wearable.AssetID = wearables[i].AssetID;
-                        wearable.ItemID  = inventoryMap[wearables[i].ItemID];
+                        wearable.Wear(inventoryMap[wearables[i][0].ItemID],
+                                wearables[i][0].AssetID);
                         avatarAppearance.SetWearable(i, wearable);
                     }
                 }
 
-                AvatarData avatarData = new AvatarData(avatarAppearance);
-                scene.AvatarService.SetAvatar(destination, avatarData);
+                scene.AvatarService.SetAppearance(destination, avatarAppearance);
             }
             catch (Exception e)
             {
@@ -1573,10 +1577,10 @@ namespace OpenSim.ApplicationPlugins.RemoteController
             for (int i=0; i<wearables.Length; i++)
             {
                 wearable = wearables[i];
-                if (wearable.ItemID != UUID.Zero)
+                if (wearable[0].ItemID != UUID.Zero)
                 {
                     // Get inventory item and copy it
-                    InventoryItemBase item = new InventoryItemBase(wearable.ItemID, source);
+                    InventoryItemBase item = new InventoryItemBase(wearable[0].ItemID, source);
                     item = inventoryService.GetItem(item);
 
                     if (item != null)
@@ -1587,6 +1591,7 @@ namespace OpenSim.ApplicationPlugins.RemoteController
                         destinationItem.InvType = item.InvType;
                         destinationItem.CreatorId = item.CreatorId;
                         destinationItem.CreatorIdAsUuid = item.CreatorIdAsUuid;
+                        destinationItem.CreatorData = item.CreatorData;
                         destinationItem.NextPermissions = item.NextPermissions;
                         destinationItem.CurrentPermissions = item.CurrentPermissions;
                         destinationItem.BasePermissions = item.BasePermissions;
@@ -1607,24 +1612,23 @@ namespace OpenSim.ApplicationPlugins.RemoteController
 
                         // Wear item
                         AvatarWearable newWearable = new AvatarWearable();
-                        newWearable.AssetID = wearable.AssetID;
-                        newWearable.ItemID  = destinationItem.ID;
+                        newWearable.Wear(destinationItem.ID, wearable[0].AssetID);
                         avatarAppearance.SetWearable(i, newWearable);
                     }
                     else
                     {
-                        m_log.WarnFormat("[RADMIN]: Error transferring {0} to folder {1}", wearable.ItemID, destinationFolder.ID);
+                        m_log.WarnFormat("[RADMIN]: Error transferring {0} to folder {1}", wearable[0].ItemID, destinationFolder.ID);
                     }
                 }
             }
 
             // Attachments
-            Dictionary<int, UUID[]> attachments = avatarAppearance.GetAttachmentDictionary();
+            List<AvatarAttachment> attachments = avatarAppearance.GetAttachments();
 
-            foreach (KeyValuePair<int, UUID[]> attachment in attachments)
+            foreach (AvatarAttachment attachment in attachments)
             {
-                int attachpoint = attachment.Key;
-                UUID itemID = attachment.Value[0];
+                int attachpoint = attachment.AttachPoint;
+                UUID itemID = attachment.ItemID;
 
                 if (itemID != UUID.Zero)
                 {
@@ -1640,6 +1644,7 @@ namespace OpenSim.ApplicationPlugins.RemoteController
                         destinationItem.InvType = item.InvType;
                         destinationItem.CreatorId = item.CreatorId;
                         destinationItem.CreatorIdAsUuid = item.CreatorIdAsUuid;
+                        destinationItem.CreatorData = item.CreatorData;
                         destinationItem.NextPermissions = item.NextPermissions;
                         destinationItem.CurrentPermissions = item.CurrentPermissions;
                         destinationItem.BasePermissions = item.BasePermissions;
@@ -1747,6 +1752,7 @@ namespace OpenSim.ApplicationPlugins.RemoteController
                     destinationItem.InvType = item.InvType;
                     destinationItem.CreatorId = item.CreatorId;
                     destinationItem.CreatorIdAsUuid = item.CreatorIdAsUuid;
+                    destinationItem.CreatorData = item.CreatorData;
                     destinationItem.NextPermissions = item.NextPermissions;
                     destinationItem.CurrentPermissions = item.CurrentPermissions;
                     destinationItem.BasePermissions = item.BasePermissions;
@@ -1908,10 +1914,8 @@ namespace OpenSim.ApplicationPlugins.RemoteController
                         if (include)
                         {
                             // Setup for appearance processing
-                            AvatarData avatarData = scene.AvatarService.GetAvatar(ID);
-                            if (avatarData != null)
-                                avatarAppearance = avatarData.ToAvatarAppearance(ID);
-                            else
+                            avatarAppearance = scene.AvatarService.GetAppearance(ID);
+                            if (avatarAppearance == null)
                                 avatarAppearance = new AvatarAppearance();
 
                             AvatarWearable[] wearables = avatarAppearance.Wearables;
@@ -2032,7 +2036,8 @@ namespace OpenSim.ApplicationPlugins.RemoteController
                                             inventoryItem.InvType = GetIntegerAttribute(item,"invtype",-1);
                                             inventoryItem.CreatorId = GetStringAttribute(item,"creatorid","");
                                             inventoryItem.CreatorIdAsUuid = (UUID)GetStringAttribute(item,"creatoruuid","");
-                                            inventoryItem.NextPermissions = GetUnsignedAttribute(perms,"next",0x7fffffff);
+                                            inventoryItem.CreatorData = GetStringAttribute(item, "creatordata", "");
+                                            inventoryItem.NextPermissions = GetUnsignedAttribute(perms, "next", 0x7fffffff);
                                             inventoryItem.CurrentPermissions = GetUnsignedAttribute(perms,"current",0x7fffffff);
                                             inventoryItem.BasePermissions = GetUnsignedAttribute(perms,"base",0x7fffffff);
                                             inventoryItem.EveryOnePermissions = GetUnsignedAttribute(perms,"everyone",0x7fffffff);
@@ -2064,8 +2069,7 @@ namespace OpenSim.ApplicationPlugins.RemoteController
                                         {
                                         if (select && (GetStringAttribute(item, "wear", "false") == "true"))
                                             {
-                                                avatarAppearance.Wearables[inventoryItem.Flags].ItemID = inventoryItem.ID;
-                                                avatarAppearance.Wearables[inventoryItem.Flags].AssetID = inventoryItem.AssetID;
+                                                avatarAppearance.Wearables[inventoryItem.Flags].Wear(inventoryItem.ID, inventoryItem.AssetID);
                                             }
                                         }
                                         catch (Exception e)
@@ -2076,8 +2080,7 @@ namespace OpenSim.ApplicationPlugins.RemoteController
                                     m_log.DebugFormat("[RADMIN] Outfit {0} load completed", outfitName);
                                 } // foreach outfit
                                 m_log.DebugFormat("[RADMIN] Inventory update complete for {0}", name);
-                                AvatarData avatarData2 = new AvatarData(avatarAppearance);
-                                scene.AvatarService.SetAvatar(ID, avatarData2);
+                                scene.AvatarService.SetAppearance(ID, avatarAppearance);
                             }
                             catch (Exception e)
                             {

@@ -286,6 +286,9 @@ namespace OpenSim.Data.SQLiteLegacy
             //Return default LL windlight settings
             return new RegionLightShareData();
         }
+        public void RemoveRegionWindlightSettings(UUID regionID)
+        {
+        }
         public void StoreRegionWindlightSettings(RegionLightShareData wl)
         {
             //This connector doesn't support the windlight module yet
@@ -654,6 +657,7 @@ namespace OpenSim.Data.SQLiteLegacy
                 DataRow landRow = land.Rows.Find(globalID.ToString());
                 if (landRow != null)
                 {
+                    landRow.Delete();
                     land.Rows.Remove(landRow);
                 }
                 List<DataRow> rowsToDelete = new List<DataRow>();
@@ -664,6 +668,7 @@ namespace OpenSim.Data.SQLiteLegacy
                 }
                 for (int iter = 0; iter < rowsToDelete.Count; iter++)
                 {
+                    rowsToDelete[iter].Delete();
                     landaccesslist.Rows.Remove(rowsToDelete[iter]);
                 }
 
@@ -714,6 +719,7 @@ namespace OpenSim.Data.SQLiteLegacy
                 }
                 for (int iter = 0; iter < rowsToDelete.Count; iter++)
                 {
+                    rowsToDelete[iter].Delete();
                     landaccesslist.Rows.Remove(rowsToDelete[iter]);
                 }
                 rowsToDelete.Clear();
@@ -1195,7 +1201,7 @@ namespace OpenSim.Data.SQLiteLegacy
             prim.TouchName = (String) row["TouchName"];
             // permissions
             prim.Flags = (PrimFlags)Convert.ToUInt32(row["ObjectFlags"]);
-            prim.CreatorID = new UUID((String) row["CreatorID"]);
+            prim.CreatorIdentification = (String) row["CreatorID"];
             prim.OwnerID = new UUID((String) row["OwnerID"]);
             prim.GroupID = new UUID((String) row["GroupID"]);
             prim.LastOwnerID = new UUID((String) row["LastOwnerID"]);
@@ -1331,7 +1337,7 @@ namespace OpenSim.Data.SQLiteLegacy
             taskItem.Name          = (String)row["name"];
             taskItem.Description   = (String)row["description"];
             taskItem.CreationDate  = Convert.ToUInt32(row["creationDate"]);
-            taskItem.CreatorID     = new UUID((String)row["creatorID"]);
+            taskItem.CreatorIdentification = (String)row["creatorID"];
             taskItem.OwnerID       = new UUID((String)row["ownerID"]);
             taskItem.LastOwnerID   = new UUID((String)row["lastOwnerID"]);
             taskItem.GroupID       = new UUID((String)row["groupID"]);
@@ -1528,7 +1534,7 @@ namespace OpenSim.Data.SQLiteLegacy
             row["TouchName"] = prim.TouchName;
             // permissions
             row["ObjectFlags"] = (uint)prim.Flags;
-            row["CreatorID"] = prim.CreatorID.ToString();
+            row["CreatorID"] = prim.CreatorIdentification.ToString();
             row["OwnerID"] = prim.OwnerID.ToString();
             row["GroupID"] = prim.GroupID.ToString();
             row["LastOwnerID"] = prim.LastOwnerID.ToString();
@@ -1661,7 +1667,7 @@ namespace OpenSim.Data.SQLiteLegacy
             row["name"] = taskItem.Name;
             row["description"] = taskItem.Description;
             row["creationDate"] = taskItem.CreationDate;
-            row["creatorID"] = taskItem.CreatorID.ToString();
+            row["creatorID"] = taskItem.CreatorIdentification.ToString();
             row["ownerID"] = taskItem.OwnerID.ToString();
             row["lastOwnerID"] = taskItem.LastOwnerID.ToString();
             row["groupID"] = taskItem.GroupID.ToString();

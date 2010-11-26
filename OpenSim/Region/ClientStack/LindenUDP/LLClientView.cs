@@ -79,7 +79,7 @@ namespace OpenSim.Region.ClientStack.LindenUDP
         public event DeRezObject OnDeRezObject;
         public event ModifyTerrain OnModifyTerrain;
         public event Action<IClientAPI> OnRegionHandShakeReply;
-        public event GenericCall2 OnRequestWearables;
+        public event GenericCall1 OnRequestWearables;
         public event SetAppearance OnSetAppearance;
         public event AvatarNowWearing OnAvatarNowWearing;
         public event RezSingleAttachmentFromInv OnRezSingleAttachmentFromInv;
@@ -651,8 +651,9 @@ namespace OpenSim.Region.ClientStack.LindenUDP
             catch (Exception e)
             {
                 // Make sure that we see any exception caused by the asynchronous operation.
-                m_log.Error(
-                    string.Format("[LLCLIENTVIEW]: Caught exception while processing {0}", packetObject.Pack), e);
+                m_log.ErrorFormat(
+                    "[LLCLIENTVIEW]: Caught exception while processing {0} for {1}, {2} {3}", 
+                    packetObject.Pack, Name, e.Message, e.StackTrace);
             }
         }
 
@@ -3387,20 +3388,29 @@ namespace OpenSim.Region.ClientStack.LindenUDP
             aw.AgentData.SerialNum = (uint)serial;
             aw.AgentData.SessionID = m_sessionId;
 
+            int count = 0;
+            for (int i = 0; i < wearables.Length; i++)
+                count += wearables[i].Count;
+
             // TODO: don't create new blocks if recycling an old packet
-            aw.WearableData = new AgentWearablesUpdatePacket.WearableDataBlock[13];
+            aw.WearableData = new AgentWearablesUpdatePacket.WearableDataBlock[count];
             AgentWearablesUpdatePacket.WearableDataBlock awb;
+            int idx = 0;
             for (int i = 0; i < wearables.Length; i++)
             {
-                awb = new AgentWearablesUpdatePacket.WearableDataBlock();
-                awb.WearableType = (byte)i;
-                awb.AssetID = wearables[i].AssetID;
-                awb.ItemID = wearables[i].ItemID;
-                aw.WearableData[i] = awb;
+                for (int j = 0; j < wearables[i].Count; j++)
+                {
+                    awb = new AgentWearablesUpdatePacket.WearableDataBlock();
+                    awb.WearableType = (byte)i;
+                    awb.AssetID = wearables[i][j].AssetID;
+                    awb.ItemID = wearables[i][j].ItemID;
+                    aw.WearableData[idx] = awb;
+                    idx++;
 
 //                                m_log.DebugFormat(
 //                                    "[APPEARANCE]: Sending wearable item/asset {0} {1} (index {2}) for {3}",
 //                                    awb.ItemID, awb.AssetID, i, Name);
+                }
             }
 
             OutPacket(aw, ThrottleOutPacketType.Task);
@@ -5647,11 +5657,11 @@ namespace OpenSim.Region.ClientStack.LindenUDP
 
         private bool HandlerAgentWearablesRequest(IClientAPI sender, Packet Pack)
         {
-            GenericCall2 handlerRequestWearables = OnRequestWearables;
+            GenericCall1 handlerRequestWearables = OnRequestWearables;
 
             if (handlerRequestWearables != null)
             {
-                handlerRequestWearables();
+                handlerRequestWearables(sender);
             }
 
             Action<IClientAPI> handlerRequestAvatarsData = OnRequestAvatarsData;
@@ -5694,7 +5704,7 @@ namespace OpenSim.Region.ClientStack.LindenUDP
                     if (appear.ObjectData.TextureEntry.Length > 1)
                         te = new Primitive.TextureEntry(appear.ObjectData.TextureEntry, 0, appear.ObjectData.TextureEntry.Length);
 
-                    handlerSetAppearance(te, visualparams);
+                    handlerSetAppearance(sender, te, visualparams);
                 }
                 catch (Exception e)
                 {
@@ -5725,6 +5735,7 @@ namespace OpenSim.Region.ClientStack.LindenUDP
                 AvatarWearingArgs wearingArgs = new AvatarWearingArgs();
                 for (int i = 0; i < nowWearing.WearableData.Length; i++)
                 {
+                    m_log.DebugFormat("[XXX]: Wearable type {0} item {1}", nowWearing.WearableData[i].WearableType, nowWearing.WearableData[i].ItemID);
                     AvatarWearingArgs.Wearable wearable =
                         new AvatarWearingArgs.Wearable(nowWearing.WearableData[i].ItemID,
                                                        nowWearing.WearableData[i].WearableType);
@@ -6005,8 +6016,9 @@ namespace OpenSim.Region.ClientStack.LindenUDP
             SoundTrigger handlerSoundTrigger = OnSoundTrigger;
             if (handlerSoundTrigger != null)
             {
-                handlerSoundTrigger(soundTriggerPacket.SoundData.SoundID, soundTriggerPacket.SoundData.OwnerID,
-                    soundTriggerPacket.SoundData.ObjectID, soundTriggerPacket.SoundData.ParentID,
+                // UUIDS are sent as zeroes by the client, substitute agent's id
+                handlerSoundTrigger(soundTriggerPacket.SoundData.SoundID, AgentId,
+                    AgentId, AgentId,
                     soundTriggerPacket.SoundData.Gain, soundTriggerPacket.SoundData.Position,
                     soundTriggerPacket.SoundData.Handle, 0);
 

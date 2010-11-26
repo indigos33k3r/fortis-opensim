@@ -28,6 +28,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Reflection;
 using System.Text.RegularExpressions;
@@ -330,10 +331,10 @@ namespace OpenSim.Services.LLLoginService
                 //
                 // Get the avatar
                 //
-                AvatarData avatar = null;
+                AvatarAppearance avatar = null;
                 if (m_AvatarService != null)
                 {
-                    avatar = m_AvatarService.GetAvatar(account.PrincipalID);
+                    avatar = m_AvatarService.GetAppearance(account.PrincipalID);
                 }
 
                 //
@@ -427,12 +428,9 @@ namespace OpenSim.Services.LLLoginService
                     {
                         m_log.WarnFormat("[LLOGIN SERVICE]: User {0} {1} does not have a valid home and this grid does not have default locations. Attempting to find random region",
                             account.FirstName, account.LastName);
-                        defaults = m_GridService.GetRegionsByName(scopeID, "", 1);
-                        if (defaults != null && defaults.Count > 0)
-                        {
-                            region = defaults[0];
+                        region = FindAlternativeRegion(scopeID);
+                        if (region != null)
                             where = "safe";
-                        }
                     }
                 }
 
@@ -459,12 +457,9 @@ namespace OpenSim.Services.LLLoginService
                     else
                     {
                         m_log.Info("[LLOGIN SERVICE]: Last Region Not Found Attempting to find random region");
-                        defaults = m_GridService.GetRegionsByName(scopeID, "", 1);
-                        if (defaults != null && defaults.Count > 0)
-                        {
-                            region = defaults[0];
+                        region = FindAlternativeRegion(scopeID);
+                        if (region != null)
                             where = "safe";
-                        }
                     }
 
                 }
@@ -564,6 +559,31 @@ namespace OpenSim.Services.LLLoginService
 
         }
 
+        private GridRegion FindAlternativeRegion(UUID scopeID)
+        {
+            List<GridRegion> hyperlinks = null;
+            List<GridRegion> regions = m_GridService.GetFallbackRegions(scopeID, 1000 * (int)Constants.RegionSize, 1000 * (int)Constants.RegionSize);
+            if (regions != null && regions.Count > 0)
+            {
+                hyperlinks = m_GridService.GetHyperlinks(scopeID);
+                IEnumerable<GridRegion> availableRegions = regions.Except(hyperlinks);
+                if (availableRegions.Count() > 0)
+                    return availableRegions.ElementAt(0);
+            }
+            // No fallbacks, try to find an arbitrary region that is not a hyperlink
+            // maxNumber is fixed for now; maybe use some search pattern with increasing maxSize here?
+            regions = m_GridService.GetRegionsByName(scopeID, "", 10);
+            if (regions != null && regions.Count > 0)
+            {
+                if (hyperlinks == null)
+                    hyperlinks = m_GridService.GetHyperlinks(scopeID);
+                IEnumerable<GridRegion> availableRegions = regions.Except(hyperlinks);
+                if (availableRegions.Count() > 0)
+                    return availableRegions.ElementAt(0);
+            }
+            return null;
+        }
+
         private GridRegion FindForeignRegion(string domainName, uint port, string regionName, out GridRegion gatekeeper)
         {
             gatekeeper = new GridRegion();
@@ -601,7 +621,7 @@ namespace OpenSim.Services.LLLoginService
             }
         }
 
-        protected AgentCircuitData LaunchAgentAtGrid(GridRegion gatekeeper, GridRegion destination, UserAccount account, AvatarData avatar,
+        protected AgentCircuitData LaunchAgentAtGrid(GridRegion gatekeeper, GridRegion destination, UserAccount account, AvatarAppearance avatar,
             UUID session, UUID secureSession, Vector3 position, string currentWhere, string viewer, string channel, string mac, string id0,
             IPEndPoint clientIP, out string where, out string reason, out GridRegion dest)
         {
@@ -697,14 +717,14 @@ namespace OpenSim.Services.LLLoginService
         }
 
         private AgentCircuitData MakeAgent(GridRegion region, UserAccount account, 
-            AvatarData avatar, UUID session, UUID secureSession, uint circuit, Vector3 position, 
+            AvatarAppearance avatar, UUID session, UUID secureSession, uint circuit, Vector3 position, 
             string ipaddress, string viewer, string channel, string mac, string id0)
         {
             AgentCircuitData aCircuit = new AgentCircuitData();
 
             aCircuit.AgentID = account.PrincipalID;
             if (avatar != null)
-                aCircuit.Appearance = avatar.ToAvatarAppearance(account.PrincipalID);
+                aCircuit.Appearance = new AvatarAppearance(avatar);
             else
                 aCircuit.Appearance = new AvatarAppearance(account.PrincipalID);
 

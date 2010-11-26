@@ -126,10 +126,11 @@ namespace OpenSim.Region.CoreModules.World.Archiver
 
             OptionSet ops = new OptionSet();
             ops.Add("v|version=", delegate(string v) { options["version"] = v; });
+            ops.Add("p|profile=", delegate(string v) { options["profile"] = v; });
 
             List<string> mainParams = ops.Parse(cmdparams);
 
-            if (cmdparams.Length > 2)
+            if (mainParams.Count > 2)
             {
                 ArchiveRegion(mainParams[2], options);
             }
