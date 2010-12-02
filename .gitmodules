@@ -1,0 +1,3 @@
+[submodule "addon-modules/AuroraDotNetEngine"]
+	path = addon-modules/AuroraDotNetEngine
+	url = https://github.com/coyled/AuroraDotNetEngine.git
