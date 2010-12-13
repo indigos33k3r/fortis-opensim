@@ -545,8 +545,6 @@ namespace OpenSim
             // This allows to make the revision available in simulators not running from the source tree.
             // FIXME: Making an assumption about the directory we're currently in - we do this all over the place
             // elsewhere as well
-            string svnRevisionFileName = "svn_revision";
-            string svnFileName = ".svn/entries";
             string gitCommitFileName = ".version";
             string inputLine;
             int strcmp;
@@ -557,42 +555,6 @@ namespace OpenSim
                 buildVersion = CommitFile.ReadLine();
                 CommitFile.Close();
                 m_version += buildVersion ?? "";
-            }
-
-            // Remove the else logic when subversion mirror is no longer used
-            else
-            {
-                if (File.Exists(svnRevisionFileName))
-                {
-                    StreamReader RevisionFile = File.OpenText(svnRevisionFileName);
-                    buildVersion = RevisionFile.ReadLine();
-                    buildVersion.Trim();
-                    RevisionFile.Close();
-
-                }
-
-                if (string.IsNullOrEmpty(buildVersion) && File.Exists(svnFileName))
-                {
-                    StreamReader EntriesFile = File.OpenText(svnFileName);
-                    inputLine = EntriesFile.ReadLine();
-                    while (inputLine != null)
-                    {
-                        // using the dir svn revision at the top of entries file
-                        strcmp = String.Compare(inputLine, "dir");
-                        if (strcmp == 0)
-                        {
-                            buildVersion = EntriesFile.ReadLine();
-                            break;
-                        }
-                        else
-                        {
-                            inputLine = EntriesFile.ReadLine();
-                        }
-                    }
-                    EntriesFile.Close();
-                }
-
-                m_version += string.IsNullOrEmpty(buildVersion) ? "      " : ("." + buildVersion + "     ").Substring(0, 6);
             }
         }
 
