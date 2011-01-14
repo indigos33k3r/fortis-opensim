@@ -35,7 +35,6 @@ using System.Drawing;
 using System.Drawing.Imaging;
 
 using log4net;
-using Mono.Addins;
 using Nini.Config;
 using OpenSim.Framework;
 using OpenSim.Region.Framework.Interfaces;
@@ -50,7 +49,7 @@ namespace OpenSim.Region.OptionalModules.Simian
     /// <remarks>
     /// </remarks>
 
-    [Extension(Path = "/OpenSim/RegionModules", NodeName = "RegionModule", Id = "SimianGridMaptile")]
+    [RegionModuleDeprecated("SimianGridMaptileModule")]
     public class SimianGridMaptile : ISharedRegionModule
     {
         private static readonly ILog m_log =

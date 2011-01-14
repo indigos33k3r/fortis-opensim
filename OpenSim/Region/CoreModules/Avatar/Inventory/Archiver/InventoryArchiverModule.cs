@@ -381,7 +381,6 @@ namespace OpenSim.Region.CoreModules.Avatar.Inventory.Archiver
 
             List<string> mainParams = ops.Parse(cmdparams);
 
->>>>>>> core/master
             try
             {
                 if (cmdparams.Length < 6)

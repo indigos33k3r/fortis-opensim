@@ -30,6 +30,8 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.IO;
 using System.Net;
+using System.Drawing;
+using System.Drawing.Imaging;
 using System.Reflection;
 using log4net;
 using Nini.Config;
