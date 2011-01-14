@@ -107,11 +107,13 @@ namespace OpenSim.Region.CoreModules.Avatar.Inventory.Archiver
                 
                 scene.AddCommand(
                     this, "save iar",
-                    "save iar <first> <last> <inventory path> <password> [<IAR path>]",
+                    "save iar [--p|-profile=<url>] <first> <last> <inventory path> <password> [<IAR path>] [--v|-verbose]",
                     "Save user inventory archive (IAR).", 
                     "<first> is the user's first name." + Environment.NewLine
                     + "<last> is the user's last name." + Environment.NewLine
                     + "<inventory path> is the path inside the user's inventory for the folder/item to be saved." + Environment.NewLine
+                    + "-p|--profile=<url> adds the url of the profile service to the saved user information." + Environment.NewLine
+                    + "-v|--verbose extra debug messages." + Environment.NewLine
                     + "<IAR path> is the filesystem path at which to save the IAR."
                     + string.Format("  If this is not given then the filename {0} in the current directory is used", DEFAULT_INV_BACKUP_FILENAME),
                     HandleSaveInvConsoleCommand);
@@ -369,7 +371,17 @@ namespace OpenSim.Region.CoreModules.Avatar.Inventory.Archiver
         protected void HandleSaveInvConsoleCommand(string module, string[] cmdparams)
         {
             Guid id = Guid.NewGuid();
-            
+
+            Dictionary<string, object> options = new Dictionary<string, object>();
+
+            OptionSet ops = new OptionSet();
+            //ops.Add("v|version=", delegate(string v) { options["version"] = v; });
+            ops.Add("p|profile=", delegate(string v) { options["profile"] = v; });
+            ops.Add("v|verbose", delegate(string v) { options["verbose"] = v; });
+
+            List<string> mainParams = ops.Parse(cmdparams);
+
+>>>>>>> core/master
             try
             {
                 if (cmdparams.Length < 6)
