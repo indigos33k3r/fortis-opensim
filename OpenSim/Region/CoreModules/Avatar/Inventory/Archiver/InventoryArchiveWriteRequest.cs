@@ -141,6 +141,7 @@ namespace OpenSim.Region.CoreModules.Avatar.Inventory.Archiver
 
         protected void SaveInvItem(InventoryItemBase inventoryItem, string path)
         {
+
             string filename = path + CreateArchiveItemName(inventoryItem);
 
             // Record the creator of this item for user record purposes (which might go away soon)
@@ -163,6 +164,7 @@ namespace OpenSim.Region.CoreModules.Avatar.Inventory.Archiver
         /// <param name="saveThisFolderItself">If true, save this folder itself.  If false, only saves contents</param>
         protected void SaveInvFolder(InventoryFolderBase inventoryFolder, string path, bool saveThisFolderItself)
         {
+
             if (saveThisFolderItself)
             {
                 path += CreateArchiveFolderName(inventoryFolder);
